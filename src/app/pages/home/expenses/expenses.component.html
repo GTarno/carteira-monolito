@@ -1,0 +1,138 @@
+
+<div class="expenses-dashboard">
+  <h2>Análise de Gastos</h2>
+  
+  <!-- Mobile Layout -->
+  @if (isMobile$ | async) {
+    <div class="mobile-layout">
+      <!-- Chart Type Navigation -->
+      <div class="chart-nav">
+        <button 
+          [class.active]="currentChart === 'doughnut'"
+          (click)="switchChart('doughnut')"
+          class="nav-btn">
+          Categorias
+        </button>
+        <button 
+          [class.active]="currentChart === 'bar'"
+          (click)="switchChart('bar')"
+          class="nav-btn">
+          Mensal
+        </button>
+        <button 
+          [class.active]="currentChart === 'line'"
+          (click)="switchChart('line')"
+          class="nav-btn">
+          Tendência
+        </button>
+      </div>
+
+      <!-- Chart Container -->
+      <div class="chart-container">
+        <!-- Doughnut Chart -->
+        @if (currentChart === 'doughnut') {
+          <div class="chart-wrapper">
+            <app-doughnut-chart
+              [data]="expenseCategories"
+              title="Gastos por Categoria"
+              [showTotal]="true"
+              [showActions]="true"
+              actionLabel="Simular Novo Gasto"
+              (chartClick)="onChartClick($event)"
+              (chartHover)="onChartHover($event)"
+              (actionClick)="onExpenseAction()">
+            </app-doughnut-chart>
+          </div>
+        }
+
+        <!-- Bar Chart -->
+        @if (currentChart === 'bar') {
+          <div class="chart-wrapper">
+            <app-bar-chart
+              [data]="monthlyBudgets"
+              title="Gastos Mensais vs Orçamento"
+              [showSummary]="true"
+              [showActions]="true"
+              actionLabel="Adicionar Mês"
+              (chartClick)="onChartClick($event)"
+              (chartHover)="onChartHover($event)"
+              (actionClick)="onMonthlyAction()">
+            </app-bar-chart>
+          </div>
+        }
+
+        <!-- Line Chart -->
+        @if (currentChart === 'line') {
+          <div class="chart-wrapper">
+            <app-line-chart
+              [trendData]="trendData"
+              title="Tendência Semanal por Categoria"
+              [showMetrics]="true"
+              [showActions]="true"
+              actionLabel="Adicionar Semana"
+              (chartClick)="onChartClick($event)"
+              (chartHover)="onChartHover($event)"
+              (actionClick)="onTrendAction()">
+            </app-line-chart>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Desktop Layout -->
+  @if (!(isMobile$ | async)) {
+    <div class="desktop-layout">
+      <div class="charts-grid">
+        <!-- Top row: Categories (30%) and Monthly (70%) -->
+        <div class="chart-wrapper categories-chart">
+          <app-doughnut-chart
+            [data]="expenseCategories"
+            title="Gastos por Categoria"
+            [showTotal]="true"
+            [showActions]="true"
+            actionLabel="Simular Novo Gasto"
+            (chartClick)="onChartClick($event)"
+            (chartHover)="onChartHover($event)"
+            (actionClick)="onExpenseAction()">
+          </app-doughnut-chart>
+        </div>
+        
+        <div class="chart-wrapper monthly-chart">
+          <app-bar-chart
+            [data]="monthlyBudgets"
+            title="Gastos Mensais vs Orçamento"
+            [showSummary]="true"
+            [showActions]="true"
+            actionLabel="Adicionar Mês"
+            (chartClick)="onChartClick($event)"
+            (chartHover)="onChartHover($event)"
+            (actionClick)="onMonthlyAction()">
+          </app-bar-chart>
+        </div>
+
+        <!-- Bottom row: Trend (100%) -->
+        <div class="chart-wrapper trend-chart">
+          <app-line-chart
+            [trendData]="trendData"
+            title="Tendência Semanal por Categoria"
+            [showMetrics]="true"
+            [showActions]="true"
+            actionLabel="Adicionar Semana"
+            (chartClick)="onChartClick($event)"
+            (chartHover)="onChartHover($event)"
+            (actionClick)="onTrendAction()">
+          </app-line-chart>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Global Stats -->
+  <div class="global-stats">
+    <div class="stat-card">
+      <h4>Total de Gastos</h4>
+      <span class="stat-value">R$ {{ getTotalExpenses().toLocaleString('pt-BR') }}</span>
+    </div>
+  </div>
+</div>

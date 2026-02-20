@@ -1,0 +1,159 @@
+.expenses-dashboard {
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-height: 85vh;
+  
+  h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 3rem;
+    font-weight: 600;
+    font-size: 2.5rem;
+  }
+  
+  // Mobile Layout
+  .mobile-layout {
+    .chart-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+      
+      .nav-btn {
+        padding: 1rem 2rem;
+        border: 2px solid #e9ecef;
+        background: white;
+        border-radius: 8px;
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: #f8f9fa;
+          border-color: #dee2e6;
+        }
+        
+        &.active {
+          background: #007bff;
+          color: white;
+          border-color: #007bff;
+          box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+        }
+      }
+    }
+    
+    .chart-container {
+      margin-bottom: 3rem;
+      
+      .chart-wrapper {
+        min-height: 500px;
+        padding: 2rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      }
+    }
+  }
+
+  // Desktop Layout
+  .desktop-layout {
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 3fr 7fr;
+      grid-auto-rows: auto;
+      gap: 24px;
+      margin-bottom: 3rem;
+      width: 100%;
+      
+      .chart-wrapper {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        min-height: 450px;
+        width: 100%;
+        overflow: hidden; // Previne overflow durante resize
+      }
+      
+      .categories-chart {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      
+      .monthly-chart {
+        grid-column: 2;
+        grid-row: 1;
+      }
+      
+      .trend-chart {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        min-height: 550px;
+      }
+    }
+  }
+
+  .global-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    
+    .stat-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      text-align: center;
+      min-width: 250px;
+      
+      h4 {
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+        font-size: 1.2rem;
+        font-weight: 500;
+      }
+      
+      .stat-value {
+        color: #28a745;
+        font-size: 1.8rem;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .expenses-dashboard {
+    padding: 1.5rem;
+    
+    h2 {
+      font-size: 2rem;
+    }
+    
+    .mobile-layout {
+      .chart-nav {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        
+        .nav-btn {
+          width: 100%;
+          max-width: 250px;
+        }
+      }
+    }
+    
+    .global-stats {
+      flex-direction: column;
+      
+      .stat-card {
+        min-width: unset;
+      }
+    }
+  }
+}

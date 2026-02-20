@@ -1,0 +1,90 @@
+.doughnut-chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  
+  h3 {
+    text-align: center;
+    color: #495057;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  
+  .total-display {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem;
+    background: #d4edda;
+    border-radius: 6px;
+    border: 1px solid #c3e6cb;
+  }
+  
+  .chart-wrapper {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    min-height: 300px;
+    
+    canvas {
+      max-width: 100% !important;
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 auto;
+      display: block;
+    }
+  }
+  
+  .chart-actions {
+    text-align: center;
+    margin-top: 1rem;
+    
+    .action-btn {
+      padding: 0.75rem 1.5rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        background: #0056b3;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+      }
+      
+      &:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .doughnut-chart-container {
+    padding: 1rem;
+    
+    h3 {
+      font-size: 1.1rem;
+    }
+    
+    .chart-wrapper {
+      height: 300px !important;
+    }
+    
+    .total-display {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+  }
+}

@@ -1,0 +1,18 @@
+<div class="persona-container">
+  <div class="persona-card">
+    <div class="persona-header">
+      <div class="persona-avatar">
+        <span class="avatar-initial">{{ persona.nome.charAt(0) }}</span>
+      </div>
+      <div class="persona-info">
+        <h3 class="persona-name">Olá, {{ persona.nome }}</h3>
+        <p class="persona-title">Analista de Sistemas</p>
+      </div>
+    </div>
+    
+    <div class="persona-balance">
+      <div class="balance-label">Valor em Caixa</div>
+      <div class="balance-amount">{{ formatCurrency(persona.valorEmCaixa) }}</div>
+    </div>
+  </div>
+</div>

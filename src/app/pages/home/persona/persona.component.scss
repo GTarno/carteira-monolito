@@ -1,0 +1,90 @@
+.persona-container {
+  margin-bottom: 20px;
+}
+
+.persona-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 20px;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.persona-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.persona-avatar {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+.avatar-initial {
+  font-size: 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.persona-info {
+  flex: 1;
+}
+
+.persona-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.persona-title {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.persona-balance {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+  backdrop-filter: blur(10px);
+}
+
+.balance-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.balance-amount {
+  font-size: 28px;
+  font-weight: bold;
+  color: #fff;
+}
+
+@media (max-width: 768px) {
+  .persona-card {
+    padding: 15px;
+  }
+  
+  .balance-amount {
+    font-size: 24px;
+  }
+  
+  .persona-name {
+    font-size: 16px;
+  }
+}

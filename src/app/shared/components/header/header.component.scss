@@ -1,0 +1,127 @@
+// Layout principal
+.sidenav-container {
+  height: 100vh;
+  width: 100%;
+}
+
+.sidenav {
+  width: 280px;
+  box-shadow: 3px 0 6px rgba(0,0,0,.24);
+  z-index: 999; // Abaixo do header mas acima do conteúdo
+  
+  @media (max-width: 768px) {
+    width: 260px;
+  }
+}
+
+// Toolbar
+.toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+  background-color: #3f51b5 !important; // Cor do tema primary aplicada
+}
+
+// Container fixo para botão e título no lado esquerdo
+.left-section {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 64px;
+  z-index: 1001;
+  padding-left: 8px;
+  padding-right: 16px;
+}
+
+// Botões do lado direito do header
+.toolbar button {
+  color: white;
+  
+  mat-icon {
+    color: white;
+  }
+}
+
+.menu-button {
+  margin-right: 8px;
+  color: white;
+  min-width: 48px;
+  height: 48px;
+}
+
+.app-icon {
+  margin-right: 12px;
+  color: white;
+}
+
+.app-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+// Navigation
+.nav-list {
+  padding-top: 16px;
+}
+
+.nav-item {
+  margin: 0 8px 4px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+  
+  &.active {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+  
+  mat-icon {
+    margin-right: 12px;
+    color: #666;
+  }
+}
+
+// Main content
+.main-content {
+  min-height: calc(100vh - 64px);
+  background-color: #fafafa;
+  margin-top: 64px; // Compensar o header fixo
+  
+  // Responsive padding
+  @media (min-width: 1024px) {
+    // Desktop: mais espaçamento
+    padding: 24px 32px;
+  }
+  
+  @media (max-width: 1023px) and (min-width: 768px) {
+    // Tablet: espaçamento médio
+    padding: 20px 24px;
+  }
+  
+  @media (max-width: 767px) {
+    // Mobile: menos espaçamento
+    padding: 16px;
+  }
+}

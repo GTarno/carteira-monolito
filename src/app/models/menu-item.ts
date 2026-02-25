@@ -25,10 +25,10 @@ export const MENU_ITEMS: MenuItem[] = [
     description: 'Registre novos gastos'
   },
   {
-    icon: 'warning',
-    label: 'Gastos extraordinários',
-    route: '/gastos-extraordinarios',
-    description: 'Gastos imprevistos e esporádicos'
+    icon: 'inventory_2',
+    label: 'Inventário',
+    route: '/inventario',
+    description: 'Gerencie suas categorias de inventário'
   },
   {
     icon: 'info',

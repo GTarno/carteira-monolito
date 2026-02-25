@@ -1,0 +1,41 @@
+<div class="inventory-container">
+  <h1>Inventário</h1>
+  <h2>Categorias</h2>
+
+  <div class="categories-grid">
+    @for (category of categories$ | async; track category.id) {
+      <mat-card 
+        class="category-card" 
+        (click)="openCategory(category.id)"
+        [attr.aria-label]="'Acessar categoria ' + category.name"
+        tabindex="0"
+        (keydown.enter)="openCategory(category.id)"
+        (keydown.space)="openCategory(category.id)">
+        
+        <div class="card-image-container">
+          <img 
+            [src]="category.imageUrl" 
+            [alt]="category.name" 
+            class="category-image"
+            (error)="onImageError($event, category)" />
+        </div>
+        
+        <mat-card-content class="card-content">
+          <h3 class="category-name">{{ category.name }}</h3>
+          <p class="category-description">{{ category.description }}</p>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+
+  <div class="add-category-section">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="openAddDialog()"
+      aria-label="Adicionar nova categoria">
+      <mat-icon>add</mat-icon>
+      Adicionar categoria
+    </button>
+  </div>
+</div>

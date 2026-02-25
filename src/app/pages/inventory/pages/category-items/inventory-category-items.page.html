@@ -1,0 +1,110 @@
+<div class="category-items-container">
+  <mat-card class="category-items-card">
+    
+    <!-- Header da página -->
+    <mat-card-header class="category-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="category-name">
+            {{ (category$ | async)?.name || 'Categoria' }}
+          </h1>
+          <h2 class="subtitle">Itens</h2>
+        </div>
+        <button 
+          mat-icon-button 
+          (click)="onBackToCategories()"
+          aria-label="Voltar para categorias"
+          class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+
+    <!-- Conteúdo da tabela -->
+    <mat-card-content class="table-content">
+      
+      <!-- Tabela de itens -->
+      <div class="table-container" *ngIf="items$ | async as items; else noItems">
+        <table mat-table [dataSource]="items" class="items-table">
+          
+          <!-- Coluna Título -->
+          <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef class="title-header">Título</th>
+            <td mat-cell *matCellDef="let item" class="title-cell">
+              <span class="item-title">{{ item.title }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Coluna Autor -->
+          <ng-container matColumnDef="author">
+            <th mat-header-cell *matHeaderCellDef class="author-header">
+              {{ getAuthorLabel(category$ | async) }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="author-cell">
+              <span class="item-author">{{ item.author }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Coluna Observações -->
+          <ng-container matColumnDef="notes">
+            <th mat-header-cell *matHeaderCellDef class="notes-header">Observações</th>
+            <td mat-cell *matCellDef="let item" class="notes-cell">
+              <span class="item-notes">{{ item.notes || '-' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Coluna Data de inclusão -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef class="date-header">Data de inclusão</th>
+            <td mat-cell *matCellDef="let item" class="date-cell">
+              <span class="item-date">{{ formatDate(item.createdAt) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Coluna Ações -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-header">Ações</th>
+            <td mat-cell *matCellDef="let item" class="actions-cell">
+              <button 
+                mat-icon-button 
+                color="warn"
+                (click)="onDeleteItem(item.id)"
+                [attr.aria-label]="'Excluir ' + item.title"
+                class="delete-button">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+
+      <!-- Estado vazio -->
+      <ng-template #noItems>
+        <div class="no-items-state">
+          <mat-icon class="no-items-icon">inventory_2</mat-icon>
+          <h3 class="no-items-title">Nenhum item encontrado</h3>
+          <p class="no-items-message">
+            Adicione seu primeiro item para começar a organizar sua coleção.
+          </p>
+        </div>
+      </ng-template>
+
+    </mat-card-content>
+
+    <!-- Ações -->
+    <mat-card-actions class="card-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="openAddItemDialog()"
+        class="add-item-button">
+        <mat-icon>add</mat-icon>
+        Adicionar novo item
+      </button>
+    </mat-card-actions>
+
+  </mat-card>
+</div>

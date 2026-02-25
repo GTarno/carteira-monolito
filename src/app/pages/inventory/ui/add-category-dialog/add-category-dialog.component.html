@@ -1,0 +1,89 @@
+<h2 mat-dialog-title>Adicionar categoria</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="categoryForm" class="category-form">
+    
+    <!-- Nome da categoria -->
+    <mat-form-field class="full-width">
+      <mat-label>Nome da categoria</mat-label>
+      <input 
+        matInput 
+        formControlName="name" 
+        placeholder="Ex: Livros, Discos, Jogos..."
+        maxlength="50">
+      <mat-error *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.errors">
+        {{ getErrorMessage('name') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Descrição -->
+    <mat-form-field class="full-width">
+      <mat-label>Descrição</mat-label>
+      <textarea 
+        matInput 
+        formControlName="description" 
+        placeholder="Breve descrição da categoria..."
+        rows="3"
+        maxlength="120">
+      </textarea>
+      <mat-hint align="end">
+        {{ categoryForm.get('description')?.value?.length || 0 }}/120
+      </mat-hint>
+      <mat-error *ngIf="categoryForm.get('description')?.touched && categoryForm.get('description')?.errors">
+        {{ getErrorMessage('description') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Upload de imagem -->
+    <div class="image-upload-section">
+      <label for="image-upload" class="upload-label">
+        <mat-icon>add_photo_alternate</mat-icon>
+        <span>Selecionar imagem</span>
+      </label>
+      <input 
+        type="file" 
+        id="image-upload" 
+        accept="image/*" 
+        (change)="onFileSelected($event)"
+        class="file-input">
+      
+      <!-- Preview da imagem -->
+      <div class="image-preview" *ngIf="previewUrl; else placeholder">
+        <img [src]="previewUrl" alt="Preview da categoria" class="preview-image">
+        <div class="preview-overlay">
+          <mat-icon>edit</mat-icon>
+          <span>Alterar imagem</span>
+        </div>
+      </div>
+      
+      <!-- Placeholder quando não há imagem -->
+      <ng-template #placeholder>
+        <div class="image-placeholder">
+          <mat-icon class="placeholder-icon">image</mat-icon>
+          <p class="placeholder-text">Clique para selecionar uma imagem</p>
+        </div>
+      </ng-template>
+      
+      <!-- Erro de imagem -->
+      <div class="image-error" *ngIf="categoryForm.get('imageFile')?.touched && categoryForm.get('imageFile')?.errors">
+        {{ getErrorMessage('imageFile') }}
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onCancel()" type="button">
+    Cancelar
+  </button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSave()" 
+    type="button"
+    [disabled]="!categoryForm.valid || !previewUrl">
+    <mat-icon>save</mat-icon>
+    Salvar
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,67 @@
+.dialog-content {
+  padding: 24px;
+  min-width: 400px;
+  max-width: 500px;
+  
+  @media (max-width: 600px) {
+    min-width: 300px;
+    padding: 16px;
+  }
+
+  .item-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .full-width {
+      width: 100%;
+    }
+
+    // Estilos específicos para campos
+    mat-form-field {
+      .mat-mdc-form-field-subscript-wrapper {
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+.dialog-actions {
+  padding: 16px 24px;
+  gap: 12px;
+
+  @media (max-width: 600px) {
+    padding: 16px;
+    flex-direction: column-reverse;
+    
+    button {
+      width: 100%;
+    }
+  }
+
+  button {
+    min-width: 80px;
+
+    &[mat-raised-button] {
+      gap: 8px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+}
+
+// Título do dialog
+h2[mat-dialog-title] {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #333;
+}

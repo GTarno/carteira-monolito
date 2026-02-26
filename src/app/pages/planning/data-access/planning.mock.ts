@@ -1,5 +1,6 @@
-import { MonthlyPlan } from '../models/planning.models';
+import { MonthlyPlan, PlanItemDetail } from '../models/planning.models';
 import { YearMonth, YearMonthUtils } from '../models/year-month.models';
+import { ItemMonthlyTrend } from '../models/item-monthly-trend.model';
 
 export const PLANNING_MOCKS: Map<string, MonthlyPlan> = new Map();
 
@@ -294,3 +295,278 @@ export function getAllAvailableMonths(): YearMonth[] {
   console.log('Available months:', months);
   return months;
 }
+
+// Dados detalhados dos itens por categoria e mês
+export const PLAN_ITEMS_MOCKS: Map<string, PlanItemDetail[]> = new Map();
+
+// Fevereiro 2026 - Itens detalhados
+const feb2026_contas: PlanItemDetail[] = [
+  {
+    id: 'luz_feb2026',
+    categoryId: 'contas',
+    name: 'Luz',
+    plannedValue: 200.00,
+    realValue: 180.50,
+    icon: 'lightbulb'
+  },
+  {
+    id: 'condominio_feb2026',
+    categoryId: 'contas',
+    name: 'Condomínio',
+    plannedValue: 450.00,
+    realValue: 450.00,
+    icon: 'apartment'
+  },
+  {
+    id: 'internet_feb2026',
+    categoryId: 'contas',
+    name: 'Internet',
+    plannedValue: 100.00,
+    realValue: 89.90,
+    icon: 'wifi'
+  },
+  {
+    id: 'financiamento_feb2026',
+    categoryId: 'contas',
+    name: 'Financiamento',
+    plannedValue: 1850.00,
+    realValue: 1850.00,
+    icon: 'home'
+  }
+];
+
+const feb2026_cartao: PlanItemDetail[] = [
+  {
+    id: 'fatura_feb2026',
+    categoryId: 'cartao-credito',
+    name: 'Fatura Atual',
+    plannedValue: 800.00,
+    realValue: 720.35,
+    icon: 'credit_card'
+  }
+];
+
+const feb2026_alimentacao: PlanItemDetail[] = [
+  {
+    id: 'mercado_feb2026',
+    categoryId: 'alimentacao',
+    name: 'Mercado',
+    plannedValue: 700.00,
+    realValue: 650.80,
+    icon: 'shopping_cart'
+  },
+  {
+    id: 'acougue_feb2026',
+    categoryId: 'alimentacao',
+    name: 'Açougue',
+    plannedValue: 200.00,
+    realValue: 185.00,
+    icon: 'restaurant'
+  },
+  {
+    id: 'restaurantes_feb2026',
+    categoryId: 'alimentacao',
+    name: 'Restaurantes',
+    plannedValue: 300.00,
+    realValue: 420.50,
+    icon: 'dinner_dining'
+  }
+];
+
+// Janeiro 2026 - Itens detalhados
+const jan2026_contas: PlanItemDetail[] = [
+  {
+    id: 'luz_jan2026',
+    categoryId: 'contas',
+    name: 'Luz',
+    plannedValue: 200.00,
+    realValue: 220.80,
+    icon: 'lightbulb'
+  },
+  {
+    id: 'condominio_jan2026',
+    categoryId: 'contas',
+    name: 'Condomínio',
+    plannedValue: 450.00,
+    realValue: 450.00,
+    icon: 'apartment'
+  },
+  {
+    id: 'internet_jan2026',
+    categoryId: 'contas',
+    name: 'Internet',
+    plannedValue: 100.00,
+    realValue: 89.90,
+    icon: 'wifi'
+  },
+  {
+    id: 'financiamento_jan2026',
+    categoryId: 'contas',
+    name: 'Financiamento',
+    plannedValue: 1850.00,
+    realValue: 1850.00,
+    icon: 'home'
+  }
+];
+
+const jan2026_cartao: PlanItemDetail[] = [
+  {
+    id: 'fatura_jan2026',
+    categoryId: 'cartao-credito',
+    name: 'Fatura Atual',
+    plannedValue: 800.00,
+    realValue: 950.25,
+    icon: 'credit_card'
+  }
+];
+
+const jan2026_alimentacao: PlanItemDetail[] = [
+  {
+    id: 'mercado_jan2026',
+    categoryId: 'alimentacao',
+    name: 'Mercado',
+    plannedValue: 700.00,
+    realValue: 780.50,
+    icon: 'shopping_cart'
+  },
+  {
+    id: 'acougue_jan2026',
+    categoryId: 'alimentacao',
+    name: 'Açougue',
+    plannedValue: 200.00,
+    realValue: 200.00,
+    icon: 'restaurant'
+  },
+  {
+    id: 'restaurantes_jan2026',
+    categoryId: 'alimentacao',
+    name: 'Restaurantes',
+    plannedValue: 300.00,
+    realValue: 380.00,
+    icon: 'dinner_dining'
+  }
+];
+
+// Março 2026 - Itens detalhados (início de mês)
+const mar2026_contas: PlanItemDetail[] = [
+  {
+    id: 'luz_mar2026',
+    categoryId: 'contas',
+    name: 'Luz',
+    plannedValue: 200.00,
+    realValue: 0,
+    icon: 'lightbulb'
+  },
+  {
+    id: 'condominio_mar2026',
+    categoryId: 'contas',
+    name: 'Condomínio',
+    plannedValue: 450.00,
+    realValue: 450.00,
+    icon: 'apartment'
+  },
+  {
+    id: 'internet_mar2026',
+    categoryId: 'contas',
+    name: 'Internet',
+    plannedValue: 100.00,
+    realValue: 89.90,
+    icon: 'wifi'
+  },
+  {
+    id: 'financiamento_mar2026',
+    categoryId: 'contas',
+    name: 'Financiamento',
+    plannedValue: 1850.00,
+    realValue: 1850.00,
+    icon: 'home'
+  }
+];
+
+const mar2026_cartao: PlanItemDetail[] = [
+  {
+    id: 'fatura_mar2026',
+    categoryId: 'cartao-credito',
+    name: 'Fatura Atual',
+    plannedValue: 800.00,
+    realValue: 120.80,
+    icon: 'credit_card'
+  }
+];
+
+const mar2026_alimentacao: PlanItemDetail[] = [
+  {
+    id: 'mercado_mar2026',
+    categoryId: 'alimentacao',
+    name: 'Mercado',
+    plannedValue: 700.00,
+    realValue: 0,
+    icon: 'shopping_cart'
+  },
+  {
+    id: 'acougue_mar2026',
+    categoryId: 'alimentacao',
+    name: 'Açougue',
+    plannedValue: 200.00,
+    realValue: 0,
+    icon: 'restaurant'
+  },
+  {
+    id: 'restaurantes_mar2026',
+    categoryId: 'alimentacao',
+    name: 'Restaurantes',
+    plannedValue: 300.00,
+    realValue: 85.50,
+    icon: 'dinner_dining'
+  }
+];
+
+// Adicionar os dados de itens detalhados
+PLAN_ITEMS_MOCKS.set('2026-02_contas', feb2026_contas);
+PLAN_ITEMS_MOCKS.set('2026-02_cartao-credito', feb2026_cartao);
+PLAN_ITEMS_MOCKS.set('2026-02_alimentacao', feb2026_alimentacao);
+
+PLAN_ITEMS_MOCKS.set('2026-01_contas', jan2026_contas);
+PLAN_ITEMS_MOCKS.set('2026-01_cartao-credito', jan2026_cartao);
+PLAN_ITEMS_MOCKS.set('2026-01_alimentacao', jan2026_alimentacao);
+
+PLAN_ITEMS_MOCKS.set('2026-03_contas', mar2026_contas);
+PLAN_ITEMS_MOCKS.set('2026-03_cartao-credito', mar2026_cartao);
+PLAN_ITEMS_MOCKS.set('2026-03_alimentacao', mar2026_alimentacao);
+
+// Dados de tendência mensal dos itens (últimos 12 meses)
+export const ITEM_TREND_MOCKS: Map<string, ItemMonthlyTrend[]> = new Map();
+
+// Helper function para gerar tendência realística
+function generateTrendData(baseValue: number, variation: number = 0.2): ItemMonthlyTrend[] {
+  const months = [
+    '2025-03', '2025-04', '2025-05', '2025-06', '2025-07', '2025-08',
+    '2025-09', '2025-10', '2025-11', '2025-12', '2026-01', '2026-02'
+  ];
+  
+  return months.map((month, index) => {
+    // Variação gradual + ruído aleatório
+    const trend = 1 + (index * 0.02); // Crescimento de 2% ao mês
+    const noise = (Math.random() - 0.5) * variation; // Ruído ±10%
+    const value = Math.max(0, baseValue * trend * (1 + noise));
+    
+    return {
+      month,
+      value: Math.round(value * 100) / 100 // Arredondar para 2 casas decimais
+    };
+  });
+}
+
+// Tendências dos itens de Contas
+ITEM_TREND_MOCKS.set('contas_luz_feb2026', generateTrendData(180, 0.15));
+ITEM_TREND_MOCKS.set('contas_condominio_feb2026', generateTrendData(450, 0.05));
+ITEM_TREND_MOCKS.set('contas_internet_feb2026', generateTrendData(90, 0.10));
+ITEM_TREND_MOCKS.set('contas_financiamento_feb2026', generateTrendData(1850, 0.02));
+
+// Tendências dos itens de Cartão
+ITEM_TREND_MOCKS.set('cartao-credito_fatura_feb2026', generateTrendData(720, 0.25));
+
+// Tendências dos itens de Alimentação
+ITEM_TREND_MOCKS.set('alimentacao_mercado_feb2026', generateTrendData(650, 0.20));
+ITEM_TREND_MOCKS.set('alimentacao_acougue_feb2026', generateTrendData(185, 0.18));
+ITEM_TREND_MOCKS.set('alimentacao_restaurantes_feb2026', generateTrendData(420, 0.30));

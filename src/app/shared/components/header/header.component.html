@@ -4,9 +4,11 @@
     #sidenav 
     class="sidenav"
     [mode]="(sidenavMode$ | async) || 'side'" 
-    [opened]="(opened$ | async) || false"
+    [opened]="false"
     [fixedInViewport]="true"
-    [fixedTopGap]="64">
+    [fixedTopGap]="64"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()">
     
     <!-- Menu items -->
     <mat-nav-list class="nav-list">
@@ -34,7 +36,7 @@
           type="button"
           aria-label="Toggle sidenav"
           mat-icon-button
-          (click)="sidenav.toggle()"
+          (click)="toggleMenu()"
           class="menu-button">
           <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
         </button>

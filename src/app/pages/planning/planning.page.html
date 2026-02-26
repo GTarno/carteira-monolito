@@ -143,48 +143,15 @@
       </div>
     </div>
 
-    <!-- Resumo Final -->
-    <div *ngIf="plan$ | async as plan" class="planning-summary">
-      <mat-card class="summary-card">
-        <mat-card-header>
-          <mat-icon mat-card-avatar>assessment</mat-icon>
-          <mat-card-title>Resumo do Mês</mat-card-title>
-          <mat-card-subtitle>{{ getSelectedMonthLabel() }}</mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="summary-grid">
-            <div class="summary-item">
-              <mat-icon>trending_up</mat-icon>
-              <div class="summary-text">
-                <span class="label">Total Planejado</span>
-                <span class="value">{{ plannedTotal$ | async | currency:'BRL':'symbol':'1.2-2' }}</span>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <mat-icon>shopping_cart</mat-icon>
-              <div class="summary-text">
-                <span class="label">Total Gasto</span>
-                <span class="value">{{ spentTotal$ | async | currency:'BRL':'symbol':'1.2-2' }}</span>
-              </div>
-            </div>
-
-            <div class="summary-item">
-              <mat-icon>account_balance_wallet</mat-icon>
-              <div class="summary-text">
-                <span class="label">Saldo Restante</span>
-                <span 
-                  class="value"
-                  [class]="getRemainingClass()"
-                >
-                  {{ getRemaining() | currency:'BRL':'symbol':'1.2-2' }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
+    <!-- Resumo Final usando componente reutilizável -->
+    <app-summary-header-card 
+      *ngIf="plan$ | async as plan"
+      title="Resumo do Mês"
+      [subtitle]="getSelectedMonthLabel()"
+      icon="assessment"
+      [totalPlanned$]="plannedTotal$"
+      [totalSpent$]="spentTotal$"
+      [remaining$]="remaining$"
+    ></app-summary-header-card>
   </div>
 </div>

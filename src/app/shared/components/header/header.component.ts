@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,8 +30,11 @@ import { MenuItem, MENU_ITEMS } from '../../../models/menu-item';
 export class HeaderComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private router = inject(Router);
+  
+  @ViewChild('sidenav') sidenav!: MatSidenav;
 
   menuItems: MenuItem[] = MENU_ITEMS;
+  private isMenuOpen = false;
 
   // Observes se está em modo mobile
   isMobile$: Observable<boolean> = this.breakpointObserver
@@ -59,23 +62,40 @@ export class HeaderComponent {
     shareReplay(1)
   );
 
+  // Funcao para abrir o menu quando clicar no botão
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+    if (this.sidenav) {
+      if (this.isMenuOpen) {
+        this.sidenav.open();
+      } else {
+        this.sidenav.close();
+      }
+    }
+  }
+
+  // Funcao para fechar o menu quando o mouse sair
+  onMouseLeave(): void {
+    this.isMenuOpen = false;
+    if (this.sidenav) {
+      this.sidenav.close();
+    }
+  }
+
+  // Funcao para manter o menu aberto quando o mouse está em cima
+  onMouseEnter(): void {
+    // Mantém o estado atual quando o mouse entra
+    // Evita que feche acidentalmente
+  }
+
   // Funcao para fechar sidenav no mobile ao navegar
   onNavigate(route: string): void {
     this.router.navigate([route]);
     
-    // No mobile, fecha o sidenav após navegar
-    this.isMobile$.pipe(
-      map(isMobile => {
-        if (isMobile) {
-          // Pequeno delay para melhor UX
-          setTimeout(() => {
-            const sidenav = document.querySelector('mat-sidenav') as any;
-            if (sidenav && sidenav._animationStarted === false) {
-              sidenav.close();
-            }
-          }, 100);
-        }
-      })
-    ).subscribe();
+    // Fecha o menu ao navegar
+    this.isMenuOpen = false;
+    if (this.sidenav) {
+      this.sidenav.close();
+    }
   }
 }

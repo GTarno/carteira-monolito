@@ -19,6 +19,22 @@ export interface MonthlyPlan {
   cards: PlanCard[];
 }
 
+export interface PlanItemDetail {
+  id: string;
+  categoryId: string;
+  name: string;
+  plannedValue: number;
+  realValue: number;
+  icon?: string;
+}
+
+export interface PlanningItemCreate {
+  categoryId: string;
+  name: string;
+  plannedValue: number;
+  icon: string;
+}
+
 export type PlanCardStatus = 'ok' | 'limit' | 'over';
 
 export class PlanningUtils {
@@ -81,5 +97,24 @@ export class PlanningUtils {
     const totalPlanned = PlanningUtils.getTotalPlanned(plan);
     const totalSpent = PlanningUtils.getTotalSpent(plan);
     return Math.max(totalSpent - totalPlanned, 0);
+  }
+
+  // Métodos para itens individuais
+  static getItemStatus(plannedValue: number, realValue: number): PlanCardStatus {
+    if (plannedValue === 0) return 'ok';
+    
+    const ratio = realValue / plannedValue;
+    if (ratio > 1) return 'over';
+    if (ratio > 0.9) return 'limit';
+    return 'ok';
+  }
+
+  static getItemProgress(plannedValue: number, realValue: number): number {
+    if (plannedValue === 0) return 0;
+    return Math.min(realValue / plannedValue, 1);
+  }
+
+  static getItemExcess(plannedValue: number, realValue: number): number {
+    return Math.max(realValue - plannedValue, 0);
   }
 }

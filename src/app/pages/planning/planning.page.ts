@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe, AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,6 +18,7 @@ import { PlanningService } from './data-access/planning.service';
 import { PlanCard, MonthlyPlan, PlanCardStatus, PlanningUtils } from './models/planning.models';
 import { YearMonth, YearMonthUtils } from './models/year-month.models';
 import { PlannedVsSpentMeterComponent } from './ui/planned-vs-spent-meter/planned-vs-spent-meter.component';
+import { SummaryHeaderCardComponent } from '../../shared/components/summary-header-card/summary-header-card.component';
 
 @Component({
   selector: 'app-planning-page',
@@ -35,7 +37,8 @@ import { PlannedVsSpentMeterComponent } from './ui/planned-vs-spent-meter/planne
     MatProgressSpinnerModule,
     MatChipsModule,
     MatOptionModule,
-    PlannedVsSpentMeterComponent
+    PlannedVsSpentMeterComponent,
+    SummaryHeaderCardComponent
   ],
   templateUrl: './planning.page.html',
   styleUrls: ['./planning.page.scss'],
@@ -60,6 +63,7 @@ months$!: Observable<YearMonth[]>;
   cards$!: Observable<PlanCard[]>;
   plannedTotal$!: Observable<number>;
   spentTotal$!: Observable<number>;
+  remaining$!: Observable<number>;
   isLoading$!: Observable<boolean>;
 
   error$ = this.errorSubject.asObservable();
@@ -69,7 +73,7 @@ months$!: Observable<YearMonth[]>;
   private currentPlannedTotal = 0;
   private currentSpentTotal = 0;
 
-  constructor(private planningService: PlanningService, private cdr: ChangeDetectorRef) {}
+  constructor(private planningService: PlanningService, private cdr: ChangeDetectorRef, private router: Router) {}
 
   ngOnInit(): void {
     console.log('PlanningPage ngOnInit called');
@@ -109,6 +113,13 @@ months$!: Observable<YearMonth[]>;
     this.spentTotal$ = this.plan$.pipe(
       map(plan => plan ? PlanningUtils.getTotalSpent(plan) : 0),
       startWith(0)
+    );
+
+    this.remaining$ = combineLatest([
+      this.plannedTotal$,
+      this.spentTotal$
+    ]).pipe(
+      map(([planned, spent]) => planned - spent)
     );
 
     this.isLoading$ = combineLatest([
@@ -168,10 +179,10 @@ months$!: Observable<YearMonth[]>;
       plannedValue: card.plannedValue
     });
 
-    // TODO: Implementar navegação para detalhes do card
-    // this.router.navigate(['/card-details', card.id], { 
-    //   queryParams: { month: YearMonthUtils.toKey(currentMonth) }
-    // });
+    // Navegação para a página de itens da categoria
+    this.router.navigate(['/planejamentos', card.id], { 
+      queryParams: { month: YearMonthUtils.toKey(currentMonth) }
+    });
   }
 
   retryLoad(): void {
@@ -217,17 +228,8 @@ months$!: Observable<YearMonth[]>;
     return PlanningUtils.getCardExcess(card);
   }
 
-  // Summary Methods
-  getRemaining(): number {
-    return this.currentPlannedTotal - this.currentSpentTotal;
-  }
-
-  getRemainingClass(): string {
-    const remaining = this.getRemaining();
-    if (remaining < 0) return 'negative';
-    if (remaining > 0) return 'positive';
-    return '';
-  }
+  // Summary Methods - removidos pois agora estão no componente reutilizável
+  // getRemaining() e getRemainingClass() não são mais necessários
 
   // Accessibility Methods
   onCardKeydown(event: KeyboardEvent, card: PlanCard): void {

@@ -1,0 +1,374 @@
+.item-detail-page {
+  padding: 0 16px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  // Page Header
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+    
+    .back-button {
+      color: #757575;
+      
+      &:hover {
+        color: #1976d2;
+        background-color: rgba(25, 118, 210, 0.08);
+      }
+    }
+    
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      
+      .item-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #1976d2;
+      }
+      
+      .item-title {
+        h2 {
+          margin: 0;
+          font-size: 1.5rem;
+          font-weight: 500;
+          color: #212121;
+        }
+        
+        .month-label {
+          color: #757575;
+          font-size: 0.875rem;
+        }
+      }
+      
+      .loading-text {
+        color: #757575;
+        margin-left: 8px;
+      }
+    }
+  }
+  
+  // Detail Cards
+  .item-details {
+    margin-bottom: 16px;
+    
+    .detail-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .values-card, .status-card {
+      .mat-card-header {
+        padding-bottom: 8px;
+      }
+      
+      .mat-card-title {
+        font-size: 1.125rem;
+        font-weight: 500;
+        margin-bottom: 0;
+      }
+    }
+    
+    .values-card {
+      .value-rows {
+        .value-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid #f5f5f5;
+          
+          &:last-child {
+            border-bottom: none;
+            margin-top: 8px;
+            padding-top: 12px;
+            border-top: 2px solid #e0e0e0;
+          }
+          
+          .label {
+            color: #757575;
+            font-weight: 500;
+          }
+          
+          .value {
+            font-weight: 600;
+            
+            &.planned-value {
+              color: #1976d2;
+            }
+            
+            &.spent-value {
+              color: #424242;
+            }
+            
+            &.positive {
+              color: #4caf50;
+            }
+            
+            &.negative {
+              color: #f44336;
+            }
+          }
+        }
+      }
+    }
+    
+    .status-card {
+      .status-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        border-radius: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+        
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          margin-bottom: 12px;
+        }
+        
+        .status-label {
+          font-size: 20px;
+          font-weight: 600;
+          line-height: 1.2;
+        }
+        
+        // Classes de status
+        &.status-ok {
+          background: rgba(76, 175, 80, 0.12);
+          color: #2e7d32;
+        }
+        
+        &.status-limit {
+          background: rgba(255, 152, 0, 0.12);
+          color: #ef6c00;
+        }
+        
+        &.status-over {
+          background: rgba(244, 67, 54, 0.12);
+          color: #c62828;
+        }
+        
+        &.status-default {
+          background: rgba(158, 158, 158, 0.12);
+          color: #757575;
+        }
+      }
+    }
+  }
+  
+  // Chart Card
+  .chart-card {
+    margin-bottom: 16px;
+    
+    .mat-card-header {
+      .mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.25rem;
+        
+        mat-icon {
+          color: #1976d2;
+        }
+      }
+      
+      .mat-card-subtitle {
+        color: #757575;
+        margin-top: 4px;
+      }
+    }
+    
+    .chart-container {
+      margin-top: 16px;
+      
+      .no-data-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        color: #757575;
+        text-align: center;
+        
+        mat-icon {
+          font-size: 48px;
+          width: 48px;
+          height: 48px;
+          margin-bottom: 8px;
+          color: #bdbdbd;
+        }
+      }
+      
+      .chart-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        color: #757575;
+        gap: 16px;
+      }
+    }
+  }
+  
+  // Category Card
+  .category-card {
+    .mat-card-header {
+      .mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.125rem;
+        
+        mat-icon {
+          color: #757575;
+        }
+      }
+      
+      .mat-card-subtitle {
+        color: #757575;
+        font-size: 0.875rem;
+      }
+    }
+    
+    .category-actions {
+      margin-top: 16px;
+      
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+  }
+  
+  // Loading Overlay
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 1000;
+    
+    span {
+      color: #757575;
+      font-weight: 500;
+    }
+  }
+  
+  // Error Messages
+  .error-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    color: #f44336;
+    text-align: center;
+    gap: 16px;
+    
+    mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+    }
+    
+    button {
+      margin-top: 8px;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+  .item-detail-page {
+    padding: 0 12px 12px;
+    
+    .page-header {
+      .header-info {
+        .item-icon {
+          font-size: 24px;
+          width: 24px;
+          height: 24px;
+        }
+        
+        .item-title h2 {
+          font-size: 1.25rem;
+        }
+      }
+    }
+    
+    .item-details .detail-cards {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    
+    .chart-card {
+      // Redusir padding em mobile
+      .mat-card-content {
+        padding: 8px 16px 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .item-detail-page {
+    padding: 0 8px 8px;
+    
+    .page-header {
+      padding: 12px 0;
+      margin-bottom: 12px;
+      
+      .header-info {
+        gap: 8px;
+        
+        .item-title h2 {
+          font-size: 1.125rem;
+        }
+      }
+    }
+    
+    .values-card, .status-card, .chart-card, .category-card {
+      margin-bottom: 12px;
+    }
+    
+    // Ajuste para status badge em mobile
+    .status-card {
+      .status-badge {
+        padding: 24px;
+        
+        mat-icon {
+          font-size: 40px;
+          width: 40px;
+          height: 40px;
+          margin-bottom: 10px;
+        }
+        
+        .status-label {
+          font-size: 18px;
+        }
+      }
+    }
+  }
+}

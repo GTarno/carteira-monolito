@@ -1,0 +1,138 @@
+<div class="planning-category-items">
+  <!-- Header com botão voltar -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    
+    <div class="header-info" *ngIf="categoryInfo$ | async as categoryInfo; else loadingHeader">
+      <mat-icon class="category-icon">{{ categoryInfo.icon }}</mat-icon>
+      <div class="category-title">
+        <h2>{{ categoryInfo.title }}</h2>
+        <span class="month-label">{{ getMonthLabel() }}</span>
+      </div>
+    </div>
+    
+    <ng-template #loadingHeader>
+      <div class="header-info">
+        <mat-progress-spinner [diameter]="24"></mat-progress-spinner>
+        <span class="loading-text">Carregando...</span>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Header usando o componente Summary reutilizável -->
+  <app-summary-header-card 
+    *ngIf="categoryInfo$ | async as categoryInfo"
+    [title]="categoryInfo.title"
+    [subtitle]="'Itens do mês · ' + getMonthLabel()"
+    [icon]="categoryInfo.icon"
+    [totalPlanned$]="totalPlanned$"
+    [totalSpent$]="totalSpent$"
+    [remaining$]="remaining$"
+  ></app-summary-header-card>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading$ | async" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Carregando itens...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error$ | async as error" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <h3>Erro ao carregar dados</h3>
+    <p>{{ error }}</p>
+    <button mat-stroked-button color="primary" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar ao Planejamento
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="category-content" *ngIf="items$ | async as items">
+    <!-- Items Grid -->
+    <div class="items-grid">
+      <mat-card 
+        *ngFor="let item of items; trackBy: trackByItemId"
+        class="item-card"
+        [class]="getItemStatusClass(item)"
+        (click)="onItemClick(item)"
+        [attr.role]="'button'"
+        [attr.tabindex]="0"
+        [attr.aria-label]="getItemAriaLabel(item)"
+        (keydown)="onItemKeydown($event, item)"
+      >
+        <mat-card-header>
+          <!-- Avatar/Icon -->
+          <mat-icon 
+            mat-card-avatar 
+            [class]="'item-icon ' + getItemStatusClass(item)"
+          >
+            {{ getItemIcon(item) }}
+          </mat-icon>
+          
+          <!-- Title e Subtitle -->
+          <mat-card-title>{{ item.name }}</mat-card-title>
+          
+          <mat-card-subtitle>
+            Planejado: {{ item.plannedValue | currency:'BRL':'symbol':'1.2-2' }}
+          </mat-card-subtitle>
+
+          <!-- Badge Status -->
+          <div class="card-actions" *ngIf="shouldShowBadge(item)">
+            <mat-chip 
+              [class]="getItemStatus(item) === 'over' ? 'excess-chip' : 'limit-chip'"
+            >
+              {{ getBadgeText(item) }}
+            </mat-chip>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- Progress Bar -->
+          <div class="card-progress">
+            <div class="progress-bar">
+              <div 
+                class="progress-fill"
+                [style.width.%]="getItemProgress(item) * 100"
+                [class]="getItemStatusClass(item)"
+              ></div>
+            </div>
+            
+            <div class="progress-text">
+              {{ (getItemProgress(item) * 100) | number:'1.0-0' }}% utilizado
+            </div>
+          </div>
+
+          <!-- Valor Real -->
+          <div class="real-value">
+            <strong>
+              Valor real: {{ item.realValue | currency:'BRL':'symbol':'1.2-2' }}
+            </strong>
+            
+            <span 
+              *ngIf="shouldShowExcess(item)" 
+              class="excess-amount"
+            >
+              (Excesso: {{ getItemExcess(item) | currency:'BRL':'symbol':'1.2-2' }})
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+    <!-- Botão de adicionar item -->
+    <div class="add-item-section">
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="addNewItem()"
+        class="add-item-button"
+      >
+        <mat-icon>add</mat-icon>
+        Adicionar novo item
+      </button>
+    </div>
+  </div>
+</div>

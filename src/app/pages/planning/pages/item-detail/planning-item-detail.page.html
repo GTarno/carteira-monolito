@@ -66,48 +66,18 @@
 
       <!-- Card de Status -->
       <mat-card class="status-card">
-        <mat-card-header>
-          <mat-card-title>Status</mat-card-title>
-        </mat-card-header>
         <mat-card-content>
-          <div class="status-info">
-            <mat-icon 
-              class="status-icon"
-              [class.status-ok]="(headerStatus$ | async) === 'ok'"
-              [class.status-limit]="(headerStatus$ | async) === 'limit'"
-              [class.status-over]="(headerStatus$ | async) === 'over'">
-              @switch(headerStatus$ | async) {
-                @case('ok') {
-                  check_circle
-                }
-                @case('limit') {
-                  warning
-                }
-                @case('over') {
-                  error
-                }
-                @default {
-                  help
-                }
-              }
-            </mat-icon>
-            <span class="status-text">
-              @switch(headerStatus$ | async) {
-                @case('ok') {
-                  Dentro do orçamento
-                }
-                @case('limit') {
-                  Próximo do limite
-                }
-                @case('over') {
-                  Acima do orçamento
-                }
-                @default {
-                  Carregando...
-                }
-              }
-            </span>
-          </div>
+          @if (statusConfig$ | async; as status) {
+            <div class="status-badge" [ngClass]="status.className">
+              <mat-icon>{{ status.icon }}</mat-icon>
+              <div class="status-label">{{ status.label }}</div>
+            </div>
+          } @else {
+            <div class="status-badge status-default">
+              <mat-icon>help</mat-icon>
+              <div class="status-label">Carregando...</div>
+            </div>
+          }
         </mat-card-content>
       </mat-card>
     </div>

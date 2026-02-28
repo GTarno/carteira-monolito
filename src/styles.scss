@@ -37,3 +37,12 @@ body {
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Customizações globais para PrimeNG */
+:root {
+  /* Cores personalizadas para o tema */
+  --primary-color: #3498db;
+  --primary-color-text: #ffffff;
+  --surface-ground: #f8f9fa;
+  --text-color: #2c3e50;
+}

@@ -1,6 +1,5 @@
 .planning-page {
   padding: 24px;
-  max-width: 1400px;
   margin: 0 auto;
   min-height: 100vh;
   background-color: #f8f9fa;
@@ -14,16 +13,11 @@
 .planning-header {
   margin-bottom: 32px;
 
-  h1 {
+h1 {
     color: #1976d2;
-    font-size: 2rem;
     margin-bottom: 24px;
-    font-weight: 500;
-
-    @media (max-width: 768px) {
-      font-size: 1.75rem;
-      margin-bottom: 16px;
-    }
+    font-size: 32px;
+    font-weight: 300;
   }
 
   .month-filter {

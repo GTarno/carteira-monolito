@@ -3,6 +3,20 @@
     color: #1976d2;
     margin-bottom: 24px;
     font-size: 32px;
-    font-weight: 400;
+    font-weight: 300;
+  }
+
+  // Espaçamento entre componentes
+  app-persona,
+  app-quick-access,
+  app-expenses,
+  app-bills-checklist,
+  app-installments-carousel {
+    display: block;
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }

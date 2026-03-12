@@ -5,6 +5,13 @@ export interface MenuItem {
   description?: string;
 }
 
+export interface QuickAccessItem {
+  id: string;
+  label: string;
+  route: string;
+  icon: string;
+}
+
 export const MENU_ITEMS: MenuItem[] = [
   {
     icon: 'home',

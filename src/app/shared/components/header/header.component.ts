@@ -9,7 +9,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable, combineLatest, map, shareReplay, startWith } from 'rxjs';
-import { MenuItem, MENU_ITEMS } from '../../../models/menu-item';
+import { MenuItem } from '../../../models/menu-item';
+import { MenuService } from '../../../core/services/menu.service';
 
 @Component({
   selector: 'app-header',
@@ -30,10 +31,11 @@ import { MenuItem, MENU_ITEMS } from '../../../models/menu-item';
 export class HeaderComponent {
   private breakpointObserver = inject(BreakpointObserver);
   private router = inject(Router);
+  private menuService = inject(MenuService);
   
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
-  menuItems: MenuItem[] = MENU_ITEMS;
+  menuItems: MenuItem[] = this.menuService.getMenuItems();
   private isMenuOpen = false;
 
   // Observes se está em modo mobile

@@ -37,7 +37,7 @@
     <!-- Upload de imagem -->
     <div class="image-upload-section">
       <label for="image-upload" class="upload-label">
-        <mat-icon>add_photo_alternate</mat-icon>
+        <i class="far fa-image"></i>
         <span>Selecionar imagem</span>
       </label>
       <input 
@@ -51,7 +51,7 @@
       <div class="image-preview" *ngIf="previewUrl; else placeholder">
         <img [src]="previewUrl" alt="Preview da categoria" class="preview-image">
         <div class="preview-overlay">
-          <mat-icon>edit</mat-icon>
+          <i class="fas fa-pen"></i>
           <span>Alterar imagem</span>
         </div>
       </div>
@@ -59,7 +59,7 @@
       <!-- Placeholder quando não há imagem -->
       <ng-template #placeholder>
         <div class="image-placeholder">
-          <mat-icon class="placeholder-icon">image</mat-icon>
+          <i class="far fa-image placeholder-icon"></i>
           <p class="placeholder-text">Clique para selecionar uma imagem</p>
         </div>
       </ng-template>
@@ -83,7 +83,7 @@
     (click)="onSave()" 
     type="button"
     [disabled]="!categoryForm.valid || !previewUrl">
-    <mat-icon>save</mat-icon>
+    <i class="far fa-save"></i>
     Salvar
   </button>
 </mat-dialog-actions>

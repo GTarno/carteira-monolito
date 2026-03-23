@@ -35,7 +35,7 @@
         color="primary" 
         class="reset-button"
         (click)="onResetMonth()">
-        <mat-icon>refresh</mat-icon>
+        <i class="fas fa-sync-alt"></i>
         Resetar Mês
       </button>
     </div>
@@ -82,7 +82,7 @@
 
             <!-- Calendar Icon with Date -->
             <div class="date-badge">
-              <mat-icon class="date-icon">event</mat-icon>
+              <i class="far fa-calendar-alt date-icon"></i>
               <span class="date-text">{{ formatDueDate(bill.dueDate) }}</span>
             </div>
           </div>
@@ -95,7 +95,7 @@
 
   <!-- Empty State -->
   <div class="empty-state" *ngIf="summary.totalCount === 0">
-    <mat-icon class="empty-icon">receipt_long</mat-icon>
+    <i class="fas fa-receipt empty-icon"></i>
     <h3>Nenhuma conta encontrada</h3>
     <p>Clique em "Resetar Mês" para carregar as contas padrão</p>
   </div>

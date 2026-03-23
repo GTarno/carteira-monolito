@@ -1,0 +1,54 @@
+<div class="adicionar-gastos-container">
+  <h1>Adicionar gastos</h1>
+  <p class="subtitle">Escolha o tipo de gasto que deseja registrar</p>
+
+  <div class="cards-grid">
+    <div 
+      class="expense-card"
+      role="button"
+      tabindex="0"
+      (click)="onCardClick('gastos-mensais')"
+      (keydown.enter)="onCardClick('gastos-mensais')"
+      (keydown.space)="onCardClick('gastos-mensais')"
+      aria-label="Adicionar gastos mensais">
+      
+      <div class="card-header">
+        <img src="assets/images/mensais.png" alt="Gastos mensais" class="card-image">
+      </div>
+      
+      <div class="card-content">
+        <div class="card-icon">
+          <i class="far fa-credit-card"></i>
+        </div>
+        <div class="card-text">
+          <h3>Gastos mensais</h3>
+          <p>Adiciona um gasto comum a ser pago todos os meses.</p>
+        </div>
+      </div>
+    </div>
+
+    <div 
+      class="expense-card"
+      role="button"
+      tabindex="0"
+      (click)="onCardClick('grandes-compras')"
+      (keydown.enter)="onCardClick('grandes-compras')"
+      (keydown.space)="onCardClick('grandes-compras')"
+      aria-label="Adicionar grandes compras">
+      
+      <div class="card-header">
+        <img src="assets/images/parcelamentos.png" alt="Grandes compras" class="card-image">
+      </div>
+      
+      <div class="card-content">
+        <div class="card-icon">
+          <i class="fas fa-shopping-cart"></i>
+        </div>
+        <div class="card-text">
+          <h3>Grandes compras</h3>
+          <p>Adiciona um novo item de parcelamento para ser acompanhado.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

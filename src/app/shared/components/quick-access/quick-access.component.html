@@ -12,7 +12,7 @@
       (keydown)="onItemKeydown($event, item)"
     >
       <div class="quick-access__item-content">
-        <mat-icon class="quick-access__icon">{{ item.icon }}</mat-icon>
+        <i class="{{ item.icon }} quick-access__icon"></i>
         <span class="quick-access__label">{{ item.label }}</span>
       </div>
     </div>

@@ -19,4 +19,10 @@
       margin-bottom: 0;
     }
   }
+  
+  // Footer deve quebrar o container e ocupar toda largura
+  app-footer {
+    margin-bottom: 0;
+    display: block;
+  }
 }

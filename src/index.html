@@ -7,7 +7,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Font Awesome 6 Free - Usando Regular para visual mais fino -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+  <style>
+    /* Usar 'far' como base para ícones mais finos, fallback para 'fas' quando 'far' não está disponível */
+    .fa-thin {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 400; /* Regular weight para ícones outline */
+    }
+    /* Para ícones que não têm versão regular, manter como solid mas mais fino */
+    .fa-thin.fa-house, .fa-thin.fa-wallet, .fa-thin.fa-circle-plus, 
+    .fa-thin.fa-boxes-stacked, .fa-thin.fa-circle-info, .fa-thin.fa-bars,
+    .fa-thin.fa-circle-user, .fa-thin.fa-gear, .fa-thin.fa-right-from-bracket,
+    .fa-thin.fa-cart-shopping, .fa-thin.fa-calendar-days {
+      font-weight: 900; /* Solid para compatibilidade */
+      opacity: 0.8; /* Reduzir opacidade para efeito mais fino */
+    }
+  </style>
 </head>
 <body>
   <app-root></app-root>

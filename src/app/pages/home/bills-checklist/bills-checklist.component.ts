@@ -35,7 +35,6 @@ interface BillsSummary {
     MatCardModule,
     MatCheckboxModule,
     MatChipsModule,
-    MatIconModule,
     MatProgressBarModule,
     MatButtonModule
   ],

@@ -1,0 +1,77 @@
+<div class="about-container">
+  <!-- Header Section -->
+  <div class="about-header">
+    <div class="hero-content">
+      <i class="far fa-credit-card hero-icon"></i>
+      <h1 class="hero-title">{{ appName }}</h1>
+      <p class="hero-subtitle">{{ description }}</p>
+      <div class="version-badge">Versão {{ version }}</div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="about-section">
+    <h2 class="section-title">Funcionalidades</h2>
+    <div class="features-grid">
+      <mat-card *ngFor="let feature of features" class="feature-card">
+        <div class="feature-header">
+          <i class="{{ feature.icon }} feature-icon"></i>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+        </div>
+        <p class="feature-description">{{ feature.description }}</p>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Technology Stack Section -->
+  <div class="about-section">
+    <h2 class="section-title">Tecnologias Utilizadas</h2>
+    <div class="tech-grid">
+      <mat-card *ngFor="let tech of techStack" class="tech-card">
+        <div class="tech-header">
+          <h4 class="tech-name">{{ tech.name }}</h4>
+          <span *ngIf="tech.version" class="tech-version">v{{ tech.version }}</span>
+        </div>
+        <p class="tech-description">{{ tech.description }}</p>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Project Information Section -->
+  <div class="about-section">
+    <mat-card class="project-card">
+      <div class="project-content">
+        <i class="fas fa-graduation-cap project-icon"></i>
+        <div class="project-info">
+          <h3 class="project-title">Sobre o Projeto</h3>
+          <p class="project-description">
+            {{ contact.project }} desenvolvido como uma solução completa 
+            para gestão financeira pessoal. O sistema oferece uma interface 
+            moderna e intuitiva para controle de gastos, planejamentos e 
+            organização financeira.
+          </p>
+          <div class="project-meta">
+            <div class="project-year">
+              <i class="far fa-calendar"></i>
+              <span>{{ contact.year }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Call to Action -->
+  <div class="about-section">
+    <div class="cta-container">
+      <h3 class="cta-title">Comece a usar agora!</h3>
+      <p class="cta-description">
+        Organize suas finanças de forma inteligente e alcance seus objetivos financeiros.
+      </p>
+      <button mat-raised-button color="primary" class="cta-button" routerLink="/home">
+        <i class="far fa-building"></i>
+        Ir para o Dashboard
+      </button>
+    </div>
+  </div>
+</div>

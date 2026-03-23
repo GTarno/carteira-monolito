@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { Observable, take, filter } from 'rxjs';
@@ -19,7 +18,6 @@ import { AddItemDialogComponent } from '../../ui/add-item-dialog/add-item-dialog
     CommonModule,
     MatCardModule,
     MatButtonModule,
-    MatIconModule,
     MatTableModule,
     MatDialogModule
   ],

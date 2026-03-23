@@ -14,31 +14,31 @@ export interface QuickAccessItem {
 
 export const MENU_ITEMS: MenuItem[] = [
   {
-    icon: 'home',
+    icon: 'far fa-building',
     label: 'Início',
     route: '/home',
     description: 'Página inicial do sistema'
   },
   {
-    icon: 'account_balance_wallet',
+    icon: 'far fa-credit-card',
     label: 'Planejamentos',
     route: '/planejamentos',
     description: 'Gerencie seus planejamentos financeiros'
   },
   {
-    icon: 'add_circle',
+    icon: 'far fa-plus-square',
     label: 'Adicionar gastos',
     route: '/adicionar-gastos',
     description: 'Registre novos gastos'
   },
   {
-    icon: 'inventory_2',
+    icon: 'far fa-folder-open',
     label: 'Inventário',
     route: '/inventario',
     description: 'Gerencie suas categorias de inventário'
   },
   {
-    icon: 'info',
+    icon: 'far fa-question-circle',
     label: 'Sobre',
     route: '/sobre',
     description: 'Informações sobre o sistema'

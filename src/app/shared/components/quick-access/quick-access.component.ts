@@ -1,14 +1,13 @@
 import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
 import { QuickAccessItem } from '../../../models/menu-item';
 import { MenuService } from '../../../core/services/menu.service';
 
 @Component({
   selector: 'app-quick-access',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule],
   templateUrl: './quick-access.component.html',
   styleUrl: './quick-access.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

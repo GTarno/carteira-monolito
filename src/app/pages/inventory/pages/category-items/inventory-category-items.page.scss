@@ -1,7 +1,20 @@
 .category-items-container {
-  max-width: 1200px;
   margin: 0 auto;
   padding: 24px 16px;
+
+  h1 {
+    color: #1976d2;
+    margin-bottom: 24px;
+    font-size: 32px;
+    font-weight: 300;
+  }
+
+  h2 {
+    color: #383e44;
+    margin-bottom: 24px;
+    font-size: 28px;
+    font-weight: 300;
+  }
 
   .category-items-card {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

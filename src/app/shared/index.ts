@@ -9,5 +9,8 @@ export { SummaryHeaderCardComponent } from './components/summary-header-card/sum
 // Navigation Components
 export { QuickAccessComponent } from './components/quick-access/quick-access.component';
 
+// Layout Components
+export { FooterComponent } from './components/footer/footer.component';
+
 // Chart Types
 export * from './types/chart.types';

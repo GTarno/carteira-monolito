@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { MatSidenavModule, MatSidenav } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
@@ -20,7 +19,6 @@ import { MenuService } from '../../../core/services/menu.service';
     RouterModule,
     MatSidenavModule,
     MatToolbarModule,
-    MatIconModule,
     MatButtonModule,
     MatListModule,
     MatMenuModule

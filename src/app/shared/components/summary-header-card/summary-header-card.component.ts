@@ -21,7 +21,6 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
     AsyncPipe,
     CurrencyPipe,
     MatCardModule,
-    MatIconModule,
     MatButtonModule
   ],
   template: `
@@ -33,7 +32,7 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
         [class.header-over]="status === 'over'"
       >
         <mat-card-header>
-          <mat-icon mat-card-avatar>{{ icon }}</mat-icon>
+          <i class="{{ icon }} mat-mdc-card-avatar-icon" mat-card-avatar></i>
           <mat-card-title>{{ title }}</mat-card-title>
           <mat-card-subtitle>{{ subtitle }}</mat-card-subtitle>
           
@@ -45,14 +44,14 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
             (click)="onEditClick()"
             [attr.aria-label]="'Editar ' + title"
           >
-            <mat-icon>edit</mat-icon>
+            <i class="fas fa-pen"></i>
           </button>
         </mat-card-header>
         
         <mat-card-content>
           <div class="summary-grid">
             <div class="summary-item">
-              <mat-icon>trending_up</mat-icon>
+              <i class="far fa-chart-bar"></i>
               <div class="summary-text">
                 <span class="label">Total Planejado</span>
                 <span class="value">{{ totalPlanned$ | async | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -60,7 +59,7 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
             </div>
 
             <div class="summary-item">
-              <mat-icon>shopping_cart</mat-icon>
+              <i class="fas fa-shopping-cart"></i>
               <div class="summary-text">
                 <span class="label">Total Gasto</span>
                 <span class="value">{{ totalSpent$ | async | currency:'BRL':'symbol':'1.2-2' }}</span>
@@ -68,7 +67,7 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
             </div>
 
             <div class="summary-item">
-              <mat-icon>account_balance_wallet</mat-icon>
+              <i class="far fa-credit-card"></i>
               <div class="summary-text">
                 <span class="label">Saldo Restante</span>
                 <span 

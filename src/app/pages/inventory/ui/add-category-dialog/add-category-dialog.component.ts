@@ -5,7 +5,6 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { InventoryCategoryCreate } from '../../models/inventory-category.model';
 
 @Component({
@@ -17,8 +16,7 @@ import { InventoryCategoryCreate } from '../../models/inventory-category.model';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-    MatIconModule
+    MatButtonModule
   ],
   templateUrl: './add-category-dialog.component.html',
   styleUrl: './add-category-dialog.component.scss'

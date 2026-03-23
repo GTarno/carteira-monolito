@@ -5,17 +5,17 @@
     <mat-card-header class="category-header">
       <div class="header-content">
         <div class="title-section">
-          <h1 class="category-name">
+          <h1>
             {{ (category$ | async)?.name || 'Categoria' }}
           </h1>
-          <h2 class="subtitle">Itens</h2>
+          <h2>Itens</h2>
         </div>
         <button 
           mat-icon-button 
           (click)="onBackToCategories()"
           aria-label="Voltar para categorias"
           class="back-button">
-          <mat-icon>arrow_back</mat-icon>
+          <i class="fas fa-arrow-left"></i>
         </button>
       </div>
     </mat-card-header>
@@ -71,7 +71,7 @@
                 (click)="onDeleteItem(item.id)"
                 [attr.aria-label]="'Excluir ' + item.title"
                 class="delete-button">
-                <mat-icon>delete</mat-icon>
+                <i class="far fa-trash-alt"></i>
               </button>
             </td>
           </ng-container>
@@ -84,7 +84,7 @@
       <!-- Estado vazio -->
       <ng-template #noItems>
         <div class="no-items-state">
-          <mat-icon class="no-items-icon">inventory_2</mat-icon>
+          <i class="fas fa-boxes no-items-icon"></i>
           <h3 class="no-items-title">Nenhum item encontrado</h3>
           <p class="no-items-message">
             Adicione seu primeiro item para começar a organizar sua coleção.
@@ -101,7 +101,7 @@
         color="primary" 
         (click)="openAddItemDialog()"
         class="add-item-button">
-        <mat-icon>add</mat-icon>
+        <i class="fas fa-plus"></i>
         Adicionar novo item
       </button>
     </mat-card-actions>

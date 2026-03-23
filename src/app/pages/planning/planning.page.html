@@ -18,7 +18,7 @@
             {{ getMonthLabel(month) }}
           </mat-option>
         </mat-select>
-        <mat-icon matSuffix>date_range</mat-icon>
+        <i class="far fa-calendar" matSuffix></i>
       </mat-form-field>
     </div>
   </div>
@@ -31,11 +31,11 @@
 
   <!-- Error State -->
   <div *ngIf="error$ | async as error" class="error-container">
-    <mat-icon color="warn">error</mat-icon>
+    <i class="fas fa-exclamation-circle" color="warn"></i>
     <h3>Erro ao carregar dados</h3>
     <p>{{ error }}</p>
     <button mat-stroked-button color="primary" (click)="retryLoad()">
-      <mat-icon>refresh</mat-icon>
+      <i class="fas fa-sync-alt"></i>
       Tentar novamente
     </button>
   </div>

@@ -1,12 +1,19 @@
 {
   "name": "carteira-monolito",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "node server.js",
+    "dev": "ng serve",
     "build": "ng build",
+    "heroku-postbuild": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
@@ -21,6 +28,8 @@
     "@angular/router": "^20.3.16",
     "@primeuix/themes": "^2.0.3",
     "chart.js": "^4.3.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
     "ng2-charts": "^8.0.0",
     "primeng": "^21.1.1",
     "rxjs": "~7.8.0",

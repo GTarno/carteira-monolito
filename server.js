@@ -21,7 +21,7 @@ const distPath = path.join(__dirname, 'dist', 'carteira-monolito', 'browser');
 app.use(express.static(distPath));
 
 // SPA fallback: return index.html for any route not matched by a static file
-app.get('*', (_req, res) => {
+app.get('/{*any}', (_req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 

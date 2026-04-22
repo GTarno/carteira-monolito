@@ -4,9 +4,11 @@
     #sidenav 
     class="sidenav"
     [mode]="(sidenavMode$ | async) || 'side'" 
-    [opened]="(opened$ | async) || false"
+    [opened]="false"
     [fixedInViewport]="true"
-    [fixedTopGap]="64">
+    [fixedTopGap]="64"
+    (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()">
     
     <!-- Menu items -->
     <mat-nav-list class="nav-list">
@@ -17,7 +19,7 @@
         routerLinkActive="active"
         (click)="onNavigate(item.route)"
         class="nav-item">
-        <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+        <i class="{{ item.icon }}" matListItemIcon></i>
         <span matListItemTitle>{{ item.label }}</span>
         <span matListItemLine *ngIf="item.description">{{ item.description }}</span>
       </a>
@@ -34,9 +36,9 @@
           type="button"
           aria-label="Toggle sidenav"
           mat-icon-button
-          (click)="sidenav.toggle()"
+          (click)="toggleMenu()"
           class="menu-button">
-          <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+          <i class="fas fa-bars" aria-label="Side nav toggle icon"></i>
         </button>
         
         <span class="app-title">Minhas Finanças</span>
@@ -46,7 +48,7 @@
       
       <!-- Botao opcional do account menu -->
       <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Account menu">
-        <mat-icon>account_circle</mat-icon>
+        <i class="far fa-user-circle"></i>
       </button>
     </mat-toolbar>
 
@@ -60,15 +62,15 @@
 <!-- Account menu (opcional para futuras implementações) -->
 <mat-menu #menu="matMenu">
   <button mat-menu-item>
-    <mat-icon>person</mat-icon>
+    <i class="far fa-user"></i>
     <span>Perfil</span>
   </button>
   <button mat-menu-item>
-    <mat-icon>settings</mat-icon>
+    <i class="fas fa-cog"></i>
     <span>Configurações</span>
   </button>
   <button mat-menu-item>
-    <mat-icon>logout</mat-icon>
+    <i class="fas fa-sign-out-alt"></i>
     <span>Sair</span>
   </button>
 </mat-menu>

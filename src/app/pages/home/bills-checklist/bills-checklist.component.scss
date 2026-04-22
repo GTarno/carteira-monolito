@@ -1,0 +1,437 @@
+.bills-checklist-container {
+  padding: 20px;
+  margin: 0 auto;
+  height: auto;
+
+  // Layout Grid - Desktop primeiro
+  .bills-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: stretch;
+
+    @media (max-width: 959px) {
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: initial;
+      min-height: auto;
+    }
+  }
+
+  // Summary Section (Left Column)
+  .bills-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+    height: 100%;
+    max-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .title-group {
+      margin-bottom: 20px;
+      flex-shrink: 0;
+
+      .title {
+        margin: 0 0 4px 0;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 14px;
+        font-weight: 400;
+      }
+    }
+
+    .summary-stats {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+
+      .stats-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .stats-label {
+          font-size: 12px;
+          opacity: 0.8;
+          text-transform: uppercase;
+          font-weight: 500;
+          letter-spacing: 0.5px;
+        }
+
+        .stats-value {
+          font-size: 18px;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .progress-section {
+      margin-bottom: auto;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      mat-progress-bar {
+        height: 6px;
+        border-radius: 3px;
+        margin-bottom: 8px;
+
+        ::ng-deep .mdc-linear-progress__bar-inner {
+          border-radius: 3px;
+        }
+      }
+
+      .progress-text {
+        font-size: 12px;
+        opacity: 0.9;
+        font-weight: 500;
+      }
+    }
+
+    .reset-button {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: white;
+      flex-shrink: 0;
+      margin-top: 20px;
+      
+      mat-icon {
+        margin-right: 8px;
+      }
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    @media (max-width: 959px) {
+      height: auto;
+      max-height: none;
+      justify-content: flex-start;
+      
+      .progress-section {
+        margin-bottom: 20px;
+        flex-grow: 0;
+      }
+      
+      .reset-button {
+        margin-top: 0;
+      }
+    }
+  }
+
+  // Bills List Wrapper (Right Column)
+  .bills-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 500px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+
+    @media (max-width: 959px) {
+      max-height: none;
+      box-shadow: none;
+      background: transparent;
+      border-radius: 0;
+    }
+  }
+
+  .bills-list-scroll {
+    position: relative;
+    height: 100%;
+    max-height: 280px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    padding-right: 12px;
+
+    @media (max-width: 959px) {
+      height: auto;
+      max-height: none;
+      overflow-y: visible;
+      padding: 0;
+    }
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #60b3e6;
+      border-radius: 4px;
+      border: 1px solid #f8f9fa;
+
+      &:hover {
+        background: #4a9cd6;
+      }
+    }
+
+    // Adiciona uma sombra sutil na parte inferior para indicar scroll
+    &::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: 0;
+      height: 8px;
+      background: linear-gradient(to top, rgba(255, 255, 255, 0.9), transparent);
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+
+  // Bills Cards - Now inside scroll container
+  .bill-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    @media (max-width: 959px) {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    &:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      transform: translateY(-2px);
+    }
+
+    &.paid {
+      opacity: 0.7;
+      background-color: #f8f9fa;
+      
+      .bill-content {
+        opacity: 0.8;
+      }
+    }
+  }
+
+  .bill-content {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    gap: 16px;
+    transition: all 0.3s ease;
+
+    .bill-checkbox {
+      flex-shrink: 0;
+    }
+
+    .bill-info {
+      flex: 1;
+      min-width: 0;
+
+      .bill-name {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 4px;
+        transition: all 0.3s ease;
+        color: #2c3e50;
+
+        &.strike-through {
+          text-decoration: line-through;
+          color: #95ab95;
+        }
+      }
+
+      .bill-details {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+
+        .bill-amount {
+          font-weight: 600;
+          color: #27ae60;
+          font-size: 14px;
+        }
+
+        .bill-due-date {
+          font-size: 12px;
+          color: #7f8c8d;
+        }
+      }
+    }
+
+    .status-chip {
+      flex-shrink: 0;
+      font-size: 11px;
+      font-weight: 500;
+      color: white;
+
+      &.mat-mdc-chip-selected.mat-primary {
+        background-color: #3498db;
+      }
+
+      &.mat-mdc-chip-selected.mat-accent {
+        background-color: #f39c12;
+      }
+
+      &.mat-mdc-chip-selected.mat-warn {
+        background-color: #e74c3c;
+      }
+
+      &.mat-mdc-chip-selected.mat-success {
+        background-color: #27ae60;
+      }
+    }
+
+    .date-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+
+      .date-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+        color: #7f8c8d;
+      }
+
+      .date-text {
+        font-size: 10px;
+        color: #7f8c8d;
+        font-weight: 500;
+      }
+    }
+  }
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    text-align: center;
+    color: #7f8c8d;
+
+    .empty-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 959px) {
+  .bills-checklist-container {
+    padding: 16px;
+
+    .bills-summary {
+      padding: 20px;
+      margin-bottom: 24px;
+      height: auto;
+      max-height: none;
+      justify-content: flex-start;
+
+      .progress-section {
+        margin-bottom: 20px;
+        flex-grow: 0;
+      }
+      
+      .reset-button {
+        margin-top: 0;
+      }
+
+      .summary-stats {
+        gap: 20px;
+
+        .stats-item {
+          .stats-value {
+            font-size: 16px;
+          }
+        }
+      }
+
+      .title {
+        font-size: 20px;
+      }
+    }
+
+    .bill-content {
+      padding: 16px;
+      gap: 12px;
+
+      .bill-info {
+        .bill-details {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 4px;
+        }
+      }
+
+      .date-badge {
+        display: none;
+      }
+    }
+  }
+}
+
+// Animation for paid state transition
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+.bill-card.paid {
+  animation: fadeOut 0.3s ease-in-out;
+}
+
+// Custom Material overrides
+::ng-deep {
+  .mat-mdc-progress-bar {
+    --mdc-linear-progress-active-indicator-color: white;
+  }
+
+  .mat-mdc-chip-selected {
+    &.mat-success {
+      background-color: #27ae60 !important;
+      color: white !important;
+    }
+  }
+}

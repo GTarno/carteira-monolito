@@ -1,0 +1,40 @@
+<div class="installments-carousel-container">
+  <h2>Meus Parcelamentos</h2>
+  
+  <p-carousel 
+    [value]="(plans$ | async) || []" 
+    [numVisible]="3" 
+    [numScroll]="1"
+    [circular]="true"
+    [responsiveOptions]="responsiveOptions"
+    [showIndicators]="true"
+    [showNavigators]="true"
+    [autoplayInterval]="0">
+    
+    <ng-template pTemplate="item" let-plan>
+      <div class="installment-card">
+        <div class="card-header">
+          <img [src]="plan.imageUrl" [alt]="plan.title" class="card-image">
+          <div class="installment-badge">
+            {{ plan.paid }}/{{ plan.total }}
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <h4 class="card-title">{{ plan.title }}</h4>
+          <p class="card-amount">{{ formatCurrency(plan.amount) }}</p>
+          
+          <div class="progress-container">
+            <div class="progress-bar" [style.width.%]="calculateProgress(plan.paid, plan.total)">
+            </div>
+          </div>
+          
+          <div class="progress-text">
+            {{ plan.paid }} de {{ plan.total }} parcelas pagas
+          </div>
+        </div>
+      </div>
+    </ng-template>
+    
+  </p-carousel>
+</div>

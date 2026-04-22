@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>Adicionar novo item - {{ categoryName }}</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="itemForm" class="item-form">
+    
+    <!-- Título -->
+    <mat-form-field class="full-width">
+      <mat-label>{{ getTitleLabel() }}</mat-label>
+      <input 
+        matInput 
+        formControlName="title" 
+        [placeholder]="getTitlePlaceholder()"
+        maxlength="100">
+      <mat-error *ngIf="itemForm.get('title')?.touched && itemForm.get('title')?.errors">
+        {{ getErrorMessage('title') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Autor -->
+    <mat-form-field class="full-width">
+      <mat-label>{{ getAuthorLabel() }}</mat-label>
+      <input 
+        matInput 
+        formControlName="author" 
+        [placeholder]="getAuthorPlaceholder()"
+        maxlength="80">
+      <mat-error *ngIf="itemForm.get('author')?.touched && itemForm.get('author')?.errors">
+        {{ getErrorMessage('author') }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Observações -->
+    <mat-form-field class="full-width">
+      <mat-label>Observações (opcional)</mat-label>
+      <textarea 
+        matInput 
+        formControlName="notes" 
+        placeholder="Adicione observações, estado do item, edição..."
+        rows="3"
+        maxlength="200">
+      </textarea>
+      <mat-hint align="end">
+        {{ itemForm.get('notes')?.value?.length || 0 }}/200
+      </mat-hint>
+      <mat-error *ngIf="itemForm.get('notes')?.touched && itemForm.get('notes')?.errors">
+        {{ getErrorMessage('notes') }}
+      </mat-error>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button (click)="onCancel()" type="button">
+    Cancelar
+  </button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSave()" 
+    type="button"
+    [disabled]="!itemForm.valid">
+    <mat-icon>save</mat-icon>
+    Salvar item
+  </button>
+</mat-dialog-actions>

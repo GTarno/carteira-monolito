@@ -1,2 +1,7 @@
 // App component agora é apenas um shell simples
 // Todo o layout está encapsulado no header component
+
+// Layout principal apenas organiza o footer
+:host {
+  display: block;
+}

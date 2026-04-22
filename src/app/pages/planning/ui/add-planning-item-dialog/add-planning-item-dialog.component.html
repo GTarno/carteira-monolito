@@ -1,0 +1,86 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon>add</mat-icon>
+    Adicionar Novo Item
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="dialog-form">
+      <!-- Campo Nome -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nome do item</mat-label>
+        <input 
+          matInput 
+          formControlName="name"
+          placeholder="Ex: Conta de luz, Mercado..."
+          maxlength="50"
+        />
+        <mat-icon matSuffix>edit</mat-icon>
+        <mat-error>{{ getNameError() }}</mat-error>
+      </mat-form-field>
+
+      <!-- Campo Valor Planejado -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Valor planejado</mat-label>
+        <input 
+          matInput 
+          type="number"
+          formControlName="plannedValue"
+          placeholder="0,00"
+          min="0"
+          step="0.01"
+        />
+        <span matTextPrefix>R$&nbsp;</span>
+        <mat-icon matSuffix>attach_money</mat-icon>
+        <mat-error>{{ getValueError() }}</mat-error>
+      </mat-form-field>
+
+      <!-- Seleção de Ícone -->
+      <div class="icon-selection-section">
+        <label class="icon-selection-label">
+          Escolha um ícone
+          <span class="required-asterisk">*</span>
+        </label>
+        
+        <div class="icons-grid">
+          <button 
+            *ngFor="let iconItem of availableIcons"
+            type="button"
+            class="icon-option"
+            [class.selected]="isIconSelected(iconItem.icon)"
+            (click)="selectIcon(iconItem.icon)"
+            [attr.aria-label]="'Selecionar ícone ' + iconItem.name"
+          >
+            <mat-icon>{{ iconItem.icon }}</mat-icon>
+            <span class="icon-name">{{ iconItem.name }}</span>
+          </button>
+        </div>
+        
+        <div *ngIf="!selectedIcon" class="icon-required-error">
+          Por favor, selecione um ícone para o item
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button 
+      mat-button 
+      (click)="onCancel()"
+      class="cancel-button"
+    >
+      Cancelar
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSave()"
+      [disabled]="!isFormValid()"
+      class="save-button"
+    >
+      <mat-icon>check</mat-icon>
+      Salvar
+    </button>
+  </mat-dialog-actions>
+</div>

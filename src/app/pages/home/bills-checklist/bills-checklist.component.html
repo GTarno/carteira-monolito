@@ -1,0 +1,102 @@
+<div class="bills-checklist-container" *ngIf="billsSummary$ | async as summary">
+  <div class="bills-layout">
+    <!-- Summary Section (Left Column) -->
+    <div class="bills-summary">
+      <div class="title-group">
+        <h2 class="title">Checklist de Contas</h2>
+        <p class="subtitle">Mês atual</p>
+      </div>
+      
+      <!-- Summary Stats -->
+      <div class="summary-stats">
+        <div class="stats-item">
+          <span class="stats-label">Pagas</span>
+          <span class="stats-value">{{ summary.paidCount }}/{{ summary.totalCount }}</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-label">Pendente</span>
+          <span class="stats-value">{{ summary.pendingTotalAmount | currency:'BRL':'symbol':'1.2-2':'pt' }}</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-section">
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="summary.progressPercent"
+          color="primary">
+        </mat-progress-bar>
+        <span class="progress-text">{{ summary.progressPercent | number:'1.0-0' }}% concluído</span>
+      </div>
+
+      <!-- Reset Button -->
+      <button 
+        mat-stroked-button 
+        color="primary" 
+        class="reset-button"
+        (click)="onResetMonth()">
+        <i class="fas fa-sync-alt"></i>
+        Resetar Mês
+      </button>
+    </div>
+
+    <!-- Bills List (Right Column) -->
+    <div class="bills-list-wrapper">
+      <div class="bills-list-scroll">
+        <mat-card 
+          *ngFor="let bill of summary.bills; trackBy: trackByBillId" 
+          class="bill-card"
+          [class.paid]="bill.isPaid">
+          
+          <div class="bill-content">
+            <!-- Checkbox -->
+            <mat-checkbox
+              [checked]="bill.isPaid"
+              (change)="onTogglePaid(bill.id)"
+              color="primary"
+              class="bill-checkbox">
+            </mat-checkbox>
+
+            <!-- Bill Info -->
+            <div class="bill-info">
+              <div class="bill-name" [class.strike-through]="bill.isPaid">
+                {{ bill.name }}
+              </div>
+              
+              <div class="bill-details">
+                <span class="bill-amount">
+                  {{ bill.amount | currency:'BRL':'symbol':'1.2-2':'pt' }}
+                </span>
+                <span class="bill-due-date">
+                  {{ getDueDateLabel(bill.dueDate) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Status Chip -->
+            <mat-chip 
+              [color]="bill.status.color"
+              class="status-chip">
+              {{ bill.status.label }}
+            </mat-chip>
+
+            <!-- Calendar Icon with Date -->
+            <div class="date-badge">
+              <i class="far fa-calendar-alt date-icon"></i>
+              <span class="date-text">{{ formatDueDate(bill.dueDate) }}</span>
+            </div>
+          </div>
+
+        </mat-card>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="summary.totalCount === 0">
+    <i class="fas fa-receipt empty-icon"></i>
+    <h3>Nenhuma conta encontrada</h3>
+    <p>Clique em "Resetar Mês" para carregar as contas padrão</p>
+  </div>
+</div>

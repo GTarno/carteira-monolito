@@ -1,0 +1,24 @@
+<section class="quick-access">
+  <h2 class="quick-access__title">Acessos rápidos</h2>
+  <div class="quick-access__box-align">
+  <div class="quick-access__grid">
+    <div 
+      *ngFor="let item of getItems()"
+      class="quick-access__item"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="getItemAriaLabel(item)"
+      (click)="onItemClick(item)"
+      (keydown)="onItemKeydown($event, item)"
+    >
+      <div class="quick-access__item-content">
+        <i class="{{ item.icon }} quick-access__icon"></i>
+        <span class="quick-access__label">{{ item.label }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="quick-access__image-container">
+    <img src="assets/images/economia.png" alt="Acessos rápidos" class="quick-access__img-size">
+  </div>
+  </div>
+</section>

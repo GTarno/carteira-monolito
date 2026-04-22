@@ -6,11 +6,10 @@
   min-height: 85vh;
   
   h2 {
-    color: #2c3e50;
-    text-align: center;
-    margin-bottom: 3rem;
-    font-weight: 600;
-    font-size: 2.5rem;
+    color: #383e44;
+    margin-bottom: 24px;
+    font-size: 28px;
+    font-weight: 300;
   }
   
   // Mobile Layout
@@ -27,7 +26,7 @@
         background: white;
         border-radius: 8px;
         color: #6c757d;
-        font-weight: 500;
+        font-weight: 300;
         font-size: 1.1rem;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -114,7 +113,7 @@
         color: #6c757d;
         margin-bottom: 0.75rem;
         font-size: 1.2rem;
-        font-weight: 500;
+        font-weight: 300;
       }
       
       .stat-value {

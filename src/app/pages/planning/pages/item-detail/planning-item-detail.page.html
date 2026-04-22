@@ -1,0 +1,158 @@
+<div class="item-detail-page">
+  <!-- Header com botão voltar -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    
+    <div class="header-info" *ngIf="item$ | async as item; else loadingHeader">
+      <mat-icon class="item-icon">{{ getItemIcon(item) }}</mat-icon>
+      <div class="item-title">
+        <h2>{{ getItemName(item) }}</h2>
+        <span class="month-label">{{ getMonthLabel() }}</span>
+      </div>
+    </div>
+    
+    <ng-template #loadingHeader>
+      <div class="header-info">
+        <mat-progress-spinner [diameter]="24"></mat-progress-spinner>
+        <span class="loading-text">Carregando...</span>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Summary Header Card com status dinâmico -->
+  <app-summary-header-card
+    [title]="'Resumo do Item'"
+    [subtitle]="getMonthLabel()"
+    [icon]="getItemIcon(item$ | async)"
+    [totalPlanned$]="totalPlanned$"
+    [totalSpent$]="totalSpent$"
+    [remaining$]="remaining$"
+    [status]="(headerStatus$ | async) || 'default'"
+    [showEditButton]="true"
+    (editClick)="onEditClick()">
+  </app-summary-header-card>
+
+  <!-- Detalhes do Item -->
+  <div class="item-details" *ngIf="item$ | async as item">
+    <div class="detail-cards">
+      <!-- Card de Planejado vs Gasto -->
+      <mat-card class="values-card">
+        <mat-card-header>
+          <mat-card-title>Valores</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="value-rows">
+            <div class="value-row">
+              <span class="label">Valor Planejado:</span>
+              <span class="value planned-value">{{ item.plannedValue | currency:'BRL' }}</span>
+            </div>
+            <div class="value-row">
+              <span class="label">Valor Gasto:</span>
+              <span class="value spent-value">{{ item.realValue | currency:'BRL' }}</span>
+            </div>
+            <div class="value-row">
+              <span class="label">Diferença:</span>
+              <span class="value" 
+                    [class.positive]="(item.plannedValue - item.realValue) >= 0"
+                    [class.negative]="(item.plannedValue - item.realValue) < 0">
+                {{ (item.plannedValue - item.realValue) | currency:'BRL' }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Card de Status -->
+      <mat-card class="status-card">
+        <mat-card-content>
+          @if (statusConfig$ | async; as status) {
+            <div class="status-badge" [ngClass]="status.className">
+              <mat-icon>{{ status.icon }}</mat-icon>
+              <div class="status-label">{{ status.label }}</div>
+            </div>
+          } @else {
+            <div class="status-badge status-default">
+              <mat-icon>help</mat-icon>
+              <div class="status-label">Carregando...</div>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Gráfico de Tendência -->
+  <mat-card class="chart-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>trending_up</mat-icon>
+        Tendência de Gastos
+      </mat-card-title>
+      <mat-card-subtitle>Últimos 12 meses</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="chart-container">
+        @if (chartData$ | async; as chartData) {
+          @if (chartData?.labels && chartData.labels.length > 0) {
+            <app-line-chart 
+              [trendData]="chartData"
+              [height]="'300px'"
+              [showMetrics]="false"
+              [showLegend]="true"
+              (chartClick)="onChartClick($event)"
+              (chartHover)="onChartHover($event)">
+            </app-line-chart>
+          } @else {
+            <div class="no-data-message">
+              <mat-icon>info</mat-icon>
+              <span>Nenhum dado histórico disponível</span>
+            </div>
+          }
+        } @else {
+          <div class="chart-loading">
+            <mat-progress-spinner [diameter]="40"></mat-progress-spinner>
+            <span>Carregando gráfico...</span>
+          </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Categoria de origem -->
+  <mat-card class="category-card" *ngIf="categoryInfo$ | async as categoryInfo">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>{{ categoryInfo.icon }}</mat-icon>
+        {{ categoryInfo.title }}
+      </mat-card-title>
+      <mat-card-subtitle>Categoria</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="category-actions">
+        <button mat-stroked-button (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon>
+          Ver outros itens desta categoria
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  @if (isLoading$ | async) {
+    <div class="loading-overlay">
+      <mat-progress-spinner [diameter]="48"></mat-progress-spinner>
+      <span>Carregando detalhes...</span>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error$ | async; as error) {
+    <div class="error-message">
+      <mat-icon>error</mat-icon>
+      <span>{{ error }}</span>
+      <button mat-button (click)="goBack()">Voltar</button>
+    </div>
+  }
+</div>

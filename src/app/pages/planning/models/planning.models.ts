@@ -37,6 +37,29 @@ export interface PlanningItemCreate {
 
 export type PlanCardStatus = 'ok' | 'limit' | 'over';
 
+/** A partir de qual fração do planejado o gasto é considerado "no limite". */
+export const BUDGET_WARNING_RATIO = 0.9;
+
+/** Regra única de status do orçamento: ok (até 90%), limit (até 100%), over (acima de 100%). */
+export function getBudgetStatus(plannedValue: number, realValue: number): PlanCardStatus {
+  if (plannedValue <= 0) return 'ok';
+  const ratio = realValue / plannedValue;
+  if (ratio > 1) return 'over';
+  if (ratio > BUDGET_WARNING_RATIO) return 'limit';
+  return 'ok';
+}
+
+/** Fração utilizada do planejado, limitada a 1. */
+export function getBudgetProgress(plannedValue: number, realValue: number): number {
+  if (plannedValue <= 0) return 0;
+  return Math.min(realValue / plannedValue, 1);
+}
+
+/** Quanto o gasto passou do planejado (0 se não passou). */
+export function getBudgetExcess(plannedValue: number, realValue: number): number {
+  return Math.max(realValue - plannedValue, 0);
+}
+
 export class PlanningUtils {
   static getRealValue(card: PlanCard): number {
     if (card.items && card.items.length > 0) {
@@ -46,23 +69,15 @@ export class PlanningUtils {
   }
 
   static getCardStatus(card: PlanCard): PlanCardStatus {
-    const realValue = PlanningUtils.getRealValue(card);
-    if (card.plannedValue === 0) return 'ok';
-    
-    const ratio = realValue / card.plannedValue;
-    if (ratio > 1) return 'over';
-    if (ratio > 0.9) return 'limit';
-    return 'ok';
+    return getBudgetStatus(card.plannedValue, PlanningUtils.getRealValue(card));
   }
 
   static getCardProgress(card: PlanCard): number {
-    if (card.plannedValue === 0) return 0;
-    return Math.min(PlanningUtils.getRealValue(card) / card.plannedValue, 1);
+    return getBudgetProgress(card.plannedValue, PlanningUtils.getRealValue(card));
   }
 
   static getCardExcess(card: PlanCard): number {
-    const realValue = PlanningUtils.getRealValue(card);
-    return Math.max(realValue - card.plannedValue, 0);
+    return getBudgetExcess(card.plannedValue, PlanningUtils.getRealValue(card));
   }
 
   static getTotalPlanned(plan: MonthlyPlan): number {
@@ -74,47 +89,26 @@ export class PlanningUtils {
   }
 
   static getOverallStatus(plan: MonthlyPlan): PlanCardStatus {
-    const totalPlanned = PlanningUtils.getTotalPlanned(plan);
-    const totalSpent = PlanningUtils.getTotalSpent(plan);
-    
-    if (totalPlanned === 0) return 'ok';
-    
-    const ratio = totalSpent / totalPlanned;
-    if (ratio > 1) return 'over';
-    if (ratio > 0.9) return 'limit';
-    return 'ok';
+    return getBudgetStatus(PlanningUtils.getTotalPlanned(plan), PlanningUtils.getTotalSpent(plan));
   }
 
   static getOverallProgress(plan: MonthlyPlan): number {
-    const totalPlanned = PlanningUtils.getTotalPlanned(plan);
-    const totalSpent = PlanningUtils.getTotalSpent(plan);
-    
-    if (totalPlanned === 0) return 0;
-    return Math.min(totalSpent / totalPlanned, 1);
+    return getBudgetProgress(PlanningUtils.getTotalPlanned(plan), PlanningUtils.getTotalSpent(plan));
   }
 
   static getOverallExcess(plan: MonthlyPlan): number {
-    const totalPlanned = PlanningUtils.getTotalPlanned(plan);
-    const totalSpent = PlanningUtils.getTotalSpent(plan);
-    return Math.max(totalSpent - totalPlanned, 0);
+    return getBudgetExcess(PlanningUtils.getTotalPlanned(plan), PlanningUtils.getTotalSpent(plan));
   }
 
-  // Métodos para itens individuais
   static getItemStatus(plannedValue: number, realValue: number): PlanCardStatus {
-    if (plannedValue === 0) return 'ok';
-    
-    const ratio = realValue / plannedValue;
-    if (ratio > 1) return 'over';
-    if (ratio > 0.9) return 'limit';
-    return 'ok';
+    return getBudgetStatus(plannedValue, realValue);
   }
 
   static getItemProgress(plannedValue: number, realValue: number): number {
-    if (plannedValue === 0) return 0;
-    return Math.min(realValue / plannedValue, 1);
+    return getBudgetProgress(plannedValue, realValue);
   }
 
   static getItemExcess(plannedValue: number, realValue: number): number {
-    return Math.max(realValue - plannedValue, 0);
+    return getBudgetExcess(plannedValue, realValue);
   }
 }

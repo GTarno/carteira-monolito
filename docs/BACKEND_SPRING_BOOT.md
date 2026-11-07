@@ -20,7 +20,7 @@ O frontend é este repositório (`GTarno/carteira-monolito`): uma SPA Angular 20
 | Linguagem | Java 21 (LTS) | Records, pattern matching, virtual threads |
 | Framework | Spring Boot (versão estável mais recente no start.spring.io; 4.0.x no momento) | Padrão de mercado |
 | Build | Maven (com `mvnw`) | Mais comum em cursos/tutoriais |
-| Banco | PostgreSQL 16+ | Disponível no Heroku/Render/Railway |
+| Banco | PostgreSQL 16+ | Disponível em Render, Railway, Neon, Supabase etc. |
 | Migrações | Flyway | SQL versionado, simples de revisar |
 | Persistência | Spring Data JPA (Hibernate) | |
 | Validação | Bean Validation (`spring-boot-starter-validation`) | |
@@ -38,8 +38,7 @@ Organização **por funcionalidade** (não por camada técnica):
 ```
 carteira-api/
 ├── compose.yaml                      # Postgres local (Spring Docker Compose Support sobe sozinho)
-├── system.properties                 # java.runtime.version=21 (Heroku)
-├── Procfile                          # web: java -Dserver.port=$PORT -jar target/carteira-api.jar
+├── Dockerfile                        # imagem da API (Render/Railway/Fly)
 └── src/main/java/br/com/gtarno/carteira/
     ├── CarteiraApiApplication.java
     ├── shared/
@@ -237,12 +236,14 @@ create table inventory_items (
 | Método | Rota | Corpo / resposta |
 |---|---|---|
 | POST | `/auth/register` | `{ name, email, password }` → `201 { accessToken, expiresIn, user }` |
-| POST | `/auth/login` | `{ email, password }` → `{ accessToken, expiresIn, user }` + cookie `refresh_token` (`HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth`) |
-| POST | `/auth/refresh` | (cookie) → novo `accessToken` e novo refresh (rotação; o anterior é revogado) |
-| POST | `/auth/logout` | revoga o refresh e apaga o cookie |
+| POST | `/auth/login` | `{ email, password }` → `{ accessToken, expiresIn, refreshToken, user }` |
+| POST | `/auth/refresh` | `{ refreshToken }` → novo `accessToken` e novo `refreshToken` (rotação; o anterior é revogado) |
+| POST | `/auth/logout` | `{ refreshToken }` → revoga o refresh |
 | GET / PATCH | `/me` | `{ id, name, email }` |
 
 Senhas com `BCryptPasswordEncoder`. Access token de 15 min; refresh de 7 dias, guardado no banco **como hash**. Login com erro genérico ("e-mail ou senha inválidos").
+
+**Por que o refresh vai no corpo e não em cookie:** o front fica no GitHub Pages (`gtarno.github.io`) e a API em outro domínio. Para o navegador, um cookie da API é "de terceiros", e Safari/Firefox (e o Chrome, conforme a configuração) bloqueiam esse tipo de cookie, o que quebraria o login. Com o token no corpo, o front guarda o refresh no `localStorage` e o access token só em memória. O custo é a exposição a XSS, mitigada pela rotação a cada uso, revogação no logout e validade curta do access token. Se no futuro front e API ficarem num mesmo domínio próprio (ex.: `app.dominio.com` e `api.dominio.com`), dá para voltar ao cookie `HttpOnly; Secure; SameSite=Lax`.
 
 ### 6.2 Categorias e Planejamento
 
@@ -344,7 +345,7 @@ Substitui os dados fixos de `persona.component.ts` e `expenses.component.ts`.
 ## 7. Segurança
 
 - `SecurityConfig`: stateless, CSRF desabilitado para `/api/**` (Bearer token), `permitAll` só para `/api/v1/auth/**`, `/actuator/health`, `/v3/api-docs/**`, `/swagger-ui/**` (desligar a documentação em produção).
-- CORS: só a origem do front (`APP_CORS_ALLOWED_ORIGINS`), com `allowCredentials(true)` por causa do cookie. Dispensável se o front fizer proxy (ver seção 9).
+- CORS **obrigatório** (front e API em domínios diferentes): liberar só as origens do front em `APP_CORS_ALLOWED_ORIGINS` (`https://gtarno.github.io` e `http://localhost:4200`), métodos `GET, POST, PUT, PATCH, DELETE`, cabeçalhos `Authorization, Content-Type`. Sem `allowCredentials`, porque não há cookie.
 - Limite de tentativas em `/auth/login` (ex.: Bucket4j, ou um contador simples em memória por IP/e-mail).
 - Teste obrigatório: o usuário A recebe **404** ao acessar um recurso do usuário B (não 403, para não revelar que existe).
 
@@ -369,19 +370,21 @@ app:
     access-ttl: 15m
     refresh-ttl: 7d
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200}   # produção: https://gtarno.github.io
 ```
 
-No Heroku, o buildpack Java define `JDBC_DATABASE_URL`, `JDBC_DATABASE_USERNAME` e `JDBC_DATABASE_PASSWORD` a partir do Heroku Postgres.
+No provedor de hospedagem, configure `JDBC_DATABASE_URL` (formato `jdbc:postgresql://host:5432/db`), usuário e senha a partir do Postgres gerenciado. Atenção: vários provedores entregam a URL no formato `postgres://user:senha@host/db`, que precisa ser convertida para JDBC.
 
 Perfil `demo`: um `CommandLineRunner` cria o usuário `demo@carteira.app` com os mesmos dados dos mocks atuais do front (categorias Contas / Cartão de crédito / Alimentação, contas do mês, parcelamentos, inventário). Útil para apresentação.
 
 ## 9. Deploy e integração com o front
 
-- **API**: app próprio no Heroku (`carteira-api`) com Heroku Postgres, `system.properties` com `java.runtime.version=21` e o `Procfile` da seção 3. As migrações do Flyway rodam no startup.
-- **Front (este repositório)**: o `server.js` (Express) passa a fazer **proxy de `/api` para a API** (`http-proxy-middleware`, alvo em `API_URL`). Assim o navegador fala com uma única origem: sem CORS e com o cookie de refresh em `SameSite=Strict`.
-- **Desenvolvimento**: Angular em `:4200` com `proxy.conf.json` (`/api` → `http://localhost:8080`); API em `:8080` com `./mvnw spring-boot:run` (o Docker Compose Support sobe o Postgres).
-- Mudanças no front para a integração: issue [#13](https://github.com/GTarno/carteira-monolito/issues/13) (HttpClient, interceptors de auth/erro, troca dos mocks módulo a módulo).
+- **Front**: GitHub Pages, publicado pelo workflow `ci-deploy.yml` deste repositório (`https://gtarno.github.io/carteira-monolito/`). É só arquivo estático, sem servidor próprio, então não há proxy de `/api`.
+- **API**: um provedor que rode container ou JAR com Postgres gerenciado. Opções com plano gratuito ou barato: **Render** (Web Service com Docker + Postgres), **Railway**, **Fly.io** (com Neon ou Supabase como Postgres). Usar um `Dockerfile` multi-stage (Maven → JRE 21) para não depender de buildpack. As migrações do Flyway rodam no startup.
+- **Front chamando a API**: URL absoluta configurada por ambiente no Angular (`src/environments/environment.ts` com `apiUrl: 'http://localhost:8080/api/v1'` e `environment.prod.ts` com a URL pública da API, via `fileReplacements` no `angular.json`). O CORS da seção 7 libera a origem do Pages.
+- **Desenvolvimento**: Angular em `:4200` e API em `:8080` (`./mvnw spring-boot:run`; o Docker Compose Support sobe o Postgres). Com `apiUrl` absoluto não precisa de `proxy.conf.json`; o CORS já libera `localhost:4200`.
+- **Free tier hiberna**: no Render gratuito a API "dorme" após inatividade e a primeira chamada pode levar de 30 a 60 s. O front deve mostrar um estado de carregamento (não um erro) enquanto isso.
+- Mudanças no front para a integração: issue [#13](https://github.com/GTarno/carteira-monolito/issues/13) (HttpClient, interceptors de auth/erro, `environment.apiUrl`, troca dos mocks módulo a módulo).
 
 ## 10. Testes e CI
 
@@ -420,13 +423,14 @@ Cada etapa termina com testes passando e o Swagger atualizado.
 
 **Etapa 6 — Entrega**
 - [ ] Perfil `demo` com seed
-- [ ] Deploy no Heroku (API + Postgres) e proxy `/api` no `server.js` do front
+- [ ] Deploy da API (Render/Railway/Fly + Postgres) com CORS liberando `https://gtarno.github.io`
+- [ ] `environment.prod.ts` do front apontando para a URL pública da API
 - [ ] Integração do front (#13)
 
 ## 12. Decisões em aberto
 
 1. **Receitas**: o modelo já prevê `type = INCOME`. Falta definir no front onde o usuário lança receitas (necessário para o saldo da Home).
-2. **Hospedagem**: Heroku (mesmo lugar do front) ou Render/Railway (têm plano gratuito de Postgres).
+2. **Hospedagem da API**: Render, Railway ou Fly.io. O front já está decidido: GitHub Pages.
 3. **Imagens** (parcelamentos/inventário): só URL por enquanto; upload fica para depois.
 
 ## 13. Como começar a nova sessão

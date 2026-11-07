@@ -2,7 +2,7 @@
 
 ## Propósito do projeto
 
-App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, com deploy no Heroku via GitHub Actions. Módulos atuais:
+App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, com deploy no GitHub Pages via GitHub Actions. Módulos atuais:
 
 | Módulo | O que faz | Fonte de dados hoje |
 |---|---|---|
@@ -12,7 +12,7 @@ App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, co
 | Inventário | Categorias e itens pessoais (livros, discos…) | Mocks em memória |
 | Sobre | Informações do projeto | Estático |
 
-**Não existe backend.** O `server.js` só serve o build da SPA. Nada é persistido entre dispositivos.
+**Não existe backend.** O app é publicado como site estático no GitHub Pages. Nada é persistido entre dispositivos.
 
 ## Diagnóstico (resumo)
 
@@ -30,7 +30,7 @@ App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, co
 
 O backend será feito em **Java + Spring Boot, em um repositório separado** (sugestão: `GTarno/carteira-api`). O plano completo, com modelo de dados, contrato da API alinhado aos modelos do front, segurança, deploy e roteiro por etapas, está em [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md).
 
-Neste repositório fica apenas a integração do front com a API ([#13](https://github.com/GTarno/carteira-monolito/issues/13)) e o proxy `/api` no `server.js`.
+Neste repositório fica apenas a integração do front com a API ([#13](https://github.com/GTarno/carteira-monolito/issues/13)), com a URL da API configurada por ambiente.
 
 ## Fases
 

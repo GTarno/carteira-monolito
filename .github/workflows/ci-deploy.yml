@@ -2,12 +2,11 @@ name: CI / Deploy
 
 on:
   push:
-    branches: ["main"]
+    branches: ["master"]
   pull_request:
-    branches: ["main"]
+    branches: ["master"]
   workflow_dispatch:
 
-# Minimal permissions — jobs only need to read repo contents
 permissions:
   contents: read
 
@@ -17,13 +16,11 @@ concurrency:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
-  # CI — build and test on every push / PR
+  # CI — testes e build em todo push / PR
   # ─────────────────────────────────────────────────────────────────────────────
   ci:
     name: Build & Test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
       - name: Checkout
@@ -32,52 +29,49 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (production)
-        run: npm run heroku-postbuild
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 7
-
       - name: Run unit tests (headless)
         run: npm run test:ci
 
+      # O site fica em https://<usuario>.github.io/<repositorio>/, por isso o base-href
+      - name: Build (production, GitHub Pages)
+        run: npx ng build --configuration production --base-href "/${{ github.event.repository.name }}/"
+
+      # GitHub Pages não tem rewrite de rotas: o 404.html carrega a SPA em qualquer URL
+      - name: Add SPA fallback
+        run: cp dist/carteira-monolito/browser/index.html dist/carteira-monolito/browser/404.html
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/carteira-monolito/browser
+
   # ─────────────────────────────────────────────────────────────────────────────
-  # Deploy — only on push/dispatch to main, only after CI passes
+  # Deploy — só em push/dispatch na master, depois do CI
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
-    name: Deploy to Heroku
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     needs: ci
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
     permissions:
-      contents: read
+      pages: write
+      id-token: write
     environment:
-      name: production
-      url: https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     concurrency:
-      group: deploy-production
+      group: pages
       cancel-in-progress: false
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.13.15
-        with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

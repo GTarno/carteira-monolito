@@ -17,7 +17,7 @@ App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, co
 ## Diagnóstico (resumo)
 
 - Build de produção passa, com bundle inicial de **1,57 MB** e 6 arquivos SCSS acima do budget.
-- Testes: **5 de 14 falham** (locale `pt` só registrado no `main.ts`, providers faltando nos specs).
+- Testes: **5 de 14 falhavam** (locale `pt` só registrado no `main.ts`, providers faltando nos specs). Corrigido na Fase 0.
 - Bug de fuso horário no checklist de contas (vencimento aparece um dia antes em UTC-3).
 - Planejamento com mês fixo (fev/2026) e totais de card desconectados dos itens.
 - ~40 `console.log` de depuração e subscriptions sem teardown.
@@ -26,39 +26,22 @@ App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, co
 - Três sistemas de ícones (FA Free via CDN, regras de FA Pro, `mat-icon`).
 - PrimeNG inteiro configurado para um único carrossel; nenhuma rota com lazy loading.
 
-## Arquitetura proposta do backend
+## Backend
 
-Monólito em um único dyno: Express 5 serve `/api/*` e a SPA.
+O backend será feito em **Java + Spring Boot, em um repositório separado** (sugestão: `GTarno/carteira-api`). O plano completo, com modelo de dados, contrato da API alinhado aos modelos do front, segurança, deploy e roteiro por etapas, está em [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md).
 
-- **Stack**: Node 20, TypeScript, Express 5, PostgreSQL (Heroku Postgres), Prisma, Zod, JWT, Vitest + Supertest.
-- **Domínio**: o "valor real" do planejamento passa a ser a soma dos **lançamentos** do mês. Contas mensais e parcelas de compras geram lançamentos automaticamente.
-- **Dinheiro em centavos** (inteiro). Toda tabela tem `userId`.
-
-Detalhes no épico [#5](https://github.com/GTarno/carteira-monolito/issues/5).
+Neste repositório fica apenas a integração do front com a API ([#13](https://github.com/GTarno/carteira-monolito/issues/13)) e o proxy `/api` no `server.js`.
 
 ## Fases
 
-### Fase 0 — Estabilizar o que existe (curta, antes do backend)
-- [#15](https://github.com/GTarno/carteira-monolito/issues/15) Testes falhando (locale, providers) — **primeiro**, para o CI/deploy ficarem verdes
-- [#16](https://github.com/GTarno/carteira-monolito/issues/16) Bug de fuso horário nas contas
-- [#17](https://github.com/GTarno/carteira-monolito/issues/17) Planejamento: mês fixo e totais inconsistentes
-- [#18](https://github.com/GTarno/carteira-monolito/issues/18) Remover `console.log` e vazamentos de subscription
+### Fase 0 — Estabilizar o front ✅
+- [x] [#15](https://github.com/GTarno/carteira-monolito/issues/15) Testes falhando (locale, providers)
+- [x] [#16](https://github.com/GTarno/carteira-monolito/issues/16) Bug de fuso horário nas contas
+- [x] [#17](https://github.com/GTarno/carteira-monolito/issues/17) Planejamento: mês fixo e totais inconsistentes
+- [x] [#18](https://github.com/GTarno/carteira-monolito/issues/18) Remover `console.log` e vazamentos de subscription
 
-### Fase 1 — Fundação do backend
-- [#6](https://github.com/GTarno/carteira-monolito/issues/6) Servidor TypeScript com `/api`
-- [#7](https://github.com/GTarno/carteira-monolito/issues/7) PostgreSQL + Prisma, modelo e seed
-- [#8](https://github.com/GTarno/carteira-monolito/issues/8) Autenticação
-- [#14](https://github.com/GTarno/carteira-monolito/issues/14) Validação, testes de API, OpenAPI e CI
-
-### Fase 2 — Núcleo financeiro
-- [#9](https://github.com/GTarno/carteira-monolito/issues/9) API de Planejamentos
-- [#10](https://github.com/GTarno/carteira-monolito/issues/10) API de Lançamentos + tela "Adicionar gastos"
-- [#13](https://github.com/GTarno/carteira-monolito/issues/13) Integração do front (HttpClient, interceptors), módulo a módulo
-- [#19](https://github.com/GTarno/carteira-monolito/issues/19) Centralizar regras de domínio (ajuda a compartilhar com o backend)
-
-### Fase 3 — Demais módulos
-- [#11](https://github.com/GTarno/carteira-monolito/issues/11) Contas mensais e Parcelamentos
-- [#12](https://github.com/GTarno/carteira-monolito/issues/12) Inventário e Dashboard
+### Fases 1 a 3 — Backend (repositório `carteira-api`)
+Seguir o roteiro da seção 11 de [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md). As issues [#8](https://github.com/GTarno/carteira-monolito/issues/8) a [#12](https://github.com/GTarno/carteira-monolito/issues/12) descrevem os mesmos módulos e podem ser recriadas no novo repositório. No front, a integração é a [#13](https://github.com/GTarno/carteira-monolito/issues/13), e a [#19](https://github.com/GTarno/carteira-monolito/issues/19) (regras de domínio centralizadas) facilita essa troca.
 
 ### Fase 4 — Qualidade contínua do frontend (em paralelo, quando houver folga)
 - [#20](https://github.com/GTarno/carteira-monolito/issues/20) Componentes de gráfico e `ChartService`
@@ -70,7 +53,4 @@ Detalhes no épico [#5](https://github.com/GTarno/carteira-monolito/issues/5).
 
 ## Decisões em aberto
 
-1. **ORM**: Prisma (recomendado: migrations e tipos prontos) ou Drizzle/TypeORM.
-2. **Parcelas**: gerar todos os lançamentos no cadastro (recomendado) ou calcular sob demanda.
-3. **Multiusuário desde o início** (recomendado, pois o custo de adicionar depois é alto) ou modo usuário único para a apresentação do TCC.
-4. **PrimeNG**: manter ou remover (recomendado remover; só o carrossel usa).
+Ver a seção 12 de [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md). No front: remover ou não o PrimeNG (recomendado remover, já que só o carrossel usa).

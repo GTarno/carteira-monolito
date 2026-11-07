@@ -5,11 +5,13 @@ import Lara from '@primeuix/themes/lara';
 
 import { routes } from './app.routes';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { provideAppLocale } from './core/i18n/locale';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), 
-    provideRouter(routes), 
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideAppLocale(),
     provideCharts(withDefaultRegisterables()),
     providePrimeNG({
       theme: {

@@ -54,7 +54,7 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
               <i class="far fa-chart-bar"></i>
               <div class="summary-text">
                 <span class="label">Total Planejado</span>
-                <span class="value">{{ totalPlanned$ | async | currency:'BRL':'symbol':'1.2-2' }}</span>
+                <span class="value">{{ totalPlanned$ | async | currency }}</span>
               </div>
             </div>
 
@@ -62,7 +62,7 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
               <i class="fas fa-shopping-cart"></i>
               <div class="summary-text">
                 <span class="label">Total Gasto</span>
-                <span class="value">{{ totalSpent$ | async | currency:'BRL':'symbol':'1.2-2' }}</span>
+                <span class="value">{{ totalSpent$ | async | currency }}</span>
               </div>
             </div>
 
@@ -75,7 +75,7 @@ export type HeaderStatus = 'default' | 'ok' | 'limit' | 'over';
                   [class.positive]="(remaining$ | async)! >= 0"
                   [class.negative]="(remaining$ | async)! < 0"
                 >
-                  {{ remaining$ | async | currency:'BRL':'symbol':'1.2-2' }}
+                  {{ remaining$ | async | currency }}
                 </span>
               </div>
             </div>

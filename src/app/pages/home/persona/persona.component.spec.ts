@@ -1,3 +1,4 @@
+import { provideTestDefaults } from '../../../testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { PersonaComponent } from './persona.component';
@@ -8,7 +9,8 @@ describe('PersonaComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PersonaComponent]
+      imports: [PersonaComponent],
+      providers: [provideTestDefaults()]
     })
     .compileComponents();
 

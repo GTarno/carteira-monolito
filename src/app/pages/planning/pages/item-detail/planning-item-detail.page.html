@@ -46,18 +46,18 @@
           <div class="value-rows">
             <div class="value-row">
               <span class="label">Valor Planejado:</span>
-              <span class="value planned-value">{{ item.plannedValue | currency:'BRL' }}</span>
+              <span class="value planned-value">{{ item.plannedValue | currency }}</span>
             </div>
             <div class="value-row">
               <span class="label">Valor Gasto:</span>
-              <span class="value spent-value">{{ item.realValue | currency:'BRL' }}</span>
+              <span class="value spent-value">{{ item.realValue | currency }}</span>
             </div>
             <div class="value-row">
               <span class="label">Diferença:</span>
               <span class="value" 
                     [class.positive]="(item.plannedValue - item.realValue) >= 0"
                     [class.negative]="(item.plannedValue - item.realValue) < 0">
-                {{ (item.plannedValue - item.realValue) | currency:'BRL' }}
+                {{ (item.plannedValue - item.realValue) | currency }}
               </span>
             </div>
           </div>

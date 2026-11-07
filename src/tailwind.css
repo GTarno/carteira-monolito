@@ -1,0 +1,37 @@
+/*
+ * Tailwind CSS v4 + DaisyUI v5.
+ *
+ * Transição (épico #27), para não alterar as telas que ainda usam Angular Material:
+ * - o preflight do Tailwind e o reset/cores de raiz do DaisyUI ficam desligados;
+ * - a detecção automática de classes fica desligada (`source(none)`): telas antigas usam
+ *   nomes como `hero`, `card` e `menu`, que gerariam componentes do DaisyUI por cima.
+ *   Só os arquivos listados em `@source` são lidos. Ao migrar uma tela, adicione a pasta dela.
+ *
+ * Na limpeza (#33): troque os imports abaixo por `@import "tailwindcss";`, apague os
+ * `@source` e o `exclude` do DaisyUI.
+ */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+
+/* Arquivos já migrados para Tailwind/DaisyUI */
+@source "./app/shared/ui";
+@source "./app/app.component.html";
+
+@plugin "daisyui" {
+  themes: forest --default, emerald;
+  /* reset/rootcolor/scroll*: ver comentário no topo. label: telas antigas usam class="label". */
+  exclude: reset, rootcolor, rootscrollgutter, scrollbar, label;
+}
+
+/* Overlays do Angular CDK (diálogos, menus). Hoje também vêm do Material. */
+@import "@angular/cdk/overlay-prebuilt.css";
+
+/* Diálogos abertos pelo AppDialog (Dialog do CDK) com o visual do tema */
+.app-dialog-panel {
+  @apply bg-base-100 text-base-content rounded-box shadow-2xl p-6 w-[min(32rem,92vw)] max-h-[90vh] overflow-y-auto;
+}
+
+.app-dialog-backdrop {
+  background-color: oklch(0% 0 0 / 0.45);
+}

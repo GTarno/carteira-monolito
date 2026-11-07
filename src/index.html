@@ -1,9 +1,17 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="forest">
 <head>
   <meta charset="utf-8">
   <title>Minhas Finanças</title>
   <base href="/">
+  <script>
+    // Aplica o tema salvo antes do Angular iniciar, para não piscar o tema padrão.
+    // Mantenha em sincronia com THEME_STORAGE_KEY em src/app/core/theme/theme.service.ts
+    try {
+      var theme = localStorage.getItem('carteira-theme');
+      if (theme === 'forest' || theme === 'emerald') document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">

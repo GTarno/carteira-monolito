@@ -9,7 +9,7 @@
       tabindex="0"
       (click)="onCardClick('gastos-mensais')"
       (keydown.enter)="onCardClick('gastos-mensais')"
-      (keydown.space)="onCardClick('gastos-mensais')"
+      (keydown.space)="onCardClick('gastos-mensais', $event)"
       aria-label="Adicionar gastos mensais">
       
       <div class="card-header">
@@ -33,7 +33,7 @@
       tabindex="0"
       (click)="onCardClick('grandes-compras')"
       (keydown.enter)="onCardClick('grandes-compras')"
-      (keydown.space)="onCardClick('grandes-compras')"
+      (keydown.space)="onCardClick('grandes-compras', $event)"
       aria-label="Adicionar grandes compras">
       
       <div class="card-header">

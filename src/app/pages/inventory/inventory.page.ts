@@ -55,9 +55,8 @@ export class InventoryPage implements OnInit {
       });
   }
 
-  onImageError(event: any, category: InventoryCategory): void {
-    console.warn(`Failed to load image for ${category.name}:`, category.imageUrl);
-    
+  onImageError(event: Event, category: InventoryCategory): void {
+    const image = event.target as HTMLImageElement;
     // SVG fallback baseado na categoria
     const fallbackImages: { [key: string]: string } = {
       'Livros': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzQzODNjNCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxwYXRoIGQ9Ik0xMiAyQzEzLjEgMiAxNCAyLjkgMTQgNFYyMkMxNCAyMy4xIDEzLjEgMjQgMTIgMjRDMTAuOSAyNCA5IDIzLjEgOSAyMlY0QzkgMi45IDEwLjkgMiAxMiAyWk0xNCA0SDE4VjIwSDE0VjRaTTYgNEgxMFYyMEg2VjRaIi8+PC9zdmc+',
@@ -65,7 +64,7 @@ export class InventoryPage implements OnInit {
     };
     
     const fallbackSrc = fallbackImages[category.name] || fallbackImages['Livros'];
-    event.target.src = fallbackSrc;
-    event.target.style.display = 'block';
+    image.src = fallbackSrc;
+    image.style.display = 'block';
   }
 }

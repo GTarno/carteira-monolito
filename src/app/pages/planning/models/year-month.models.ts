@@ -55,4 +55,12 @@ export class YearMonthUtils {
     const [year, month] = key.split('-').map(Number);
     return { year, month };
   }
+
+  /** Como `fromKey`, mas devolve `null` para valores ausentes ou inválidos (ex.: query params). */
+  static parseKey(key: string | null | undefined): YearMonth | null {
+    const match = /^(\d{4})-(\d{2})$/.exec(key ?? '');
+    if (!match) return null;
+    const month = Number(match[2]);
+    return month >= 1 && month <= 12 ? { year: Number(match[1]), month } : null;
+  }
 }

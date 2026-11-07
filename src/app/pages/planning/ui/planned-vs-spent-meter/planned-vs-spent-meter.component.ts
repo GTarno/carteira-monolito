@@ -12,11 +12,11 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
         <div class="meter-values">
           <div class="planned-value">
             <span class="label">Planejado:</span>
-            <span class="value">{{ plannedTotal | currency:'BRL':'symbol':'1.2-2':'pt' }}</span>
+            <span class="value">{{ plannedTotal | currency }}</span>
           </div>
           <div class="spent-value">
             <span class="label">Gasto:</span>
-            <span class="value">{{ spentTotal | currency:'BRL':'symbol':'1.2-2':'pt' }}</span>
+            <span class="value">{{ spentTotal | currency }}</span>
           </div>
           <div class="percentage">
             <span class="label">Progresso:</span>
@@ -46,7 +46,7 @@ import { CommonModule, CurrencyPipe } from '@angular/common';
           class="excess-indicator"
         >
           <span class="excess-text">
-            Excedente: {{ getExcess() | currency:'BRL':'symbol':'1.2-2':'pt' }}
+            Excedente: {{ getExcess() | currency }}
           </span>
         </div>
       </div>

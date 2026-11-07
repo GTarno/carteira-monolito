@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule, CurrencyPipe, AsyncPipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,11 +11,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatOptionModule } from '@angular/material/core';
 
-import { BehaviorSubject, Observable, combineLatest, EMPTY } from 'rxjs';
-import { switchMap, map, catchError, startWith, shareReplay, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, combineLatest, of } from 'rxjs';
+import { switchMap, map, catchError, shareReplay, distinctUntilChanged, tap, finalize, startWith } from 'rxjs/operators';
 
 import { PlanningService } from './data-access/planning.service';
 import { PlanCard, MonthlyPlan, PlanCardStatus, PlanningUtils } from './models/planning.models';
+import { formatBRL } from '../../core/i18n/locale';
 import { YearMonth, YearMonthUtils } from './models/year-month.models';
 import { PlannedVsSpentMeterComponent } from './ui/planned-vs-spent-meter/planned-vs-spent-meter.component';
 import { SummaryHeaderCardComponent } from '../../shared/components/summary-header-card/summary-header-card.component';
@@ -42,154 +43,85 @@ import { SummaryHeaderCardComponent } from '../../shared/components/summary-head
   ],
   templateUrl: './planning.page.html',
   styleUrls: ['./planning.page.scss'],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PlanningPage implements OnInit, OnDestroy {
-  // State Management - Garantir que fev/2026 seja o padrão
-  private selectedMonthSubject = new BehaviorSubject<YearMonth>({
-    year: 2026,
-    month: 2
-  });
-  private errorSubject = new BehaviorSubject<string | null>(null);
+export class PlanningPage {
+  private readonly planningService = inject(PlanningService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  // Public Observables  
-  selectedMonth$ = this.selectedMonthSubject.asObservable().pipe(
+  /** Mês inicial: `?month=yyyy-mm` da URL ou o mês atual. */
+  private readonly selectedMonthSubject = new BehaviorSubject<YearMonth>(this.getInitialMonth());
+  private readonly errorSubject = new BehaviorSubject<string | null>(null);
+  private readonly loadingSubject = new BehaviorSubject<boolean>(true);
+  private readonly reloadSubject = new Subject<void>();
+
+  readonly selectedMonth$ = this.selectedMonthSubject.pipe(
     distinctUntilChanged((a, b) => YearMonthUtils.equals(a, b))
   );
 
-months$!: Observable<YearMonth[]>;
-  plan$!: Observable<MonthlyPlan>;
+  readonly months$: Observable<YearMonth[]> = this.planningService.getAvailableMonths().pipe(
+    catchError(() => {
+      this.errorSubject.next('Erro ao carregar lista de meses disponíveis');
+      return of([]);
+    }),
+    shareReplay(1)
+  );
 
-  cards$!: Observable<PlanCard[]>;
-  plannedTotal$!: Observable<number>;
-  spentTotal$!: Observable<number>;
-  remaining$!: Observable<number>;
-  isLoading$!: Observable<boolean>;
+  readonly plan$: Observable<MonthlyPlan | null> = combineLatest([
+    this.selectedMonth$,
+    this.reloadSubject.pipe(startWith(undefined))
+  ]).pipe(
+    map(([month]) => month),
+    tap(() => {
+      this.loadingSubject.next(true);
+      this.errorSubject.next(null);
+    }),
+    switchMap(month =>
+      this.planningService.getMonthlyPlan(month).pipe(
+        catchError(() => {
+          this.errorSubject.next(`Não há dados de planejamento para ${YearMonthUtils.toLongLabel(month)}`);
+          return of(null);
+        }),
+        finalize(() => this.loadingSubject.next(false))
+      )
+    ),
+    shareReplay(1)
+  );
 
-  error$ = this.errorSubject.asObservable();
+  readonly cards$: Observable<PlanCard[]> = this.plan$.pipe(map(plan => plan?.cards ?? []));
+  readonly plannedTotal$ = this.plan$.pipe(map(plan => plan ? PlanningUtils.getTotalPlanned(plan) : 0));
+  readonly spentTotal$ = this.plan$.pipe(map(plan => plan ? PlanningUtils.getTotalSpent(plan) : 0));
+  readonly remaining$ = combineLatest([this.plannedTotal$, this.spentTotal$]).pipe(
+    map(([planned, spent]) => planned - spent)
+  );
 
-  // Computed values for template
-  private currentPlan: MonthlyPlan | null = null;
-  private currentPlannedTotal = 0;
-  private currentSpentTotal = 0;
-
-  constructor(private planningService: PlanningService, private cdr: ChangeDetectorRef, private router: Router) {}
-
-  ngOnInit(): void {
-    console.log('PlanningPage ngOnInit called');
-    
-    // Inicializar observables após injeção de dependência
-    this.months$ = this.planningService.getAvailableMonths().pipe(
-      catchError(error => {
-        console.error('Erro ao carregar meses:', error);
-        this.errorSubject.next('Erro ao carregar lista de meses disponíveis');
-        return EMPTY;
-      }),
-      shareReplay(1)
-    );
-
-    this.plan$ = this.selectedMonth$.pipe(
-      switchMap(month => 
-        this.planningService.getMonthlyPlan(month).pipe(
-          catchError(error => {
-            console.error('Erro ao carregar plano:', error);
-            this.errorSubject.next(`Erro ao carregar dados para ${YearMonthUtils.toShortLabel(month)}`);
-            return EMPTY;
-          })
-        )
-      ),
-      shareReplay(1)
-    );
-
-    this.cards$ = this.plan$.pipe(
-      map(plan => plan?.cards || [])
-    );
-
-    this.plannedTotal$ = this.plan$.pipe(
-      map(plan => plan ? PlanningUtils.getTotalPlanned(plan) : 0),
-      startWith(0)
-    );
-
-    this.spentTotal$ = this.plan$.pipe(
-      map(plan => plan ? PlanningUtils.getTotalSpent(plan) : 0),
-      startWith(0)
-    );
-
-    this.remaining$ = combineLatest([
-      this.plannedTotal$,
-      this.spentTotal$
-    ]).pipe(
-      map(([planned, spent]) => planned - spent)
-    );
-
-    this.isLoading$ = combineLatest([
-      this.months$.pipe(startWith(null)),
-      this.plan$.pipe(startWith(null))
-    ]).pipe(
-      map(([months, plan]) => {
-        console.log('Loading state:', { months: !!months, plan: !!plan });
-        return false; // Simplificando para sempre mostrar conteúdo
-      })
-    );
-    
-    // Subscribe to updates for template methods
-    this.plan$.subscribe(plan => {
-      console.log('Plan received:', plan);
-      this.currentPlan = plan;
-      this.cdr.detectChanges();
-    });
-
-    this.plannedTotal$.subscribe(total => {
-      console.log('Planned total:', total);
-      this.currentPlannedTotal = total;
-    });
-
-    this.spentTotal$.subscribe(total => {
-      console.log('Spent total:', total);
-      this.currentSpentTotal = total;
-    });
-
-    this.months$.subscribe(months => {
-      console.log('Months received:', months);
-    });
-
-    // Clear any existing errors
-    this.errorSubject.next(null);
-  }
-
-  ngOnDestroy(): void {
-    this.selectedMonthSubject.complete();
-    this.errorSubject.complete();
-  }
+  readonly isLoading$ = this.loadingSubject.asObservable();
+  readonly error$ = this.errorSubject.asObservable();
 
   // Event Handlers
   onMonthSelected(month: YearMonth): void {
-    this.errorSubject.next(null); // Clear previous errors
     this.selectedMonthSubject.next(month);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { month: YearMonthUtils.toKey(month) },
+      replaceUrl: true
+    });
   }
 
   onCardClick(card: PlanCard): void {
-    const currentMonth = this.selectedMonthSubject.value;
-    console.log('Card clicked:', {
-      cardId: card.id,
-      cardTitle: card.title,
-      month: YearMonthUtils.toShortLabel(currentMonth),
-      status: this.getCardStatus(card),
-      realValue: this.getRealValue(card),
-      plannedValue: card.plannedValue
-    });
-
-    // Navegação para a página de itens da categoria
-    this.router.navigate(['/planejamentos', card.id], { 
-      queryParams: { month: YearMonthUtils.toKey(currentMonth) }
+    this.router.navigate(['/planejamentos', card.id], {
+      queryParams: { month: YearMonthUtils.toKey(this.selectedMonthSubject.value) }
     });
   }
 
   retryLoad(): void {
-    this.errorSubject.next(null);
-    // Force reload by re-emitting current month
-    const currentMonth = this.selectedMonthSubject.value;
-    this.selectedMonthSubject.next({ ...currentMonth });
+    this.reloadSubject.next();
+  }
+
+  private getInitialMonth(): YearMonth {
+    return YearMonthUtils.parseKey(this.route.snapshot.queryParamMap.get('month'))
+      ?? this.planningService.getCurrentMonth();
   }
 
   // Template Helper Methods
@@ -257,7 +189,7 @@ months$!: Observable<YearMonth[]>;
         break;
     }
 
-    return `${card.title}, ${progress}% utilizado, valor real ${realValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}, ${statusText}`;
+    return `${card.title}, ${progress}% utilizado, valor real ${formatBRL(realValue)}, ${statusText}`;
   }
 
   // Compare function for mat-select

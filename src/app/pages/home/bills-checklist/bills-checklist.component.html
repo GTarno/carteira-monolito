@@ -15,7 +15,7 @@
         </div>
         <div class="stats-item">
           <span class="stats-label">Pendente</span>
-          <span class="stats-value">{{ summary.pendingTotalAmount | currency:'BRL':'symbol':'1.2-2':'pt' }}</span>
+          <span class="stats-value">{{ summary.pendingTotalAmount | currency }}</span>
         </div>
       </div>
 
@@ -65,7 +65,7 @@
               
               <div class="bill-details">
                 <span class="bill-amount">
-                  {{ bill.amount | currency:'BRL':'symbol':'1.2-2':'pt' }}
+                  {{ bill.amount | currency }}
                 </span>
                 <span class="bill-due-date">
                   {{ getDueDateLabel(bill.dueDate) }}

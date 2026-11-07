@@ -152,14 +152,6 @@ export class EditPlanningItemDialogComponent implements OnInit {
         realValue: parseFloat(formValues.realValue.toString().replace(',', '.'))
       };
       
-      console.log('Saving planning item update:', {
-        itemName: this.data.itemName,
-        update: result,
-        original: {
-          plannedValue: this.data.plannedValue,
-          realValue: this.data.realValue
-        }
-      });
       
       this.dialogRef.close(result);
     }

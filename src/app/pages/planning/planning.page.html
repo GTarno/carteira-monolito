@@ -74,7 +74,7 @@
             <mat-card-title>{{ card.title }}</mat-card-title>
             
             <mat-card-subtitle>
-              Planejado: {{ card.plannedValue | currency:'BRL':'symbol':'1.2-2' }}
+              Planejado: {{ card.plannedValue | currency }}
             </mat-card-subtitle>
 
             <div class="card-actions">
@@ -119,7 +119,7 @@
                 >
                   <span class="item-name">{{ item.name }}</span>
                   <span class="item-value">
-                    {{ item.value | currency:'BRL':'symbol':'1.2-2' }}
+                    {{ item.value | currency }}
                   </span>
                 </div>
               </div>
@@ -128,14 +128,14 @@
             <!-- Valor real -->
             <div class="real-value">
               <strong>
-                Valor real: {{ getRealValue(card) | currency:'BRL':'symbol':'1.2-2' }}
+                Valor real: {{ getRealValue(card) | currency }}
               </strong>
               
               <span 
                 *ngIf="getCardExcess(card) > 0" 
                 class="excess-amount"
               >
-                (Excesso: {{ getCardExcess(card) | currency:'BRL':'symbol':'1.2-2' }})
+                (Excesso: {{ getCardExcess(card) | currency }})
               </span>
             </div>
           </mat-card-content>

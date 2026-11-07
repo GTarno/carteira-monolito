@@ -1,181 +1,158 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, delay, throwError, BehaviorSubject } from 'rxjs';
-import { MonthlyPlan, PlanItemDetail, PlanningItemCreate } from '../models/planning.models';
+import { Observable, Subject, of, delay, throwError } from 'rxjs';
+import { MonthlyPlan, PlanCard, PlanItemDetail, PlanningItemCreate } from '../models/planning.models';
 import { PlanningItemUpdate } from '../models/planning-item-update.model';
 import { YearMonth, YearMonthUtils } from '../models/year-month.models';
 import { ItemMonthlyTrend } from '../models/item-monthly-trend.model';
-import { PLANNING_MOCKS, getAllAvailableMonths, PLAN_ITEMS_MOCKS, ITEM_TREND_MOCKS } from './planning.mock';
+import { PLANNING_CATEGORIES, PlanningCategory, createPlanningSeed } from './planning.mock';
 
+export interface PlanningItemsChange {
+  month: YearMonth;
+  categoryId: string;
+}
+
+/** Latência simulada enquanto não existe API. */
+const MOCK_LATENCY_MS = 100;
+const TREND_MONTHS = 12;
+
+/**
+ * Serviço de planejamento em memória.
+ *
+ * Fonte de verdade única: a lista de itens por mês. Os cards (totais por categoria),
+ * a lista de meses e a tendência são todos derivados dela, então editar/adicionar
+ * um item reflete automaticamente nos totais.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class PlanningService {
+  private readonly categories: PlanningCategory[] = PLANNING_CATEGORIES;
+  private readonly itemsByMonth = createPlanningSeed(YearMonthUtils.getCurrentYearMonth());
+  private readonly itemsChangedSubject = new Subject<PlanningItemsChange>();
 
-  // BehaviorSubject para notificar mudanças nos itens
-  private itemsChangedSubject = new BehaviorSubject<{month: YearMonth; categoryId: string} | null>(null);
+  /** Emite sempre que itens de uma categoria/mês são criados ou alterados. */
+  readonly itemsChanged$: Observable<PlanningItemsChange> = this.itemsChangedSubject.asObservable();
 
-  /**
-   * Retorna a lista de meses disponíveis para consulta
-   */
+  /** Meses com dados, do mais recente para o mais antigo. */
   getAvailableMonths(): Observable<YearMonth[]> {
-    return of(getAllAvailableMonths()).pipe(
-      delay(100) // Simula latência de rede
-    );
+    const months = [...this.itemsByMonth.keys()]
+      .map(key => YearMonthUtils.fromKey(key))
+      .sort((a, b) => YearMonthUtils.compare(b, a));
+    return this.respond(months);
   }
 
-  /**
-   * Retorna o plano mensal para um mês específico
-   */
-  getMonthlyPlan(month: YearMonth): Observable<MonthlyPlan> {
-    const key = YearMonthUtils.toKey(month);
-    const plan = PLANNING_MOCKS.get(key);
-    
-    if (!plan) {
-      return throwError(() => new Error(`Plano não encontrado para ${YearMonthUtils.toShortLabel(month)}`));
-    }
-
-    return of(plan).pipe(
-      delay(150) // Simula latência de rede
-    );
-  }
-
-  /**
-   * Retorna o mês atual como padrão
-   */
   getCurrentMonth(): YearMonth {
     return YearMonthUtils.getCurrentYearMonth();
   }
 
-  /**
-   * Verifica se um mês tem dados disponíveis
-   */
-  hasDataForMonth(month: YearMonth): boolean {
-    return PLANNING_MOCKS.has(YearMonthUtils.toKey(month));
-  }
-
-  /**
-   * Retorna os itens detalhados de uma categoria específica para um mês
-   */
-  getItemsByCategory(month: YearMonth, categoryId: string): Observable<PlanItemDetail[]> {
-    const key = `${YearMonthUtils.toKey(month)}_${categoryId}`;
-    const items = PLAN_ITEMS_MOCKS.get(key) || [];
-    
-    if (items.length === 0) {
-      return throwError(() => new Error(`Itens não encontrados para a categoria ${categoryId} no mês ${YearMonthUtils.toShortLabel(month)}`));
+  getMonthlyPlan(month: YearMonth): Observable<MonthlyPlan> {
+    const items = this.itemsByMonth.get(YearMonthUtils.toKey(month));
+    if (!items) {
+      return throwError(() => new Error(`Plano não encontrado para ${YearMonthUtils.toShortLabel(month)}`));
     }
 
-    return of(items).pipe(
-      delay(100) // Simula latência de rede
-    );
+    const cards = this.categories.map(category => this.buildCard(category, items));
+    return this.respond({ month, cards });
   }
 
-  /**
-   * Adiciona um novo item a uma categoria específica
-   */
+  getItemsByCategory(month: YearMonth, categoryId: string): Observable<PlanItemDetail[]> {
+    const items = this.itemsByMonth.get(YearMonthUtils.toKey(month));
+    if (!items || !this.findCategory(categoryId)) {
+      return throwError(() => new Error(
+        `Categoria ${categoryId} não encontrada no mês ${YearMonthUtils.toShortLabel(month)}`
+      ));
+    }
+    return this.respond(items.filter(item => item.categoryId === categoryId));
+  }
+
+  getItemById(month: YearMonth, categoryId: string, itemId: string): Observable<PlanItemDetail | null> {
+    return this.respond(this.findItem(month, categoryId, itemId) ?? null);
+  }
+
+  /** Valores gastos do item nos últimos 12 meses, terminando em `endMonth`. */
+  getItemTrend(categoryId: string, itemId: string, endMonth: YearMonth = this.getCurrentMonth()): Observable<ItemMonthlyTrend[]> {
+    const trend: ItemMonthlyTrend[] = [];
+    for (let offset = -(TREND_MONTHS - 1); offset <= 0; offset++) {
+      const month = YearMonthUtils.addMonths(endMonth, offset);
+      const item = this.findItem(month, categoryId, itemId);
+      if (item) {
+        trend.push({ month: YearMonthUtils.toKey(month), value: item.realValue });
+      }
+    }
+    return this.respond(trend);
+  }
+
   addCategoryItem(month: YearMonth, payload: PlanningItemCreate): Observable<PlanItemDetail> {
-    const key = `${YearMonthUtils.toKey(month)}_${payload.categoryId}`;
-    const existingItems = PLAN_ITEMS_MOCKS.get(key) || [];
-    
-    // Criar novo item
+    const key = YearMonthUtils.toKey(month);
+    const items = this.itemsByMonth.get(key);
+    if (!items || !this.findCategory(payload.categoryId)) {
+      return throwError(() => new Error('Não é possível adicionar itens a este mês/categoria'));
+    }
+
     const newItem: PlanItemDetail = {
-      id: `${payload.icon}_${Date.now()}`, // ID simples baseado em timestamp
+      id: this.generateId(),
       categoryId: payload.categoryId,
       name: payload.name,
       plannedValue: payload.plannedValue,
-      realValue: 0, // Valor real inicial = 0
+      realValue: 0,
       icon: payload.icon
     };
 
-    // Adicionar à lista existente
-    const updatedItems = [...existingItems, newItem];
-    PLAN_ITEMS_MOCKS.set(key, updatedItems);
-
-    // Notificar mudança
+    this.itemsByMonth.set(key, [...items, newItem]);
     this.itemsChangedSubject.next({ month, categoryId: payload.categoryId });
-
-    return of(newItem).pipe(
-      delay(50) // Simula latência mínima
-    );
+    return this.respond(newItem);
   }
 
-  /**
-   * Observable para escutar mudanças nos itens
-   */
-  get itemsChanged$(): Observable<{month: YearMonth; categoryId: string} | null> {
-    return this.itemsChangedSubject.asObservable();
-  }
-
-  /**
-   * Retorna a tendência mensal de um item específico (últimos 12 meses)
-   */
-  getItemTrend(categoryId: string, itemId: string): Observable<ItemMonthlyTrend[]> {
-    const key = `${categoryId}_${itemId}`;
-    const trend = ITEM_TREND_MOCKS.get(key) || [];
-    
-    if (trend.length === 0) {
-      return throwError(() => new Error(`Tendência não encontrada para o item ${itemId} da categoria ${categoryId}`));
-    }
-
-    return of(trend).pipe(
-      delay(120) // Simula latência de rede
-    );
-  }
-
-  /**
-   * Retorna um item específico por ID
-   */
-  getItemById(month: YearMonth, categoryId: string, itemId: string): Observable<PlanItemDetail | null> {
-    const key = `${YearMonthUtils.toKey(month)}_${categoryId}`;
-    const items = PLAN_ITEMS_MOCKS.get(key) || [];
-    const item = items.find(i => i.id === itemId);
-    
-    return of(item || null).pipe(
-      delay(80)
-    );
-  }
-
-  /**
-   * Retorna os últimos N meses disponíveis
-   */
-  getRecentMonths(count: number = 6): Observable<YearMonth[]> {
-    const allMonths = getAllAvailableMonths();
-    const recentMonths = allMonths.slice(0, count);
-    
-    return of(recentMonths).pipe(
-      delay(100)
-    );
-  }
-
-  /**
-   * Atualiza os valores de um item específico
-   */
   updateItemValues(month: YearMonth, categoryId: string, itemId: string, update: PlanningItemUpdate): Observable<PlanItemDetail> {
-    const key = `${YearMonthUtils.toKey(month)}_${categoryId}`;
-    const items = PLAN_ITEMS_MOCKS.get(key) || [];
-    
-    const itemIndex = items.findIndex(item => item.id === itemId);
-    
-    if (itemIndex === -1) {
+    const key = YearMonthUtils.toKey(month);
+    const items = this.itemsByMonth.get(key) ?? [];
+    const target = this.findItem(month, categoryId, itemId);
+
+    if (!target) {
       return throwError(() => new Error(`Item ${itemId} não encontrado na categoria ${categoryId}`));
     }
 
-    // Atualizar o item
-    const updatedItem = {
-      ...items[itemIndex],
+    const updatedItem: PlanItemDetail = {
+      ...target,
       plannedValue: update.plannedValue,
       realValue: update.realValue
     };
 
-    // Atualizar a lista no mock
-    const updatedItems = [...items];
-    updatedItems[itemIndex] = updatedItem;
-    PLAN_ITEMS_MOCKS.set(key, updatedItems);
-
-    // Notificar mudança
+    this.itemsByMonth.set(key, items.map(item => item === target ? updatedItem : item));
     this.itemsChangedSubject.next({ month, categoryId });
+    return this.respond(updatedItem);
+  }
 
-    return of(updatedItem).pipe(
-      delay(100) // Simula latência de rede
-    );
+  private buildCard(category: PlanningCategory, monthItems: PlanItemDetail[]): PlanCard {
+    const items = monthItems.filter(item => item.categoryId === category.id);
+    return {
+      id: category.id,
+      title: category.title,
+      icon: category.icon,
+      plannedValue: items.reduce((sum, item) => sum + item.plannedValue, 0),
+      currentValue: items.reduce((sum, item) => sum + item.realValue, 0),
+      items: items.map(item => ({ name: item.name, value: item.realValue }))
+    };
+  }
+
+  private findCategory(categoryId: string): PlanningCategory | undefined {
+    return this.categories.find(category => category.id === categoryId);
+  }
+
+  private findItem(month: YearMonth, categoryId: string, itemId: string): PlanItemDetail | undefined {
+    return this.itemsByMonth
+      .get(YearMonthUtils.toKey(month))
+      ?.find(item => item.categoryId === categoryId && item.id === itemId);
+  }
+
+  private generateId(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return `item-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  private respond<T>(value: T): Observable<T> {
+    return of(value).pipe(delay(MOCK_LATENCY_MS));
   }
 }

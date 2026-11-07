@@ -1,3 +1,4 @@
+import { provideTestDefaults } from '../../../testing/test-providers';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BillsChecklistComponent } from './bills-checklist.component';
@@ -8,7 +9,8 @@ describe('BillsChecklistComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BillsChecklistComponent]
+      imports: [BillsChecklistComponent],
+      providers: [provideTestDefaults()]
     })
     .compileComponents();
 

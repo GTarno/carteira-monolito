@@ -1,6 +1,6 @@
 # CarteiraMonolito
 
-Angular 20 SPA — personal wallet tracker. Deployed to Heroku via a GitHub Actions CI/CD pipeline.
+Angular 20 SPA — personal wallet tracker. Deployed to GitHub Pages via a GitHub Actions CI/CD pipeline.
 
 ---
 
@@ -44,69 +44,39 @@ Artifacts are written to `dist/carteira-monolito/browser/`.
 
 ```bash
 npm run build
-npm start          # node server.js, listens on PORT (default 8080)
+npx http-server dist/carteira-monolito/browser -p 8080 -P "http://localhost:8080?"
 ```
+
+Then open http://localhost:8080. The `-P` flag sends unknown routes back to `index.html`, like the `404.html` fallback on Pages.
 
 ---
 
 ## CI/CD pipeline
 
-The pipeline lives in `.github/workflows/ci-deploy.yml` and runs on every push and pull-request targeting `main`.
-
-### Jobs
+The pipeline lives in `.github/workflows/ci-deploy.yml` and runs on every push and pull request targeting `master`.
 
 | Job | Trigger | Steps |
 |-----|---------|-------|
-| **Build & Test** | push / PR / `workflow_dispatch` | checkout → install → production build → upload artifact → headless unit tests |
-| **Deploy to Heroku** | push or `workflow_dispatch` to `main` only, after CI passes | checkout (full history) → `akhileshns/heroku-deploy` |
+| **Build & Test** | push / PR / `workflow_dispatch` | checkout → install → headless unit tests → production build with `--base-href /<repo>/` → copy `index.html` to `404.html` → upload Pages artifact (not on PRs) |
+| **Deploy to GitHub Pages** | push or `workflow_dispatch` on `master`, after CI passes | `actions/deploy-pages` |
 
-- The deploy job has `concurrency: deploy-production` with `cancel-in-progress: false` to prevent overlapping releases.
-- Failed CI always blocks deployment.
-- Use **Actions → Run workflow** in the GitHub UI for a manual redeploy or rollback trigger.
-
----
-
-## Heroku setup
-
-### One-time app creation
-
-```bash
-heroku login
-heroku create <your-app-name>
-```
-
-Heroku detects the Node.js buildpack automatically. On each deploy it:
-1. Runs `npm ci`
-2. Runs `npm run heroku-postbuild` (`ng build --configuration production`)
-3. Starts the web dyno with `node server.js` (reads `Procfile`)
-
-### Required GitHub repository secrets
-
-Go to **Settings → Secrets and variables → Actions** and add:
-
-| Secret | Description |
-|--------|-------------|
-| `HEROKU_API_KEY` | Your Heroku API key (`heroku auth:token`) |
-| `HEROKU_APP_NAME` | The Heroku app name (e.g. `carteira-monolito`) |
-| `HEROKU_EMAIL` | The email associated with your Heroku account |
-
-### Optional: protect the `production` environment
-
-In **Settings → Environments → production** you can add required reviewers so every deploy needs manual approval before it reaches Heroku.
+- Failed tests or build always block deployment.
+- Use **Actions → CI / Deploy → Run workflow** for a manual redeploy.
+- To roll back, revert the commit on `master` (or re-run an older successful workflow run).
 
 ---
 
-## Release & rollback
+## GitHub Pages setup (one time)
 
-**View recent releases:**
-```bash
-heroku releases --app <your-app-name>
-```
+1. Go to **Settings → Pages**.
+2. Under **Build and deployment → Source**, select **GitHub Actions**.
+3. Push to `master` (or run the workflow manually).
 
-**Roll back to a previous release:**
-```bash
-heroku rollback v<number> --app <your-app-name>
-```
+The site is published at `https://<user>.github.io/carteira-monolito/`.
+
+### How routing works on Pages
+
+GitHub Pages only serves static files and has no URL rewrites. The workflow copies `index.html` to `404.html`, so a direct link or refresh on a route such as `/carteira-monolito/planejamentos` loads the Angular app, which then renders the right page. The HTTP status for those URLs is 404, which browsers ignore for display purposes.
 
 ---
 
@@ -114,16 +84,15 @@ heroku rollback v<number> --app <your-app-name>
 
 | Symptom | Likely cause | Fix |
 |---------|-------------|-----|
-| Heroku build fails with "Cannot find module '@angular/cli'" | `devDependencies` pruned | Make sure `NPM_CONFIG_PRODUCTION=false` is set in Heroku config vars, or move Angular CLI to `dependencies` |
-| App boots but routes return 404 on refresh | SPA fallback missing | `server.js` catches all `GET *` routes; re-deploy and verify `Procfile` is committed |
+| Deploy job fails with "Get Pages site failed" / 404 | Pages not enabled for Actions | **Settings → Pages → Source: GitHub Actions** |
+| Blank page, assets 404 in the console | Wrong `--base-href` | It must be `/<repository-name>/` with both slashes |
+| Route works by clicking but not on refresh | `404.html` missing | Check the "Add SPA fallback" step ran |
 | `ChromeHeadless` not found in CI | Chrome not installed | `ubuntu-latest` runners include Chrome; confirm runner image hasn't changed |
-| Deploy job skipped even on `main` | Branch name mismatch | Ensure the default branch in GitHub is named `main` |
-| Heroku `H10 app crashed` | `node server.js` error | Check `heroku logs --tail --app <your-app-name>` |
 
 ---
 
 ## Additional resources
 
 - [Angular CLI reference](https://angular.dev/tools/cli)
-- [Heroku Node.js support](https://devcenter.heroku.com/articles/nodejs-support)
+- [GitHub Pages with custom workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 - [GitHub Actions documentation](https://docs.github.com/en/actions)

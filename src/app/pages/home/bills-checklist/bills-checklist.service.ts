@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Bill } from './bills-checklist.models';
-import { billsMockData } from './bills-checklist.mock';
+import { createBillsMock } from './bills-checklist.mock';
+import { toIsoDate } from '../../../shared/utils/date.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -12,18 +13,13 @@ export class BillsChecklistService {
   private billsSubject = new BehaviorSubject<Bill[]>(this.loadFromStorage());
   public bills$: Observable<Bill[]> = this.billsSubject.asObservable();
 
-  constructor() {}
-
   private loadFromStorage(): Bill[] {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
         const bills = JSON.parse(stored);
         // Validate data structure
-        if (Array.isArray(bills) && bills.every(bill => 
-          bill.id && bill.name && typeof bill.amount === 'number' && 
-          bill.dueDate && typeof bill.isPaid === 'boolean'
-        )) {
+        if (this.isValidBillList(bills) && this.isFromCurrentMonth(bills)) {
           return bills;
         }
       }
@@ -31,8 +27,20 @@ export class BillsChecklistService {
       console.warn('Error loading bills from localStorage:', error);
     }
     
-    // Return mock data if no valid storage found
-    return [...billsMockData];
+    // Sem dados válidos (ou de um mês anterior): começa o checklist do mês atual
+    return createBillsMock();
+  }
+
+  private isValidBillList(value: unknown): value is Bill[] {
+    return Array.isArray(value) && value.every(bill =>
+      bill && bill.id && bill.name && typeof bill.amount === 'number' &&
+      typeof bill.dueDate === 'string' && typeof bill.isPaid === 'boolean'
+    );
+  }
+
+  private isFromCurrentMonth(bills: Bill[]): boolean {
+    const currentMonthPrefix = toIsoDate(new Date()).slice(0, 7);
+    return bills.length > 0 && bills.every(bill => bill.dueDate.startsWith(currentMonthPrefix));
   }
 
   private saveToStorage(bills: Bill[]): void {
@@ -68,7 +76,7 @@ export class BillsChecklistService {
   }
 
   resetMonth(): void {
-    const freshBills = [...billsMockData];
+    const freshBills = createBillsMock();
     this.billsSubject.next(freshBills);
     this.saveToStorage(freshBills);
   }

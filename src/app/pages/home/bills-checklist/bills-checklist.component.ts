@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, AsyncPipe, NgFor, NgIf, CurrencyPipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { Observable, map } from 'rxjs';
 
 import { Bill, BillStatus } from './bills-checklist.models';
+import { compareBills, getBillStatus } from './bills-checklist.utils';
+import { parseIsoDate } from '../../../shared/utils/date.utils';
 import { BillsChecklistService } from './bills-checklist.service';
 
 interface BillWithStatus extends Bill {
@@ -41,49 +43,18 @@ interface BillsSummary {
   templateUrl: './bills-checklist.component.html',
   styleUrl: './bills-checklist.component.scss',
 })
-export class BillsChecklistComponent implements OnInit {
+export class BillsChecklistComponent {
   private billsService = inject(BillsChecklistService);
   
   billsSummary$: Observable<BillsSummary> = this.billsService.bills$.pipe(
     map(bills => this.processBillsData(bills))
   );
 
-  constructor() {}
-
-  ngOnInit(): void {}
-
   private processBillsData(bills: Bill[]): BillsSummary {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const billsWithStatus: BillWithStatus[] = bills.map(bill => {
-      const dueDate = new Date(bill.dueDate);
-      dueDate.setHours(0, 0, 0, 0);
-      
-      let status: BillStatus;
-      
-      if (bill.isPaid) {
-        status = { type: 'paid', label: 'Pago', color: 'success' };
-      } else if (today > dueDate) {
-        status = { type: 'overdue', label: 'Atrasado', color: 'warn' };
-      } else if (today.getTime() === dueDate.getTime()) {
-        status = { type: 'dueToday', label: 'Vence hoje', color: 'accent' };
-      } else {
-        status = { type: 'pending', label: 'Pendente', color: 'primary' };
-      }
-      
-      return { ...bill, status };
-    });
-
-    // Sort: pending first, then by due date ascending
-    const sortedBills = billsWithStatus.sort((a, b) => {
-      // If both are paid or both are unpaid
-      if (a.isPaid === b.isPaid) {
-        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-      }
-      // Unpaid first
-      return a.isPaid ? 1 : -1;
-    });
+    const sortedBills: BillWithStatus[] = bills
+      .map(bill => ({ ...bill, status: getBillStatus(bill, today) }))
+      .sort(compareBills);
 
     const paidCount = bills.filter(bill => bill.isPaid).length;
     const totalCount = bills.length;
@@ -110,16 +81,14 @@ export class BillsChecklistComponent implements OnInit {
   }
 
   formatDueDate(dueDate: string): string {
-    const date = new Date(dueDate);
+    const date = parseIsoDate(dueDate);
     const day = date.getDate();
     const month = date.getMonth() + 1;
     return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`;
   }
 
   getDueDateLabel(dueDate: string): string {
-    const date = new Date(dueDate);
-    const day = date.getDate();
-    return `Vence dia ${day}`;
+    return `Vence dia ${parseIsoDate(dueDate).getDate()}`;
   }
 
   trackByBillId(index: number, bill: BillWithStatus): string {

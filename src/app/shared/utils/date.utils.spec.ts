@@ -1,4 +1,4 @@
-import { parseIsoDate, startOfDay } from './date.utils';
+import { parseIsoDate, startOfDay, toIsoDate } from './date.utils';
 
 describe('date.utils', () => {
   describe('parseIsoDate', () => {
@@ -19,6 +19,16 @@ describe('date.utils', () => {
     it('zeroes the time without changing the day', () => {
       const result = startOfDay(new Date(2026, 4, 15, 18, 30));
       expect(result).toEqual(new Date(2026, 4, 15));
+    });
+  });
+
+  describe('toIsoDate', () => {
+    it('formats using the local calendar day', () => {
+      expect(toIsoDate(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05');
+    });
+
+    it('round-trips with parseIsoDate', () => {
+      expect(toIsoDate(parseIsoDate('2026-02-28'))).toBe('2026-02-28');
     });
   });
 });

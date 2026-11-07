@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DoughnutChartComponent } from '../../../shared/components/doughnut-chart/doughnut-chart.component';
@@ -10,8 +10,7 @@ import { ChartService } from '../../../core/services/chart.service';
 import { 
   ExpenseCategory, 
   MonthlyBudget, 
-  TrendData, 
-  ChartInteractionEvent 
+  TrendData
 } from '../../../shared/types/chart.types';
 
 @Component({
@@ -25,7 +24,7 @@ import {
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
 })
-export class ExpensesComponent implements OnInit {
+export class ExpensesComponent {
 
   // Responsive breakpoint
   public isMobile$: Observable<boolean>;
@@ -68,25 +67,9 @@ export class ExpensesComponent implements OnInit {
       .pipe(map(result => result.matches));
   }
 
-  ngOnInit(): void {
-    // Component initialization - chart components handle their own data
-  }
-
   // Switch between chart types
   public switchChart(type: 'doughnut' | 'bar' | 'line'): void {
     this.currentChart = type;
-  }
-
-  // Chart event handlers
-  public onChartClick(event: ChartInteractionEvent): void {
-    console.log('Chart clicked:', event);
-    if (event.active && event.active.length > 0) {
-      console.log('Clicked on chart element');
-    }
-  }
-
-  public onChartHover(event: ChartInteractionEvent): void {
-    console.log('Chart hovered:', event);
   }
 
   // Action handlers for each chart type

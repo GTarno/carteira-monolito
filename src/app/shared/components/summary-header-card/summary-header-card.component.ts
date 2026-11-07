@@ -196,7 +196,6 @@ export class SummaryHeaderCardComponent {
   @Output() editClick = new EventEmitter<void>();
 
   onEditClick(): void {
-    console.log('Edit clicked for:', this.title);
     this.editClick.emit();
   }
 }

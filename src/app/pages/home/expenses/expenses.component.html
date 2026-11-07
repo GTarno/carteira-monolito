@@ -38,8 +38,6 @@
               [showTotal]="true"
               [showActions]="true"
               actionLabel="Simular Novo Gasto"
-              (chartClick)="onChartClick($event)"
-              (chartHover)="onChartHover($event)"
               (actionClick)="onExpenseAction()">
             </app-doughnut-chart>
           </div>
@@ -54,8 +52,6 @@
               [showSummary]="true"
               [showActions]="true"
               actionLabel="Adicionar Mês"
-              (chartClick)="onChartClick($event)"
-              (chartHover)="onChartHover($event)"
               (actionClick)="onMonthlyAction()">
             </app-bar-chart>
           </div>
@@ -70,8 +66,6 @@
               [showMetrics]="true"
               [showActions]="true"
               actionLabel="Adicionar Semana"
-              (chartClick)="onChartClick($event)"
-              (chartHover)="onChartHover($event)"
               (actionClick)="onTrendAction()">
             </app-line-chart>
           </div>
@@ -92,8 +86,6 @@
             [showTotal]="true"
             [showActions]="true"
             actionLabel="Simular Novo Gasto"
-            (chartClick)="onChartClick($event)"
-            (chartHover)="onChartHover($event)"
             (actionClick)="onExpenseAction()">
           </app-doughnut-chart>
         </div>
@@ -105,8 +97,6 @@
             [showSummary]="true"
             [showActions]="true"
             actionLabel="Adicionar Mês"
-            (chartClick)="onChartClick($event)"
-            (chartHover)="onChartHover($event)"
             (actionClick)="onMonthlyAction()">
           </app-bar-chart>
         </div>
@@ -119,8 +109,6 @@
             [showMetrics]="true"
             [showActions]="true"
             actionLabel="Adicionar Semana"
-            (chartClick)="onChartClick($event)"
-            (chartHover)="onChartHover($event)"
             (actionClick)="onTrendAction()">
           </app-line-chart>
         </div>

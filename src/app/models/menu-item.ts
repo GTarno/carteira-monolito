@@ -1,5 +1,8 @@
+import { AppIconName } from '../shared/ui/icon/app-icons';
+
 export interface MenuItem {
-  icon: string;
+  /** Nome do ícone em APP_ICONS */
+  icon: AppIconName;
   label: string;
   route: string;
   description?: string;
@@ -9,36 +12,36 @@ export interface QuickAccessItem {
   id: string;
   label: string;
   route: string;
-  icon: string;
+  icon: AppIconName;
 }
 
 export const MENU_ITEMS: MenuItem[] = [
   {
-    icon: 'far fa-building',
+    icon: 'dashboard',
     label: 'Início',
     route: '/home',
     description: 'Página inicial do sistema'
   },
   {
-    icon: 'far fa-credit-card',
+    icon: 'wallet',
     label: 'Planejamentos',
     route: '/planejamentos',
     description: 'Gerencie seus planejamentos financeiros'
   },
   {
-    icon: 'far fa-plus-square',
+    icon: 'add-expense',
     label: 'Adicionar gastos',
     route: '/adicionar-gastos',
     description: 'Registre novos gastos'
   },
   {
-    icon: 'far fa-folder-open',
+    icon: 'inventory',
     label: 'Inventário',
     route: '/inventario',
     description: 'Gerencie suas categorias de inventário'
   },
   {
-    icon: 'far fa-question-circle',
+    icon: 'about',
     label: 'Sobre',
     route: '/sobre',
     description: 'Informações sobre o sistema'

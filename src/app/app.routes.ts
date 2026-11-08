@@ -8,14 +8,18 @@ import { InventoryPage } from './pages/inventory/inventory.page';
 import { InventoryCategoryItemsPage } from './pages/inventory/pages/category-items/inventory-category-items.page';
 import { About } from './pages/about/about';
 
+/**
+ * `data.legacyUi`: página ainda em Angular Material. O layout a exibe num painel claro
+ * até ela ser migrada para Tailwind/DaisyUI (épico #27); ao migrar, remova a flag.
+ */
 export const routes: Routes = [
-  { path: 'home', component: HomeComponent },
-  { path: 'planejamentos', component: PlanningPage },
-  { path: 'planejamentos/:categoryId/:itemId', component: PlanningItemDetailPage },
-  { path: 'planejamentos/:categoryId', component: PlanningCategoryItemsPage },
-  { path: 'adicionar-gastos', component: AdicionarGastosComponent },
-  { path: 'inventario', component: InventoryPage },
-  { path: 'inventario/:categoryId', component: InventoryCategoryItemsPage },
-  { path: 'sobre', component: About },
+  { path: 'home', component: HomeComponent, title: 'Início', data: { legacyUi: true } },
+  { path: 'planejamentos', component: PlanningPage, title: 'Planejamentos', data: { legacyUi: true } },
+  { path: 'planejamentos/:categoryId/:itemId', component: PlanningItemDetailPage, title: 'Detalhe do item', data: { legacyUi: true } },
+  { path: 'planejamentos/:categoryId', component: PlanningCategoryItemsPage, title: 'Itens da categoria', data: { legacyUi: true } },
+  { path: 'adicionar-gastos', component: AdicionarGastosComponent, title: 'Adicionar gastos', data: { legacyUi: true } },
+  { path: 'inventario', component: InventoryPage, title: 'Inventário', data: { legacyUi: true } },
+  { path: 'inventario/:categoryId', component: InventoryCategoryItemsPage, title: 'Itens do inventário', data: { legacyUi: true } },
+  { path: 'sobre', component: About, title: 'Sobre', data: { legacyUi: true } },
   { path: '', redirectTo: '/home', pathMatch: 'full' }
 ];

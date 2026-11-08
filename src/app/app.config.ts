@@ -1,7 +1,5 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection } from '@angular/core';
 import { TitleStrategy, provideRouter } from '@angular/router';
-import { providePrimeNG } from 'primeng/config';
-import Lara from '@primeuix/themes/lara';
 
 import { routes } from './app.routes';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -17,19 +15,6 @@ export const appConfig: ApplicationConfig = {
     provideAppLocale(),
     // Instancia o ThemeService na inicialização para sincronizar data-theme e localStorage
     provideAppInitializer(() => { inject(ThemeService); }),
-    provideCharts(withDefaultRegisterables()),
-    providePrimeNG({
-      theme: {
-        preset: Lara,
-        options: {
-          prefix: 'p',
-          darkModeSelector: '.dark',
-          cssLayer: {
-            name: 'primeng',
-            order: 'tailwind-base, primeng, tailwind-utilities'
-          }
-        }
-      }
-    })
+    provideCharts(withDefaultRegisterables())
   ]
 };

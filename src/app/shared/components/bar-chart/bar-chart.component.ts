@@ -1,162 +1,74 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { ChartService } from '../../../core/services/chart.service';
-import { BaseChartConfig, ChartInteractionEvent, MonthlyBudget } from '../../types/chart.types';
+import { ThemeService } from '../../../core/theme/theme.service';
+import { cartesianOptions, chartModeAt, seriesColor } from '../../charts/chart-palette';
+import { MonthlyBudget } from '../../types/chart.types';
 
+/** Barras agrupadas: gasto real vs orçamento por mês (um único eixo, em reais). */
 @Component({
   selector: 'app-bar-chart',
-  standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [BaseChartDirective, CurrencyPipe],
   template: `
-    <div class="bar-chart-container">
-      <h3 *ngIf="title">{{ title }}</h3>
-      
-      <div *ngIf="showSummary" class="summary-display">
-        <div class="summary-item">
-          <span class="label">Média Gastos:</span>
-          <span class="value">R$ {{ getAverageActual().toLocaleString('pt-BR') }}</span>
+    <div class="app-ui flex h-full flex-col gap-4">
+      @if (title()) {
+        <h3 class="font-semibold">{{ title() }}</h3>
+      }
+
+      @if (showSummary()) {
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div class="rounded-box bg-base-200 px-4 py-3">
+            <div class="text-base-content/70">Média de gastos</div>
+            <div class="text-lg font-semibold tabular-nums">{{ averageActual() | currency }}</div>
+          </div>
+          <div class="rounded-box bg-base-200 px-4 py-3">
+            <div class="text-base-content/70">Orçamento médio</div>
+            <div class="text-lg font-semibold tabular-nums">{{ averageBudget() | currency }}</div>
+          </div>
         </div>
-        <div class="summary-item">
-          <span class="label">Orçamento Médio:</span>
-          <span class="value">R$ {{ getAverageBudget().toLocaleString('pt-BR') }}</span>
-        </div>
-      </div>
-      
-      <div class="chart-wrapper" [style.height]="height" #chartContainer>
-        <canvas 
-          baseChart 
-          [data]="chartData" 
-          [type]="chartType"
-          [options]="chartOptions"
-          (chartClick)="onChartClick($event)"
-          (chartHover)="onChartHover($event)">
-        </canvas>
-      </div>
-      
-      <div *ngIf="showActions" class="chart-actions">
-        <button 
-          (click)="onActionClick()" 
-          class="action-btn"
-          [disabled]="!data || data.length === 0">
-          {{ actionLabel }}
-        </button>
+      }
+
+      <div class="relative" [style.height]="height()">
+        <canvas baseChart type="bar" [data]="chartData()" [options]="chartOptions()" role="img" [attr.aria-label]="title() ?? 'Gráfico de barras'"></canvas>
       </div>
     </div>
   `,
-  styleUrls: ['./bar-chart.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BarChartComponent implements BaseChartConfig, OnInit, OnChanges, AfterViewInit, OnDestroy {
-  @Input() data: MonthlyBudget[] = [];
-  @Input() title?: string;
-  @Input() height: string = '400px';
-  @Input() showLegend: boolean = true;
-  @Input() showSummary: boolean = true;
-  @Input() showActions: boolean = false;
-  @Input() actionLabel: string = 'Adicionar Mês';
+export class BarChartComponent {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly themeService = inject(ThemeService);
 
-  @Output() chartClick = new EventEmitter<ChartInteractionEvent>();
-  @Output() chartHover = new EventEmitter<ChartInteractionEvent>();
-  @Output() actionClick = new EventEmitter<void>();
+  readonly data = input<MonthlyBudget[]>([]);
+  readonly title = input<string>();
+  readonly height = input('300px');
+  readonly showLegend = input(true);
+  readonly showSummary = input(true);
 
-  @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
-  @ViewChild('chartContainer') chartContainer: ElementRef | undefined;
+  private readonly mode = computed(() => {
+    this.themeService.theme();
+    return chartModeAt(this.host.nativeElement);
+  });
 
-  public chartData: ChartData<'bar'> = { labels: [], datasets: [] };
-  public chartOptions: ChartOptions<'bar'> = {};
-  public chartType = 'bar' as const;
-  private resizeObserver?: ResizeObserver;
-  private resizeTimeout?: any;
+  protected readonly averageActual = computed(() => average(this.data().map(item => item.actual)));
+  protected readonly averageBudget = computed(() => average(this.data().map(item => item.budget)));
 
-  constructor(private chartService: ChartService) {}
+  protected readonly chartData = computed<ChartData<'bar'>>(() => {
+    const mode = this.mode();
+    const bar = { borderRadius: 4, borderSkipped: 'start' as const, maxBarThickness: 28, categoryPercentage: 0.7, barPercentage: 0.9 };
+    return {
+      labels: this.data().map(item => item.month),
+      datasets: [
+        { label: 'Gasto real', data: this.data().map(item => item.actual), backgroundColor: seriesColor(mode, 0), ...bar },
+        { label: 'Orçamento', data: this.data().map(item => item.budget), backgroundColor: seriesColor(mode, 1), ...bar }
+      ]
+    };
+  });
 
-  ngOnInit(): void {
-    this.updateChart();
-  }
+  protected readonly chartOptions = computed(() => cartesianOptions(this.mode(), this.showLegend()) as ChartOptions<'bar'>);
+}
 
-  ngOnChanges(): void {
-    this.updateChart();
-  }
-
-  ngAfterViewInit(): void {
-    this.setupResizeObserver();
-    // Força redimensionamento inicial após um pequeno delay
-    setTimeout(() => this.resizeChart(), 100);
-  }
-
-  ngOnDestroy(): void {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    if (this.resizeTimeout) {
-      clearTimeout(this.resizeTimeout);
-    }
-  }
-
-  private setupResizeObserver(): void {
-    if (this.chartContainer && 'ResizeObserver' in window) {
-      this.resizeObserver = new ResizeObserver((entries) => {
-        if (this.resizeTimeout) {
-          clearTimeout(this.resizeTimeout);
-        }
-        this.resizeTimeout = setTimeout(() => {
-          this.resizeChart();
-        }, 150);
-      });
-      this.resizeObserver.observe(this.chartContainer.nativeElement);
-    }
-  }
-
-  private resizeChart(): void {
-    if (this.chart && this.chart.chart) {
-      this.chart.chart.resize();
-    }
-  }
-
-  private updateChart(): void {
-    if (this.data && this.data.length > 0) {
-      const config = this.chartService.generateMonthlyBarChart(this.data);
-      this.chartData = config.data;
-      this.chartOptions = {
-        ...config.options,
-        responsive: true,
-        maintainAspectRatio: false,
-        aspectRatio: 0, // Remove qualquer ratio fixo
-        plugins: {
-          ...config.options.plugins,
-          legend: {
-            ...config.options.plugins?.legend,
-            display: this.showLegend
-          }
-        }
-      };
-      // Força redimensionamento após atualizar opções
-      setTimeout(() => this.resizeChart(), 50);
-    }
-  }
-
-  public getAverageActual(): number {
-    if (!this.data || this.data.length === 0) return 0;
-    const total = this.data.reduce((sum, item) => sum + item.actual, 0);
-    return total / this.data.length;
-  }
-
-  public getAverageBudget(): number {
-    if (!this.data || this.data.length === 0) return 0;
-    const total = this.data.reduce((sum, item) => sum + item.budget, 0);
-    return total / this.data.length;
-  }
-
-  public onChartClick(event: ChartInteractionEvent): void {
-    this.chartClick.emit(event);
-  }
-
-  public onChartHover(event: ChartInteractionEvent): void {
-    this.chartHover.emit(event);
-  }
-
-  public onActionClick(): void {
-    this.actionClick.emit();
-  }
+function average(values: number[]): number {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
 }

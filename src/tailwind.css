@@ -20,6 +20,11 @@
 @source "./app/layout";
 @source "./app/shared/components/footer";
 @source "./app/shared/components/quick-access";
+@source "./app/shared/components/doughnut-chart";
+@source "./app/shared/components/bar-chart";
+@source "./app/shared/components/line-chart";
+@source "./app/shared/charts";
+@source "./app/pages/home";
 
 @plugin "daisyui" {
   themes: forest --default, emerald;
@@ -32,6 +37,10 @@
  * Aplique `app-ui` no elemento raiz de cada componente migrado. Removido na limpeza (#33).
  */
 @layer base {
+  .app-ui,
+  .app-ui :where(*, ::before, ::after) {
+    box-sizing: border-box;
+  }
   .app-ui :where(a) {
     color: inherit;
     text-decoration: inherit;

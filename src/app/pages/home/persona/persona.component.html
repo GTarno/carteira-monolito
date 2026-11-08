@@ -1,18 +1,25 @@
-<div class="persona-container">
-  <div class="persona-card">
-    <div class="persona-header">
-      <div class="persona-avatar">
-        <span class="avatar-initial">{{ persona.nome.charAt(0) }}</span>
+<section class="app-ui card bg-base-100 shadow-sm">
+  <div class="card-body flex-col gap-6 sm:flex-row sm:items-center">
+    <div class="flex flex-1 items-center gap-4">
+      <div class="avatar avatar-placeholder">
+        <div class="w-14 rounded-full bg-primary text-primary-content">
+          <span class="text-xl font-semibold">{{ persona.nome.charAt(0) }}</span>
+        </div>
       </div>
-      <div class="persona-info">
-        <h3 class="persona-name">Olá, {{ persona.nome }}</h3>
-        <p class="persona-title">Analista de Sistemas</p>
+      <div>
+        <h2 class="text-xl font-semibold">Olá, {{ persona.nome }}</h2>
+        <p class="text-sm text-base-content/70">{{ persona.cargo }}</p>
       </div>
     </div>
-    
-    <div class="persona-balance">
-      <div class="balance-label">Valor em Caixa</div>
-      <div class="balance-amount">{{ formatCurrency(persona.valorEmCaixa) }}</div>
+
+    <div class="flex items-center gap-4 rounded-box bg-base-200 px-5 py-4">
+      <span class="rounded-box bg-primary/15 p-2.5 text-primary">
+        <app-icon name="wallet" [size]="24" />
+      </span>
+      <div>
+        <div class="text-sm text-base-content/70">Valor em caixa</div>
+        <div class="text-2xl font-bold tabular-nums">{{ persona.valorEmCaixa | currency }}</div>
+      </div>
     </div>
   </div>
-</div>
+</section>

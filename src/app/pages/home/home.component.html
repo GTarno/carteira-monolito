@@ -1,8 +1,9 @@
-<div class="home-container">
-  <h1>Dashboard</h1>
-  <app-persona></app-persona>
-  <app-quick-access></app-quick-access>
-  <app-expenses></app-expenses>
-  <app-bills-checklist></app-bills-checklist>
-  <app-installments-carousel></app-installments-carousel>
+<div class="app-ui flex min-w-0 flex-col gap-6">
+  <app-persona />
+  <app-quick-access />
+  <app-expenses />
+  <div class="grid gap-6 xl:grid-cols-2 *:min-w-0">
+    <app-bills-checklist />
+    <app-installments-carousel />
+  </div>
 </div>

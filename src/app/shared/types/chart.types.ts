@@ -1,18 +1,3 @@
-import { ChartEvent } from 'chart.js';
-
-// Base interface for all chart components
-export interface BaseChartConfig {
-  title?: string;
-  height?: string;
-  showLegend?: boolean;
-}
-
-// Chart event interface
-export interface ChartInteractionEvent {
-  event?: ChartEvent;
-  active?: object[];
-}
-
 // Expense data interface
 export interface ExpenseCategory {
   category: string;

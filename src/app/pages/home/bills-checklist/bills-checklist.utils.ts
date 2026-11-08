@@ -2,10 +2,10 @@ import { Bill, BillStatus } from './bills-checklist.models';
 import { parseIsoDate, startOfDay } from '../../../shared/utils/date.utils';
 
 const STATUS: Record<BillStatus['type'], BillStatus> = {
-  paid: { type: 'paid', label: 'Pago', color: 'success' },
-  overdue: { type: 'overdue', label: 'Atrasado', color: 'warn' },
-  dueToday: { type: 'dueToday', label: 'Vence hoje', color: 'accent' },
-  pending: { type: 'pending', label: 'Pendente', color: 'primary' }
+  paid: { type: 'paid', label: 'Pago' },
+  overdue: { type: 'overdue', label: 'Atrasado' },
+  dueToday: { type: 'dueToday', label: 'Vence hoje' },
+  pending: { type: 'pending', label: 'Pendente' }
 };
 
 /** Calcula o status de uma conta comparando o vencimento com `today` no fuso local. */

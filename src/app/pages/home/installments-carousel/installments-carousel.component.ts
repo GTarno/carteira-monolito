@@ -1,52 +1,42 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { CarouselModule } from 'primeng/carousel';
-import { Observable } from 'rxjs';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, viewChild } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { InstallmentPlan } from './models/installments.models';
 import { InstallmentsService } from './data-access/installments.service';
+import { IconComponent } from '../../../shared/ui/icon/icon.component';
 
+interface InstallmentView extends InstallmentPlan {
+  progress: number;
+  remaining: number;
+}
+
+/** Compras parceladas em andamento, num carrossel com rolagem horizontal (scroll-snap). */
 @Component({
   selector: 'app-installments-carousel',
-  standalone: true,
-  imports: [CommonModule, CarouselModule],
+  imports: [CurrencyPipe, IconComponent],
   templateUrl: './installments-carousel.component.html',
-  styleUrl: './installments-carousel.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InstallmentsCarouselComponent implements OnInit {
-  plans$!: Observable<InstallmentPlan[]>;
+export class InstallmentsCarouselComponent {
+  private readonly track = viewChild.required<ElementRef<HTMLElement>>('track');
 
-  responsiveOptions = [
-    {
-      breakpoint: '1024px',
-      numVisible: 3,
-      numScroll: 1
-    },
-    {
-      breakpoint: '768px',
-      numVisible: 2,
-      numScroll: 1
-    },
-    {
-      breakpoint: '560px',
-      numVisible: 1,
-      numScroll: 1
-    }
-  ];
+  private readonly plans = toSignal(inject(InstallmentsService).getPlans(), { initialValue: [] as InstallmentPlan[] });
 
-  constructor(private installmentsService: InstallmentsService) {}
+  protected readonly items = computed<InstallmentView[]>(() =>
+    this.plans().map(plan => ({
+      ...plan,
+      progress: plan.total ? plan.paid / plan.total : 0,
+      remaining: plan.amount * Math.max(plan.total - plan.paid, 0)
+    }))
+  );
 
-  ngOnInit(): void {
-    this.plans$ = this.installmentsService.getPlans();
-  }
+  protected readonly totalRemaining = computed(() => this.items().reduce((sum, item) => sum + item.remaining, 0));
 
-  calculateProgress(paid: number, total: number): number {
-    return (paid / total) * 100;
-  }
-
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(amount);
+  /** Rola um card para o lado (direction: -1 anterior, 1 próximo). */
+  scroll(direction: -1 | 1): void {
+    const track = this.track().nativeElement;
+    const card = track.querySelector<HTMLElement>('.carousel-item');
+    const step = card ? card.offsetWidth + 16 : track.clientWidth * 0.8;
+    track.scrollBy({ left: direction * step, behavior: 'smooth' });
   }
 }

@@ -16,12 +16,42 @@
 
 /* Arquivos já migrados para Tailwind/DaisyUI */
 @source "./app/shared/ui";
-@source "./app/app.component.html";
+@source "./app/app.component.ts";
+@source "./app/layout";
+@source "./app/shared/components/footer";
+@source "./app/shared/components/quick-access";
 
 @plugin "daisyui" {
   themes: forest --default, emerald;
   /* reset/rootcolor/scroll*: ver comentário no topo. label: telas antigas usam class="label". */
   exclude: reset, rootcolor, rootscrollgutter, scrollbar, label;
+}
+
+/*
+ * Reset mínimo para as partes JÁ MIGRADAS, enquanto o preflight está desligado.
+ * Aplique `app-ui` no elemento raiz de cada componente migrado. Removido na limpeza (#33).
+ */
+@layer base {
+  .app-ui :where(a) {
+    color: inherit;
+    text-decoration: inherit;
+  }
+  .app-ui :where(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  .app-ui :where(h1, h2, h3, h4, h5, h6, p, figure, blockquote) {
+    margin: 0;
+  }
+  .app-ui :where(ul, ol, menu) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .app-ui :where(img) {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 /* Overlays do Angular CDK (diálogos, menus). Hoje também vêm do Material. */

@@ -14,7 +14,7 @@ export class MenuService {
   }
 
   /**
-   * Retorna os itens para acessos rápidos (exclui Início e usa ícones do Material Design)
+   * Retorna os itens para acessos rápidos (todos os itens do menu exceto Início)
    */
   getQuickAccessItems(): QuickAccessItem[] {
     return MENU_ITEMS
@@ -31,6 +31,6 @@ export class MenuService {
    * Gera um ID único baseado na rota
    */
   private getItemId(route: string): string {
-    return route.replace('/', '').replace('-', '_');
+    return route.replace(/^\//, '').replaceAll('-', '_');
   }
 }

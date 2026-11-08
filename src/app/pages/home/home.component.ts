@@ -4,7 +4,6 @@ import { PersonaComponent } from './persona/persona.component';
 import { BillsChecklistComponent } from './bills-checklist/bills-checklist.component';
 import { InstallmentsCarouselComponent } from './installments-carousel/installments-carousel.component';
 import { QuickAccessComponent } from '../../shared/components/quick-access/quick-access.component';
-import { FooterComponent } from '../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-home',
@@ -14,8 +13,7 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
     PersonaComponent, 
     BillsChecklistComponent, 
     InstallmentsCarouselComponent,
-    QuickAccessComponent,
-    FooterComponent
+    QuickAccessComponent
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']

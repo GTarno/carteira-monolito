@@ -1,24 +1,21 @@
-<section class="quick-access">
-  <h2 class="quick-access__title">Acessos rápidos</h2>
-  <div class="quick-access__box-align">
-  <div class="quick-access__grid">
-    <div 
-      *ngFor="let item of getItems()"
-      class="quick-access__item"
-      role="button"
-      tabindex="0"
-      [attr.aria-label]="getItemAriaLabel(item)"
-      (click)="onItemClick(item)"
-      (keydown)="onItemKeydown($event, item)"
-    >
-      <div class="quick-access__item-content">
-        <i class="{{ item.icon }} quick-access__icon"></i>
-        <span class="quick-access__label">{{ item.label }}</span>
+<section class="app-ui card bg-base-100 shadow-sm" aria-labelledby="quick-access-title">
+  <div class="card-body gap-4 md:flex-row md:items-center">
+    <div class="flex-1">
+      <h2 id="quick-access-title" class="card-title mb-4">Acessos rápidos</h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        @for (item of visibleItems(); track item.id) {
+          <a
+            [routerLink]="item.route"
+            class="btn btn-soft btn-primary h-auto justify-start gap-3 py-4 text-base">
+            <app-icon [name]="item.icon" [size]="22" />
+            {{ item.label }}
+          </a>
+        }
       </div>
     </div>
-  </div>
-  <div class="quick-access__image-container">
-    <img src="assets/images/economia.png" alt="Acessos rápidos" class="quick-access__img-size">
-  </div>
+    <img
+      src="assets/images/economia.png"
+      alt=""
+      class="hidden w-56 shrink-0 md:block lg:w-64" />
   </div>
 </section>

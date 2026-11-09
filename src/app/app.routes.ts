@@ -14,9 +14,9 @@ import { About } from './pages/about/about';
  */
 export const routes: Routes = [
   { path: 'home', component: HomeComponent, title: 'Início' },
-  { path: 'planejamentos', component: PlanningPage, title: 'Planejamentos', data: { legacyUi: true } },
-  { path: 'planejamentos/:categoryId/:itemId', component: PlanningItemDetailPage, title: 'Detalhe do item', data: { legacyUi: true } },
-  { path: 'planejamentos/:categoryId', component: PlanningCategoryItemsPage, title: 'Itens da categoria', data: { legacyUi: true } },
+  { path: 'planejamentos', component: PlanningPage, title: 'Planejamentos' },
+  { path: 'planejamentos/:categoryId/:itemId', component: PlanningItemDetailPage, title: 'Detalhe do item' },
+  { path: 'planejamentos/:categoryId', component: PlanningCategoryItemsPage, title: 'Itens da categoria' },
   { path: 'adicionar-gastos', component: AdicionarGastosComponent, title: 'Adicionar gastos', data: { legacyUi: true } },
   { path: 'inventario', component: InventoryPage, title: 'Inventário', data: { legacyUi: true } },
   { path: 'inventario/:categoryId', component: InventoryCategoryItemsPage, title: 'Itens do inventário', data: { legacyUi: true } },

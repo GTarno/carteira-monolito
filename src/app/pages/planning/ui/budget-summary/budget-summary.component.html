@@ -1,0 +1,54 @@
+<section class="app-ui card bg-base-100 shadow-sm">
+  <div class="card-body gap-5">
+    <div class="flex items-start gap-3">
+      <span class="rounded-box p-2.5" [class]="status().tint">
+        <app-icon [name]="icon()" [size]="24" />
+      </span>
+      <div class="min-w-0 flex-1">
+        <h2 class="card-title truncate">{{ title() }}</h2>
+        @if (subtitle()) {
+          <p class="text-sm text-base-content/70">{{ subtitle() }}</p>
+        }
+      </div>
+      <span class="badge gap-1" [class]="status().badge">
+        <app-icon [name]="status().icon" [size]="14" />
+        {{ status().description }}
+      </span>
+      @if (editable()) {
+        <button type="button" class="btn btn-ghost btn-sm btn-square" [attr.aria-label]="'Editar ' + title()" (click)="edit.emit()">
+          <app-icon name="edit" [size]="18" />
+        </button>
+      }
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-3">
+      <div class="rounded-box bg-base-200 px-4 py-3">
+        <div class="text-sm text-base-content/70">Planejado</div>
+        <div class="text-xl font-semibold tabular-nums">{{ planned() | currency }}</div>
+      </div>
+      <div class="rounded-box bg-base-200 px-4 py-3">
+        <div class="text-sm text-base-content/70">Gasto</div>
+        <div class="text-xl font-semibold tabular-nums">{{ spent() | currency }}</div>
+      </div>
+      <div class="rounded-box bg-base-200 px-4 py-3">
+        @if (excess() > 0) {
+          <div class="text-sm text-base-content/70">Excedente</div>
+          <div class="text-xl font-semibold tabular-nums text-error">{{ excess() | currency }}</div>
+        } @else {
+          <div class="text-sm text-base-content/70">Restante</div>
+          <div class="text-xl font-semibold tabular-nums text-success">{{ remaining() | currency }}</div>
+        }
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <progress
+        class="progress flex-1"
+        [class]="status().progress"
+        [value]="usage() * 100 > 100 ? 100 : usage() * 100"
+        max="100"
+        [attr.aria-label]="'Uso do orçamento: ' + (usage() | percent: '1.0-0')"></progress>
+      <span class="w-28 text-right text-sm tabular-nums text-base-content/70">{{ usage() | percent: '1.0-0' }} utilizado</span>
+    </div>
+  </div>
+</section>

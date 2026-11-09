@@ -1,115 +1,96 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DialogRef } from '@angular/cdk/dialog';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PlanningItemCreate } from '../../models/planning.models';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { AppIconName } from '../../../../shared/ui/icon/app-icons';
+import { moneyValidator, parseMoney } from '../../../../shared/utils/money.utils';
 
+interface IconOption {
+  name: string;
+  icon: AppIconName;
+}
+
+/** Ícones que o usuário pode escolher para um item do planejamento. */
+export const PLANNING_ITEM_ICONS: IconOption[] = [
+  { name: 'Contas', icon: 'receipt' },
+  { name: 'Luz', icon: 'lightbulb' },
+  { name: 'Energia', icon: 'energy' },
+  { name: 'Internet', icon: 'wifi' },
+  { name: 'Casa', icon: 'home' },
+  { name: 'Condomínio', icon: 'building' },
+  { name: 'Cartão', icon: 'credit-card' },
+  { name: 'Banco', icon: 'bank' },
+  { name: 'Dinheiro', icon: 'banknote' },
+  { name: 'Poupança', icon: 'savings' },
+  { name: 'Mercado', icon: 'shopping-cart' },
+  { name: 'Compras', icon: 'shopping-bag' },
+  { name: 'Alimentação', icon: 'food' },
+  { name: 'Restaurante', icon: 'restaurant' },
+  { name: 'Carro', icon: 'car' },
+  { name: 'Saúde', icon: 'health' },
+  { name: 'Educação', icon: 'education' },
+  { name: 'Orçamento', icon: 'calculator' }
+];
+
+/** Diálogo para adicionar um item a uma categoria. Fecha com `PlanningItemCreate` (sem categoryId). */
 @Component({
   selector: 'app-add-planning-item-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatDialogModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+  imports: [ReactiveFormsModule, IconComponent],
   templateUrl: './add-planning-item-dialog.component.html',
-  styleUrls: ['./add-planning-item-dialog.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddPlanningItemDialogComponent {
-  private fb = inject(FormBuilder);
-  private dialogRef = inject(MatDialogRef<AddPlanningItemDialogComponent>);
+  private readonly dialogRef = inject<DialogRef<PlanningItemCreate>>(DialogRef);
 
-  form: FormGroup;
-  selectedIcon: string | null = null;
+  protected readonly icons = PLANNING_ITEM_ICONS;
+  protected readonly selectedIcon = signal<AppIconName | null>(null);
+  protected readonly submitted = signal(false);
 
-  // Ícones disponíveis para seleção
-  availableIcons: { name: string; icon: string }[] = [
-    { name: 'Pagamentos', icon: 'payments' },
-    { name: 'Cartão de Crédito', icon: 'credit_card' },
-    { name: 'Recibos', icon: 'receipt_long' },
-    { name: 'Banco', icon: 'account_balance' },
-    { name: 'Casa', icon: 'home' },
-    { name: 'Energia', icon: 'bolt' },
-    { name: 'Internet', icon: 'wifi' },
-    { name: 'Carro', icon: 'directions_car' },
-    { name: 'Mercado', icon: 'local_grocery_store' },
-    { name: 'Restaurante', icon: 'restaurant' },
-    { name: 'Médico', icon: 'medical_services' },
-    { name: 'Educação', icon: 'school' },
-    { name: 'Poupança', icon: 'savings' },
-    { name: 'Compras', icon: 'shopping_cart' },
-    { name: 'Dinheiro', icon: 'attach_money' },
-    { name: 'Orçamento', icon: 'request_quote' },
-    { name: 'Pagamento', icon: 'paid' },
-    { name: 'Carteira', icon: 'account_balance_wallet' }
-  ];
+  protected readonly form = inject(FormBuilder).nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    plannedValue: ['', [Validators.required, moneyValidator(0.01)]]
+  });
 
-  constructor() {
-    this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      plannedValue: [null, [Validators.required, Validators.min(0.01)]]
-    });
+  showError(control: 'name' | 'plannedValue'): boolean {
+    const field = this.form.controls[control];
+    return field.invalid && (field.touched || this.submitted());
   }
 
-  selectIcon(icon: string): void {
-    this.selectedIcon = icon;
+  nameError(): string {
+    const errors = this.form.controls.name.errors;
+    if (errors?.['required']) return 'Informe o nome do item.';
+    if (errors?.['minlength']) return 'Use pelo menos 2 caracteres.';
+    return '';
   }
 
-  isIconSelected(icon: string): boolean {
-    return this.selectedIcon === icon;
+  valueError(): string {
+    const errors = this.form.controls.plannedValue.errors;
+    if (errors?.['required']) return 'Informe o valor planejado.';
+    if (errors?.['invalidMoney']) return 'Digite um valor válido, ex.: 150,00.';
+    if (errors?.['tooManyDecimals']) return 'Use no máximo 2 casas decimais.';
+    if (errors?.['min']) return 'O valor deve ser maior que zero.';
+    return '';
   }
 
-  onCancel(): void {
+  cancel(): void {
     this.dialogRef.close();
   }
 
-  onSave(): void {
-    if (!this.form.valid || !this.selectedIcon) {
+  save(): void {
+    this.submitted.set(true);
+    const icon = this.selectedIcon();
+    if (this.form.invalid || !icon) {
+      this.form.markAllAsTouched();
       return;
     }
 
-    const formValue = this.form.value;
-    const payload: PlanningItemCreate = {
-      categoryId: '', // Será preenchido pelo componente que abre o dialog
-      name: formValue.name.trim(),
-      plannedValue: Number(formValue.plannedValue),
-      icon: this.selectedIcon
-    };
-
-    this.dialogRef.close(payload);
-  }
-
-  isFormValid(): boolean {
-    return this.form.valid && this.selectedIcon !== null;
-  }
-
-  getNameError(): string {
-    const nameControl = this.form.get('name');
-    if (nameControl?.hasError('required')) {
-      return 'Nome é obrigatório';
-    }
-    if (nameControl?.hasError('minlength')) {
-      return 'Nome deve ter pelo menos 2 caracteres';
-    }
-    return '';
-  }
-
-  getValueError(): string {
-    const valueControl = this.form.get('plannedValue');
-    if (valueControl?.hasError('required')) {
-      return 'Valor planejado é obrigatório';
-    }
-    if (valueControl?.hasError('min')) {
-      return 'Valor deve ser maior que zero';
-    }
-    return '';
+    const { name, plannedValue } = this.form.getRawValue();
+    this.dialogRef.close({
+      categoryId: '', // preenchido por quem abre o diálogo
+      name: name.trim(),
+      plannedValue: parseMoney(plannedValue) ?? 0,
+      icon
+    });
   }
 }

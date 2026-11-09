@@ -25,6 +25,7 @@
 @source "./app/shared/components/line-chart";
 @source "./app/shared/charts";
 @source "./app/pages/home";
+@source "./app/pages/planning";
 
 @plugin "daisyui" {
   themes: forest --default, emerald;
@@ -55,6 +56,15 @@
   .app-ui :where(ul, ol, menu) {
     list-style: none;
     margin: 0;
+    padding: 0;
+  }
+  .app-ui :where(fieldset) {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  .app-ui :where(legend) {
     padding: 0;
   }
   .app-ui :where(img) {

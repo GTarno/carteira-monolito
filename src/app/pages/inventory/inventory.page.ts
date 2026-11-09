@@ -1,70 +1,50 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { Observable, take } from 'rxjs';
-import { InventoryCategory } from './models/inventory-category.model';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { InventoryCategory, InventoryCategoryCreate } from './models/inventory-category.model';
+import { InventoryItem } from './models/inventory-item.model';
 import { InventoryService } from './data-access/inventory.service';
 import { AddCategoryDialogComponent } from './ui/add-category-dialog/add-category-dialog.component';
+import { AppDialog } from '../../shared/ui/dialog/app-dialog.service';
+import { ToastService } from '../../shared/ui/toast/toast.service';
+import { IconComponent } from '../../shared/ui/icon/icon.component';
 
+/** Categorias do inventário pessoal (livros, discos...). */
 @Component({
   selector: 'app-inventory',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule
-  ],
+  imports: [RouterLink, IconComponent],
   templateUrl: './inventory.page.html',
-  styleUrl: './inventory.page.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InventoryPage implements OnInit {
-  private inventoryService = inject(InventoryService);
-  private dialog = inject(MatDialog);
-  private router = inject(Router);
+export class InventoryPage {
+  private readonly inventoryService = inject(InventoryService);
+  private readonly dialog = inject(AppDialog);
+  private readonly toast = inject(ToastService);
 
-  categories$!: Observable<InventoryCategory[]>;
+  protected readonly categories = toSignal(this.inventoryService.categories$, { initialValue: [] as InventoryCategory[] });
+  private readonly items = toSignal(this.inventoryService.items$, { initialValue: [] as InventoryItem[] });
 
-  ngOnInit(): void {
-    this.categories$ = this.inventoryService.getCategories();
-  }
+  /** Quantidade de itens por categoria. */
+  protected readonly itemCount = computed(() => {
+    const counts = new Map<string, number>();
+    for (const item of this.items()) counts.set(item.categoryId, (counts.get(item.categoryId) ?? 0) + 1);
+    return counts;
+  });
 
-  openCategory(categoryId: string): void {
-    this.router.navigate(['/inventario', categoryId]);
+  /** Categorias cuja imagem não carregou (mostram um ícone no lugar). */
+  protected readonly brokenImages = signal(new Set<string>());
+
+  onImageError(categoryId: string): void {
+    this.brokenImages.update(ids => new Set(ids).add(categoryId));
   }
 
   openAddDialog(): void {
-    const dialogRef = this.dialog.open(AddCategoryDialogComponent, {
-      width: '500px',
-      maxWidth: '90vw',
-      disableClose: false,
-      autoFocus: true
+    this.dialog.open<AddCategoryDialogComponent, void, InventoryCategoryCreate>(AddCategoryDialogComponent, {
+      ariaLabel: 'Adicionar categoria'
+    }).closed.pipe(filter((result): result is InventoryCategoryCreate => !!result)).subscribe(result => {
+      this.inventoryService.addCategory(result);
+      this.toast.success(`Categoria "${result.name}" criada.`);
     });
-
-    dialogRef.afterClosed()
-      .pipe(take(1))
-      .subscribe(result => {
-        if (result) {
-          this.inventoryService.addCategory(result);
-        }
-      });
-  }
-
-  onImageError(event: Event, category: InventoryCategory): void {
-    const image = event.target as HTMLImageElement;
-    // SVG fallback baseado na categoria
-    const fallbackImages: { [key: string]: string } = {
-      'Livros': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzQzODNjNCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxwYXRoIGQ9Ik0xMiAyQzEzLjEgMiAxNCAyLjkgMTQgNFYyMkMxNCAyMy4xIDEzLjEgMjQgMTIgMjRDMTAuOSAyNCA5IDIzLjEgOSAyMlY0QzkgMi45IDEwLjkgMiAxMiAyWk0xNCA0SDE4VjIwSDE0VjRaTTYgNEgxMFYyMEg2VjRaIi8+PC9zdmc+',
-      'Discos': 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzY2M2E4MiIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiPjxwYXRoIGQ9Ik0xMiAyQzYuNDggMiAyIDYuNDggMiAxMlM2LjQ4IDIyIDEyIDIyIDIyIDE3LjUyIDIyIDEyIDIwLjUyIDIgMTIgMk0xMiA4QzE0LjIxIDggMTYgOS43OSAxNiAxMlMxNC4yMSAxNiAxMiAxNiAxMCAxNC4yMSAxMCAxMiA5LjIxIDggMTIgOE0xMiAxMUMxMS40NSAxMSAxMSAxMS40NSAxMSAxMlMxMS40NSAxMyAxMiAxMyAxMyAxMi41NSAxMyAxMiAxMi41NSAxMSAxMiAxMVoiLz48L3N2Zz4='
-    };
-    
-    const fallbackSrc = fallbackImages[category.name] || fallbackImages['Livros'];
-    image.src = fallbackSrc;
-    image.style.display = 'block';
   }
 }

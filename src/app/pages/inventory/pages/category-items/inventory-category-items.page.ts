@@ -1,105 +1,49 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTableModule } from '@angular/material/table';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { Observable, take, filter } from 'rxjs';
-import { InventoryItem } from '../../models/inventory-item.model';
-import { InventoryCategory } from '../../models/inventory-category.model';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { filter } from 'rxjs';
+import { InventoryItem, InventoryItemCreate } from '../../models/inventory-item.model';
+import { inventoryLabelsFor } from '../../models/inventory-labels';
 import { InventoryService } from '../../data-access/inventory.service';
-import { AddItemDialogComponent } from '../../ui/add-item-dialog/add-item-dialog.component';
+import { AddItemDialogComponent, AddItemDialogData } from '../../ui/add-item-dialog/add-item-dialog.component';
+import { AppDialog } from '../../../../shared/ui/dialog/app-dialog.service';
+import { ToastService } from '../../../../shared/ui/toast/toast.service';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
+/** Itens de uma categoria do inventário, em tabela. */
 @Component({
   selector: 'app-inventory-category-items',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatTableModule,
-    MatDialogModule
-  ],
+  imports: [RouterLink, DatePipe, IconComponent],
   templateUrl: './inventory-category-items.page.html',
-  styleUrl: './inventory-category-items.page.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InventoryCategoryItemsPage implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private inventoryService = inject(InventoryService);
-  private dialog = inject(MatDialog);
+export class InventoryCategoryItemsPage {
+  private readonly inventoryService = inject(InventoryService);
+  private readonly dialog = inject(AppDialog);
+  private readonly toast = inject(ToastService);
 
-  categoryId!: string;
-  category$!: Observable<InventoryCategory | undefined>;
-  items$!: Observable<InventoryItem[]>;
-  
-  displayedColumns: string[] = ['title', 'author', 'notes', 'createdAt', 'actions'];
+  readonly categoryId = inject(ActivatedRoute).snapshot.paramMap.get('categoryId') ?? '';
 
-  ngOnInit(): void {
-    this.categoryId = this.route.snapshot.paramMap.get('categoryId') || '';
-    
-    this.category$ = this.inventoryService.getCategoryById(this.categoryId);
-    this.items$ = this.inventoryService.getItemsByCategory(this.categoryId);
-  }
-
-  onDeleteItem(itemId: string): void {
-    this.inventoryService.deleteItem(itemId);
-  }
+  protected readonly category = toSignal(this.inventoryService.getCategoryById(this.categoryId));
+  protected readonly items = toSignal(this.inventoryService.getItemsByCategory(this.categoryId), {
+    initialValue: [] as InventoryItem[]
+  });
+  protected readonly labels = computed(() => inventoryLabelsFor(this.category()?.name));
 
   openAddItemDialog(): void {
-    this.category$.pipe(
-      take(1)
-    ).subscribe(category => {
-      const dialogRef = this.dialog.open(AddItemDialogComponent, {
-        width: '500px',
-        maxWidth: '90vw',
-        data: {
-          categoryId: this.categoryId,
-          categoryName: category?.name || 'Categoria'
-        }
-      });
-
-      dialogRef.afterClosed()
-        .pipe(
-          filter(Boolean),
-          take(1)
-        )
-        .subscribe(result => {
-          this.inventoryService.addItem(result);
-        });
+    const data: AddItemDialogData = { categoryId: this.categoryId, categoryName: this.category()?.name ?? 'Categoria' };
+    this.dialog.open<AddItemDialogComponent, AddItemDialogData, InventoryItemCreate>(AddItemDialogComponent, {
+      data,
+      ariaLabel: `Adicionar item em ${data.categoryName}`
+    }).closed.pipe(filter((result): result is InventoryItemCreate => !!result)).subscribe(result => {
+      this.inventoryService.addItem(result);
+      this.toast.success(`"${result.title}" adicionado.`);
     });
   }
 
-  onBackToCategories(): void {
-    this.router.navigate(['/inventario']);
-  }
-
-  getAuthorLabel(category: InventoryCategory | null | undefined): string {
-    if (!category) return 'Autor';
-    
-    switch (category.name.toLowerCase()) {
-      case 'livros':
-        return 'Autor';
-      case 'discos':
-        return 'Banda/Artista';
-      default:
-        return 'Autor';
-    }
-  }
-
-  formatDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateString;
-    }
+  onDeleteItem(item: InventoryItem): void {
+    this.inventoryService.deleteItem(item.id);
+    this.toast.info(`"${item.title}" removido.`);
   }
 }

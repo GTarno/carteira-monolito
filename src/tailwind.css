@@ -26,6 +26,9 @@
 @source "./app/shared/charts";
 @source "./app/pages/home";
 @source "./app/pages/planning";
+@source "./app/pages/inventory";
+@source "./app/pages/adicionar-gastos";
+@source "./app/pages/about";
 
 @plugin "daisyui" {
   themes: forest --default, emerald;

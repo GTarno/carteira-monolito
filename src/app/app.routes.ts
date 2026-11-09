@@ -17,9 +17,9 @@ export const routes: Routes = [
   { path: 'planejamentos', component: PlanningPage, title: 'Planejamentos' },
   { path: 'planejamentos/:categoryId/:itemId', component: PlanningItemDetailPage, title: 'Detalhe do item' },
   { path: 'planejamentos/:categoryId', component: PlanningCategoryItemsPage, title: 'Itens da categoria' },
-  { path: 'adicionar-gastos', component: AdicionarGastosComponent, title: 'Adicionar gastos', data: { legacyUi: true } },
-  { path: 'inventario', component: InventoryPage, title: 'Inventário', data: { legacyUi: true } },
-  { path: 'inventario/:categoryId', component: InventoryCategoryItemsPage, title: 'Itens do inventário', data: { legacyUi: true } },
-  { path: 'sobre', component: About, title: 'Sobre', data: { legacyUi: true } },
+  { path: 'adicionar-gastos', component: AdicionarGastosComponent, title: 'Adicionar gastos' },
+  { path: 'inventario', component: InventoryPage, title: 'Inventário' },
+  { path: 'inventario/:categoryId', component: InventoryCategoryItemsPage, title: 'Itens do inventário' },
+  { path: 'sobre', component: About, title: 'Sobre' },
   { path: '', redirectTo: '/home', pathMatch: 'full' }
 ];

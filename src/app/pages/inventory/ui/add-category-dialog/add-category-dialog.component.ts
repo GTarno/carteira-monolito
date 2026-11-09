@@ -1,101 +1,81 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DialogRef } from '@angular/cdk/dialog';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventoryCategoryCreate } from '../../models/inventory-category.model';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
+/** Tamanho máximo da imagem: ela é guardada como data URL na memória (sem backend ainda). */
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+type Field = 'name' | 'description';
+
+/** Diálogo para criar uma categoria do inventário, com imagem. */
 @Component({
   selector: 'app-add-category-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule
-  ],
+  imports: [ReactiveFormsModule, IconComponent],
   templateUrl: './add-category-dialog.component.html',
-  styleUrl: './add-category-dialog.component.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AddCategoryDialogComponent {
-  private fb = inject(FormBuilder);
-  private dialogRef = inject(MatDialogRef<AddCategoryDialogComponent>);
-  private dialogData = inject(MAT_DIALOG_DATA, { optional: true });
+  private readonly dialogRef = inject<DialogRef<InventoryCategoryCreate>>(DialogRef);
 
-  categoryForm: FormGroup;
-  previewUrl: string | null = null;
-  selectedFile: File | null = null;
+  protected readonly submitted = signal(false);
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly imageError = signal<string | null>(null);
 
-  constructor() {
-    this.categoryForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      description: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(120)]],
-      imageFile: ['', Validators.required]
-    });
+  protected readonly form = inject(FormBuilder).nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    description: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(120)]]
+  });
+
+  showError(field: Field): boolean {
+    const control = this.form.controls[field];
+    return control.invalid && (control.touched || this.submitted());
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) {
-      this.selectedFile = null;
-      this.previewUrl = null;
-      this.categoryForm.patchValue({ imageFile: '' });
-      return;
-    }
-
-    const file = input.files[0];
-    this.selectedFile = file;
-
-    // Gerar preview usando FileReader
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.previewUrl = e.target?.result as string;
-      this.categoryForm.patchValue({ imageFile: this.previewUrl });
-    };
-    reader.readAsDataURL(file);
-  }
-
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
-  onSave(): void {
-    if (this.categoryForm.valid && this.previewUrl) {
-      const formValue = this.categoryForm.value;
-      const result: InventoryCategoryCreate = {
-        name: formValue.name.trim(),
-        description: formValue.description.trim(),
-        imageUrl: this.previewUrl
-      };
-      
-      this.dialogRef.close(result);
-    } else {
-      // Marcar todos os campos como touched para mostrar erros
-      this.categoryForm.markAllAsTouched();
-    }
-  }
-
-  getErrorMessage(fieldName: string): string {
-    const field = this.categoryForm.get(fieldName);
-    if (!field?.errors || !field.touched) return '';
-
-    if (field.errors['required']) return `${this.getFieldLabel(fieldName)} é obrigatório`;
-    if (field.errors['minlength']) return `${this.getFieldLabel(fieldName)} deve ter pelo menos ${field.errors['minlength'].requiredLength} caracteres`;
-    if (field.errors['maxlength']) return `${this.getFieldLabel(fieldName)} deve ter no máximo ${field.errors['maxlength'].requiredLength} caracteres`;
-    
+  errorMessage(field: Field): string {
+    const errors = this.form.controls[field].errors;
+    const label = field === 'name' ? 'O nome' : 'A descrição';
+    if (errors?.['required']) return `${label} é obrigatório${field === 'name' ? '' : 'a'}.`;
+    if (errors?.['minlength']) return `Use pelo menos ${errors['minlength'].requiredLength} caracteres.`;
+    if (errors?.['maxlength']) return `Use no máximo ${errors['maxlength'].requiredLength} caracteres.`;
     return '';
   }
 
-  private getFieldLabel(fieldName: string): string {
-    const labels: { [key: string]: string } = {
-      'name': 'Nome',
-      'description': 'Descrição',
-      'imageFile': 'Imagem'
-    };
-    return labels[fieldName] || fieldName;
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    this.imageError.set(null);
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.imageError.set('Escolha um arquivo de imagem (PNG, JPG, WebP...).');
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      this.imageError.set('A imagem deve ter no máximo 2 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  cancel(): void {
+    this.dialogRef.close();
+  }
+
+  save(): void {
+    this.submitted.set(true);
+    const imageUrl = this.previewUrl();
+    if (!imageUrl && !this.imageError()) {
+      this.imageError.set('Escolha uma imagem para a categoria.');
+    }
+    if (this.form.invalid || !imageUrl) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const { name, description } = this.form.getRawValue();
+    this.dialogRef.close({ name: name.trim(), description: description.trim(), imageUrl });
   }
 }

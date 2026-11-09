@@ -1,77 +1,59 @@
-<div class="about-container">
-  <!-- Header Section -->
-  <div class="about-header">
-    <div class="hero-content">
-      <i class="far fa-credit-card hero-icon"></i>
-      <h1 class="hero-title">{{ appName }}</h1>
-      <p class="hero-subtitle">{{ description }}</p>
-      <div class="version-badge">Versão {{ version }}</div>
+<div class="app-ui flex min-w-0 flex-col gap-8">
+  <section class="card bg-primary text-primary-content shadow-sm">
+    <div class="card-body items-center gap-3 py-12 text-center">
+      <span class="rounded-box bg-primary-content/15 p-3"><app-icon name="wallet" [size]="36" /></span>
+      <h2 class="text-3xl font-bold">{{ appName }}</h2>
+      <p class="max-w-xl opacity-90">{{ description }}</p>
+      <span class="badge border-primary-content/30 bg-primary-content/15 text-primary-content">Versão {{ version }}</span>
     </div>
-  </div>
+  </section>
 
-  <!-- Features Section -->
-  <div class="about-section">
-    <h2 class="section-title">Funcionalidades</h2>
-    <div class="features-grid">
-      <mat-card *ngFor="let feature of features" class="feature-card">
-        <div class="feature-header">
-          <i class="{{ feature.icon }} feature-icon"></i>
-          <h3 class="feature-title">{{ feature.title }}</h3>
-        </div>
-        <p class="feature-description">{{ feature.description }}</p>
-      </mat-card>
-    </div>
-  </div>
-
-  <!-- Technology Stack Section -->
-  <div class="about-section">
-    <h2 class="section-title">Tecnologias Utilizadas</h2>
-    <div class="tech-grid">
-      <mat-card *ngFor="let tech of techStack" class="tech-card">
-        <div class="tech-header">
-          <h4 class="tech-name">{{ tech.name }}</h4>
-          <span *ngIf="tech.version" class="tech-version">v{{ tech.version }}</span>
-        </div>
-        <p class="tech-description">{{ tech.description }}</p>
-      </mat-card>
-    </div>
-  </div>
-
-  <!-- Project Information Section -->
-  <div class="about-section">
-    <mat-card class="project-card">
-      <div class="project-content">
-        <i class="fas fa-graduation-cap project-icon"></i>
-        <div class="project-info">
-          <h3 class="project-title">Sobre o Projeto</h3>
-          <p class="project-description">
-            {{ contact.project }} desenvolvido como uma solução completa 
-            para gestão financeira pessoal. O sistema oferece uma interface 
-            moderna e intuitiva para controle de gastos, planejamentos e 
-            organização financeira.
-          </p>
-          <div class="project-meta">
-            <div class="project-year">
-              <i class="far fa-calendar"></i>
-              <span>{{ contact.year }}</span>
-            </div>
+  <section class="flex flex-col gap-4" aria-labelledby="features-title">
+    <h2 id="features-title" class="text-lg font-semibold">Funcionalidades</h2>
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      @for (feature of features; track feature.title) {
+        <div class="card bg-base-100 shadow-sm">
+          <div class="card-body gap-3">
+            <span class="w-fit rounded-box bg-primary/15 p-2.5 text-primary"><app-icon [name]="feature.icon" [size]="22" /></span>
+            <h3 class="font-semibold">{{ feature.title }}</h3>
+            <p class="text-sm text-base-content/70">{{ feature.description }}</p>
           </div>
         </div>
-      </div>
-    </mat-card>
-  </div>
-
-  <!-- Call to Action -->
-  <div class="about-section">
-    <div class="cta-container">
-      <h3 class="cta-title">Comece a usar agora!</h3>
-      <p class="cta-description">
-        Organize suas finanças de forma inteligente e alcance seus objetivos financeiros.
-      </p>
-      <button mat-raised-button color="primary" class="cta-button" routerLink="/home">
-        <i class="far fa-building"></i>
-        Ir para o Dashboard
-      </button>
+      }
     </div>
-  </div>
+  </section>
+
+  <section class="flex flex-col gap-4" aria-labelledby="tech-title">
+    <h2 id="tech-title" class="text-lg font-semibold">Tecnologias</h2>
+    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      @for (tech of techStack; track tech.name) {
+        <div class="flex items-center gap-3 rounded-box bg-base-100 px-4 py-3 shadow-sm">
+          <app-icon name="code" class="text-base-content/60" />
+          <div class="flex-1">
+            <div class="font-medium">{{ tech.name }}</div>
+            <div class="text-sm text-base-content/70">{{ tech.description }}</div>
+          </div>
+          @if (tech.version) {
+            <span class="badge badge-ghost badge-sm">v{{ tech.version }}</span>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="card bg-base-100 shadow-sm" aria-labelledby="project-title">
+    <div class="card-body flex-col gap-4 sm:flex-row sm:items-center">
+      <span class="w-fit rounded-box bg-primary/15 p-3 text-primary"><app-icon name="education" [size]="28" /></span>
+      <div class="flex-1">
+        <h2 id="project-title" class="card-title">Sobre o projeto</h2>
+        <p class="text-sm text-base-content/70">
+          Trabalho de Conclusão de Curso desenvolvido por <strong class="text-base-content">{{ project.author }}</strong>
+          na <strong class="text-base-content">{{ project.institution }}</strong> · {{ project.period }}.
+        </p>
+      </div>
+      <a routerLink="/home" class="btn btn-primary">
+        <app-icon name="dashboard" [size]="18" /> Ir para o início
+      </a>
+    </div>
+  </section>
 </div>

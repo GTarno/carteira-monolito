@@ -1,137 +1,67 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InventoryItemCreate } from '../../models/inventory-item.model';
+import { inventoryLabelsFor } from '../../models/inventory-labels';
+import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 
-interface DialogData {
+export interface AddItemDialogData {
   categoryId: string;
   categoryName?: string;
 }
 
+type Field = 'title' | 'author' | 'notes';
+
+/** Diálogo para adicionar um item a uma categoria do inventário. */
 @Component({
   selector: 'app-add-item-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule
-  ],
+  imports: [ReactiveFormsModule, IconComponent],
   templateUrl: './add-item-dialog.component.html',
-  styleUrl: './add-item-dialog.component.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AddItemDialogComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private dialogRef = inject(MatDialogRef<AddItemDialogComponent>);
-  private dialogData = inject<DialogData>(MAT_DIALOG_DATA);
+export class AddItemDialogComponent {
+  protected readonly data = inject<AddItemDialogData>(DIALOG_DATA);
+  private readonly dialogRef = inject<DialogRef<InventoryItemCreate>>(DialogRef);
 
-  itemForm!: FormGroup;
-  categoryName: string = '';
+  protected readonly categoryName = this.data.categoryName || 'Categoria';
+  protected readonly labels = inventoryLabelsFor(this.categoryName);
+  protected readonly submitted = signal(false);
 
-  ngOnInit(): void {
-    this.categoryName = this.dialogData.categoryName || 'Categoria';
-    
-    this.itemForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(2)]],
-      author: ['', [Validators.required, Validators.minLength(2)]],
-      notes: ['', [Validators.maxLength(200)]]
-    });
+  protected readonly form = inject(FormBuilder).nonNullable.group({
+    title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+    author: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(80)]],
+    notes: ['', [Validators.maxLength(200)]]
+  });
+
+  showError(field: Field): boolean {
+    const control = this.form.controls[field];
+    return control.invalid && (control.touched || this.submitted());
   }
 
-  onCancel(): void {
-    this.dialogRef.close();
-  }
-
-  onSave(): void {
-    if (this.itemForm.valid) {
-      const formValue = this.itemForm.value;
-      const result: InventoryItemCreate = {
-        categoryId: this.dialogData.categoryId,
-        title: formValue.title.trim(),
-        author: formValue.author.trim(),
-        notes: formValue.notes?.trim() || undefined
-      };
-      
-      this.dialogRef.close(result);
-    } else {
-      // Marcar todos os campos como touched para mostrar erros
-      this.itemForm.markAllAsTouched();
-    }
-  }
-
-  getErrorMessage(fieldName: string): string {
-    const field = this.itemForm.get(fieldName);
-    if (!field?.errors || !field.touched) return '';
-
-    if (field.errors['required']) return `${this.getFieldLabel(fieldName)} é obrigatório`;
-    if (field.errors['minlength']) return `${this.getFieldLabel(fieldName)} deve ter pelo menos ${field.errors['minlength'].requiredLength} caracteres`;
-    if (field.errors['maxlength']) return `${this.getFieldLabel(fieldName)} deve ter no máximo ${field.errors['maxlength'].requiredLength} caracteres`;
-    
+  errorMessage(field: Field): string {
+    const errors = this.form.controls[field].errors;
+    if (errors?.['required']) return 'Campo obrigatório.';
+    if (errors?.['minlength']) return `Use pelo menos ${errors['minlength'].requiredLength} caracteres.`;
+    if (errors?.['maxlength']) return `Use no máximo ${errors['maxlength'].requiredLength} caracteres.`;
     return '';
   }
 
-  private getFieldLabel(fieldName: string): string {
-    const labels: { [key: string]: string } = {
-      'title': 'Título',
-      'author': this.getAuthorLabel(),
-      'notes': 'Observações'
-    };
-    return labels[fieldName] || fieldName;
+  cancel(): void {
+    this.dialogRef.close();
   }
 
-  getAuthorLabel(): string {
-    const categoryName = this.categoryName.toLowerCase();
-    switch (categoryName) {
-      case 'livros':
-        return 'Autor';
-      case 'discos':
-        return 'Banda/Artista';
-      default:
-        return 'Autor';
+  save(): void {
+    this.submitted.set(true);
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
     }
-  }
-
-  getTitleLabel(): string {
-    const categoryName = this.categoryName.toLowerCase();
-    switch (categoryName) {
-      case 'livros':
-        return 'Título do livro';
-      case 'discos':
-        return 'Nome do álbum';
-      default:
-        return 'Título';
-    }
-  }
-
-  getTitlePlaceholder(): string {
-    const categoryName = this.categoryName.toLowerCase();
-    switch (categoryName) {
-      case 'livros':
-        return 'Ex: Dom Casmurro, 1984, O Senhor dos Anéis...';
-      case 'discos':
-        return 'Ex: Abbey Road, Dark Side of the Moon...';
-      default:
-        return 'Digite o título...';
-    }
-  }
-
-  getAuthorPlaceholder(): string {
-    const categoryName = this.categoryName.toLowerCase();
-    switch (categoryName) {
-      case 'livros':
-        return 'Ex: Machado de Assis, George Orwell...';
-      case 'discos':
-        return 'Ex: The Beatles, Pink Floyd...';
-      default:
-        return 'Digite o autor...';
-    }
+    const { title, author, notes } = this.form.getRawValue();
+    this.dialogRef.close({
+      categoryId: this.data.categoryId,
+      title: title.trim(),
+      author: author.trim(),
+      notes: notes.trim() || undefined
+    });
   }
 }

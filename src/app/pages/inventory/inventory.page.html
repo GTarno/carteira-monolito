@@ -1,41 +1,48 @@
-<div class="inventory-container">
-  <h1>Inventário</h1>
-  <h2>Categorias</h2>
-
-  <div class="categories-grid">
-    @for (category of categories$ | async; track category.id) {
-      <mat-card 
-        class="category-card" 
-        (click)="openCategory(category.id)"
-        [attr.aria-label]="'Acessar categoria ' + category.name"
-        tabindex="0"
-        (keydown.enter)="openCategory(category.id)"
-        (keydown.space)="openCategory(category.id)">
-        
-        <div class="card-image-container">
-          <img 
-            [src]="category.imageUrl" 
-            [alt]="category.name" 
-            class="category-image"
-            (error)="onImageError($event, category)" />
-        </div>
-        
-        <mat-card-content class="card-content">
-          <h3 class="category-name">{{ category.name }}</h3>
-          <p class="category-description">{{ category.description }}</p>
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
-
-  <div class="add-category-section">
-    <button 
-      mat-raised-button 
-      color="primary" 
-      (click)="openAddDialog()"
-      aria-label="Adicionar nova categoria">
-      <mat-icon>add</mat-icon>
-      Adicionar categoria
+<div class="app-ui flex min-w-0 flex-col gap-6">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold">Categorias</h2>
+      <p class="text-sm text-base-content/70">Organize suas coleções e bens pessoais.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="openAddDialog()">
+      <app-icon name="add" [size]="18" /> Adicionar categoria
     </button>
   </div>
+
+  @if (categories().length) {
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      @for (category of categories(); track category.id) {
+        <a
+          [routerLink]="['/inventario', category.id]"
+          class="card overflow-hidden bg-base-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+          <figure class="h-44 bg-base-200">
+            @if (brokenImages().has(category.id)) {
+              <app-icon name="image" [size]="48" class="text-base-content/40" />
+            } @else {
+              <img [src]="category.imageUrl" alt="" class="h-full w-full object-cover" loading="lazy" (error)="onImageError(category.id)" />
+            }
+          </figure>
+          <div class="card-body gap-2">
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="card-title">{{ category.name }}</h3>
+              <span class="badge badge-ghost badge-sm whitespace-nowrap">
+                {{ itemCount().get(category.id) ?? 0 }} {{ (itemCount().get(category.id) ?? 0) === 1 ? 'item' : 'itens' }}
+              </span>
+            </div>
+            <p class="text-sm text-base-content/70">{{ category.description }}</p>
+          </div>
+        </a>
+      }
+    </div>
+  } @else {
+    <div class="card bg-base-100 shadow-sm">
+      <div class="card-body items-center gap-3 py-12 text-center">
+        <app-icon name="package" [size]="40" class="text-base-content/50" />
+        <p class="font-medium">Nenhuma categoria ainda</p>
+        <button type="button" class="btn btn-primary btn-sm" (click)="openAddDialog()">
+          <app-icon name="add" [size]="16" /> Criar a primeira categoria
+        </button>
+      </div>
+    </div>
+  }
 </div>

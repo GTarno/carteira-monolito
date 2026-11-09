@@ -1,54 +1,29 @@
-<div class="adicionar-gastos-container">
-  <h1>Adicionar gastos</h1>
-  <p class="subtitle">Escolha o tipo de gasto que deseja registrar</p>
+<div class="app-ui flex min-w-0 flex-col gap-6">
+  <div>
+    <h2 class="text-2xl font-bold">Que tipo de gasto você quer registrar?</h2>
+    <p class="text-sm text-base-content/70">Escolha uma opção para continuar.</p>
+  </div>
 
-  <div class="cards-grid">
-    <div 
-      class="expense-card"
-      role="button"
-      tabindex="0"
-      (click)="onCardClick('gastos-mensais')"
-      (keydown.enter)="onCardClick('gastos-mensais')"
-      (keydown.space)="onCardClick('gastos-mensais', $event)"
-      aria-label="Adicionar gastos mensais">
-      
-      <div class="card-header">
-        <img src="assets/images/mensais.png" alt="Gastos mensais" class="card-image">
-      </div>
-      
-      <div class="card-content">
-        <div class="card-icon">
-          <i class="far fa-credit-card"></i>
+  <div class="grid gap-4 md:grid-cols-2">
+    @for (option of options; track option.type) {
+      <button
+        type="button"
+        class="card overflow-hidden bg-base-100 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        (click)="onSelect(option)">
+        <figure class="h-48 bg-base-200">
+          <img [src]="option.image" alt="" class="h-full w-full object-cover" loading="lazy" />
+        </figure>
+        <div class="card-body flex-row items-center gap-4">
+          <span class="rounded-box bg-primary/15 p-3 text-primary">
+            <app-icon [name]="option.icon" [size]="24" />
+          </span>
+          <div class="flex-1">
+            <h3 class="card-title">{{ option.title }}</h3>
+            <p class="text-sm text-base-content/70">{{ option.description }}</p>
+          </div>
+          <app-icon name="forward" class="text-base-content/50" />
         </div>
-        <div class="card-text">
-          <h3>Gastos mensais</h3>
-          <p>Adiciona um gasto comum a ser pago todos os meses.</p>
-        </div>
-      </div>
-    </div>
-
-    <div 
-      class="expense-card"
-      role="button"
-      tabindex="0"
-      (click)="onCardClick('grandes-compras')"
-      (keydown.enter)="onCardClick('grandes-compras')"
-      (keydown.space)="onCardClick('grandes-compras', $event)"
-      aria-label="Adicionar grandes compras">
-      
-      <div class="card-header">
-        <img src="assets/images/parcelamentos.png" alt="Grandes compras" class="card-image">
-      </div>
-      
-      <div class="card-content">
-        <div class="card-icon">
-          <i class="fas fa-shopping-cart"></i>
-        </div>
-        <div class="card-text">
-          <h3>Grandes compras</h3>
-          <p>Adiciona um novo item de parcelamento para ser acompanhado.</p>
-        </div>
-      </div>
-    </div>
+      </button>
+    }
   </div>
 </div>

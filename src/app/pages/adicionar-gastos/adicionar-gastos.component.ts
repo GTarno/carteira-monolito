@@ -1,30 +1,47 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ToastService } from '../../shared/ui/toast/toast.service';
+import { IconComponent } from '../../shared/ui/icon/icon.component';
+import { AppIconName } from '../../shared/ui/icon/app-icons';
 
 type ExpenseType = 'gastos-mensais' | 'grandes-compras';
 
-const EXPENSE_TYPE_LABELS: Record<ExpenseType, string> = {
-  'gastos-mensais': 'Gastos mensais',
-  'grandes-compras': 'Grandes compras'
-};
+interface ExpenseOption {
+  type: ExpenseType;
+  title: string;
+  description: string;
+  image: string;
+  icon: AppIconName;
+}
 
+/** Escolha do tipo de gasto a registrar (os formulários chegam com a API de lançamentos). */
 @Component({
   selector: 'app-adicionar-gastos',
-  imports: [CommonModule, MatCardModule, MatButtonModule],
+  imports: [IconComponent],
   templateUrl: './adicionar-gastos.component.html',
-  styleUrl: './adicionar-gastos.component.scss'
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdicionarGastosComponent {
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly toast = inject(ToastService);
 
-  onCardClick(type: ExpenseType, event?: Event): void {
-    // Evita rolar a página quando ativado pela barra de espaço
-    event?.preventDefault();
+  protected readonly options: ExpenseOption[] = [
+    {
+      type: 'gastos-mensais',
+      title: 'Gastos mensais',
+      description: 'Uma conta comum, paga todos os meses.',
+      image: 'assets/images/mensais.png',
+      icon: 'receipt'
+    },
+    {
+      type: 'grandes-compras',
+      title: 'Grandes compras',
+      description: 'Uma compra parcelada, para acompanhar as parcelas.',
+      image: 'assets/images/parcelamentos.png',
+      icon: 'credit-card'
+    }
+  ];
 
-    // TODO: navegar para os formulários quando existirem (ver issue de Lançamentos no backend)
-    this.snackBar.open(`${EXPENSE_TYPE_LABELS[type]}: em breve!`, 'Fechar', { duration: 3000 });
+  onSelect(option: ExpenseOption): void {
+    // TODO: abrir os formulários quando existir a API de lançamentos (ver docs/BACKEND_SPRING_BOOT.md)
+    this.toast.info(`${option.title}: em breve!`);
   }
 }

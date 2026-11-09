@@ -1,89 +1,51 @@
-<h2 mat-dialog-title>Adicionar categoria</h2>
+<form class="app-ui flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <div class="flex items-center gap-3">
+    <span class="rounded-box bg-primary/15 p-2 text-primary"><app-icon name="inventory" /></span>
+    <h2 class="text-lg font-semibold">Adicionar categoria</h2>
+  </div>
 
-<mat-dialog-content class="dialog-content">
-  <form [formGroup]="categoryForm" class="category-form">
-    
-    <!-- Nome da categoria -->
-    <mat-form-field class="full-width">
-      <mat-label>Nome da categoria</mat-label>
-      <input 
-        matInput 
-        formControlName="name" 
-        placeholder="Ex: Livros, Discos, Jogos..."
-        maxlength="50">
-      <mat-error *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.errors">
-        {{ getErrorMessage('name') }}
-      </mat-error>
-    </mat-form-field>
+  <div class="flex flex-col gap-1">
+    <label for="category-name" class="text-sm font-medium">Nome</label>
+    <input id="category-name" class="input w-full" [class.input-error]="showError('name')" formControlName="name"
+      placeholder="Ex.: Livros, Discos, Jogos..." maxlength="50" autocomplete="off" />
+    @if (showError('name')) {
+      <p class="text-sm text-error">{{ errorMessage('name') }}</p>
+    }
+  </div>
 
-    <!-- Descrição -->
-    <mat-form-field class="full-width">
-      <mat-label>Descrição</mat-label>
-      <textarea 
-        matInput 
-        formControlName="description" 
-        placeholder="Breve descrição da categoria..."
-        rows="3"
-        maxlength="120">
-      </textarea>
-      <mat-hint align="end">
-        {{ categoryForm.get('description')?.value?.length || 0 }}/120
-      </mat-hint>
-      <mat-error *ngIf="categoryForm.get('description')?.touched && categoryForm.get('description')?.errors">
-        {{ getErrorMessage('description') }}
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Upload de imagem -->
-    <div class="image-upload-section">
-      <label for="image-upload" class="upload-label">
-        <i class="far fa-image"></i>
-        <span>Selecionar imagem</span>
-      </label>
-      <input 
-        type="file" 
-        id="image-upload" 
-        accept="image/*" 
-        (change)="onFileSelected($event)"
-        class="file-input">
-      
-      <!-- Preview da imagem -->
-      <div class="image-preview" *ngIf="previewUrl; else placeholder">
-        <img [src]="previewUrl" alt="Preview da categoria" class="preview-image">
-        <div class="preview-overlay">
-          <i class="fas fa-pen"></i>
-          <span>Alterar imagem</span>
-        </div>
-      </div>
-      
-      <!-- Placeholder quando não há imagem -->
-      <ng-template #placeholder>
-        <div class="image-placeholder">
-          <i class="far fa-image placeholder-icon"></i>
-          <p class="placeholder-text">Clique para selecionar uma imagem</p>
-        </div>
-      </ng-template>
-      
-      <!-- Erro de imagem -->
-      <div class="image-error" *ngIf="categoryForm.get('imageFile')?.touched && categoryForm.get('imageFile')?.errors">
-        {{ getErrorMessage('imageFile') }}
-      </div>
+  <div class="flex flex-col gap-1">
+    <label for="category-description" class="text-sm font-medium">Descrição</label>
+    <textarea id="category-description" class="textarea w-full" [class.textarea-error]="showError('description')"
+      formControlName="description" placeholder="Breve descrição da categoria..." rows="3" maxlength="120"></textarea>
+    <div class="flex justify-between gap-2 text-sm">
+      <span class="text-error">{{ showError('description') ? errorMessage('description') : '' }}</span>
+      <span class="tabular-nums text-base-content/60">{{ form.controls.description.value.length }}/120</span>
     </div>
+  </div>
 
-  </form>
-</mat-dialog-content>
+  <div class="flex flex-col gap-2">
+    <span class="text-sm font-medium" id="category-image-label">Imagem</span>
+    <label
+      for="category-image"
+      class="flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-box border-2 border-dashed border-base-300 bg-base-200 transition hover:border-primary"
+      [class.border-error]="imageError()">
+      @if (previewUrl(); as preview) {
+        <img [src]="preview" alt="Prévia da imagem da categoria" class="h-full w-full object-cover" />
+      } @else {
+        <span class="flex flex-col items-center gap-2 text-sm text-base-content/70">
+          <app-icon name="image" [size]="32" />
+          Clique para escolher uma imagem (até 2 MB)
+        </span>
+      }
+    </label>
+    <input id="category-image" type="file" accept="image/*" class="sr-only" aria-labelledby="category-image-label" (change)="onFileSelected($event)" />
+    @if (imageError(); as message) {
+      <p class="text-sm text-error">{{ message }}</p>
+    }
+  </div>
 
-<mat-dialog-actions align="end" class="dialog-actions">
-  <button mat-button (click)="onCancel()" type="button">
-    Cancelar
-  </button>
-  <button 
-    mat-raised-button 
-    color="primary" 
-    (click)="onSave()" 
-    type="button"
-    [disabled]="!categoryForm.valid || !previewUrl">
-    <i class="far fa-save"></i>
-    Salvar
-  </button>
-</mat-dialog-actions>
+  <div class="flex justify-end gap-2">
+    <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary"><app-icon name="check" [size]="18" /> Salvar</button>
+  </div>
+</form>

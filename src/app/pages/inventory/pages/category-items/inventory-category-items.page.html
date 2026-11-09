@@ -1,110 +1,68 @@
-<div class="category-items-container">
-  <mat-card class="category-items-card">
-    
-    <!-- Header da página -->
-    <mat-card-header class="category-header">
-      <div class="header-content">
-        <div class="title-section">
-          <h1>
-            {{ (category$ | async)?.name || 'Categoria' }}
-          </h1>
-          <h2>Itens</h2>
-        </div>
-        <button 
-          mat-icon-button 
-          (click)="onBackToCategories()"
-          aria-label="Voltar para categorias"
-          class="back-button">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-      </div>
-    </mat-card-header>
+<div class="app-ui flex min-w-0 flex-col gap-6">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <a routerLink="/inventario" class="btn btn-ghost btn-sm gap-1 px-2">
+      <app-icon name="back" [size]="18" /> Categorias
+    </a>
+    <button type="button" class="btn btn-primary" (click)="openAddItemDialog()">
+      <app-icon name="add" [size]="18" /> Adicionar item
+    </button>
+  </div>
 
-    <!-- Conteúdo da tabela -->
-    <mat-card-content class="table-content">
-      
-      <!-- Tabela de itens -->
-      <div class="table-container" *ngIf="items$ | async as items; else noItems">
-        <table mat-table [dataSource]="items" class="items-table">
-          
-          <!-- Coluna Título -->
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef class="title-header">Título</th>
-            <td mat-cell *matCellDef="let item" class="title-cell">
-              <span class="item-title">{{ item.title }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Coluna Autor -->
-          <ng-container matColumnDef="author">
-            <th mat-header-cell *matHeaderCellDef class="author-header">
-              {{ getAuthorLabel(category$ | async) }}
-            </th>
-            <td mat-cell *matCellDef="let item" class="author-cell">
-              <span class="item-author">{{ item.author }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Coluna Observações -->
-          <ng-container matColumnDef="notes">
-            <th mat-header-cell *matHeaderCellDef class="notes-header">Observações</th>
-            <td mat-cell *matCellDef="let item" class="notes-cell">
-              <span class="item-notes">{{ item.notes || '-' }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Coluna Data de inclusão -->
-          <ng-container matColumnDef="createdAt">
-            <th mat-header-cell *matHeaderCellDef class="date-header">Data de inclusão</th>
-            <td mat-cell *matCellDef="let item" class="date-cell">
-              <span class="item-date">{{ formatDate(item.createdAt) }}</span>
-            </td>
-          </ng-container>
-
-          <!-- Coluna Ações -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef class="actions-header">Ações</th>
-            <td mat-cell *matCellDef="let item" class="actions-cell">
-              <button 
-                mat-icon-button 
-                color="warn"
-                (click)="onDeleteItem(item.id)"
-                [attr.aria-label]="'Excluir ' + item.title"
-                class="delete-button">
-                <i class="far fa-trash-alt"></i>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      </div>
-
-      <!-- Estado vazio -->
-      <ng-template #noItems>
-        <div class="no-items-state">
-          <i class="fas fa-boxes no-items-icon"></i>
-          <h3 class="no-items-title">Nenhum item encontrado</h3>
-          <p class="no-items-message">
-            Adicione seu primeiro item para começar a organizar sua coleção.
+  <section class="card bg-base-100 shadow-sm" aria-labelledby="inventory-category-title">
+    <div class="card-body gap-5">
+      <div class="flex items-center gap-4">
+        @if (category()?.imageUrl) {
+          <img [src]="category()!.imageUrl" alt="" class="size-14 rounded-box object-cover" />
+        }
+        <div>
+          <h2 id="inventory-category-title" class="card-title">{{ category()?.name ?? 'Categoria' }}</h2>
+          <p class="text-sm text-base-content/70">
+            {{ items().length }} {{ items().length === 1 ? 'item' : 'itens' }}
+            @if (category()?.description) { · {{ category()!.description }} }
           </p>
         </div>
-      </ng-template>
+      </div>
 
-    </mat-card-content>
-
-    <!-- Ações -->
-    <mat-card-actions class="card-actions">
-      <button 
-        mat-raised-button 
-        color="primary" 
-        (click)="openAddItemDialog()"
-        class="add-item-button">
-        <i class="fas fa-plus"></i>
-        Adicionar novo item
-      </button>
-    </mat-card-actions>
-
-  </mat-card>
+      @if (items().length) {
+        <div class="overflow-x-auto rounded-box border border-base-200">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{{ labels().title }}</th>
+                <th>{{ labels().author }}</th>
+                <th class="hidden md:table-cell">Observações</th>
+                <th class="whitespace-nowrap">Incluído em</th>
+                <th class="w-12"><span class="sr-only">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of items(); track item.id) {
+                <tr class="hover:bg-base-200/60">
+                  <td class="font-medium">{{ item.title }}</td>
+                  <td>{{ item.author }}</td>
+                  <td class="hidden text-base-content/70 md:table-cell">{{ item.notes || '—' }}</td>
+                  <td class="whitespace-nowrap tabular-nums text-base-content/70">{{ item.createdAt | date: 'dd/MM/yyyy' }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-ghost btn-sm btn-square text-error"
+                      [attr.aria-label]="'Excluir ' + item.title"
+                      (click)="onDeleteItem(item)">
+                      <app-icon name="delete" [size]="18" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="flex flex-col items-center gap-3 py-10 text-center">
+          <app-icon name="package" [size]="40" class="text-base-content/50" />
+          <p class="font-medium">Nenhum item nesta categoria</p>
+          <p class="text-sm text-base-content/70">Adicione o primeiro item para começar a organizar sua coleção.</p>
+        </div>
+      }
+    </div>
+  </section>
 </div>

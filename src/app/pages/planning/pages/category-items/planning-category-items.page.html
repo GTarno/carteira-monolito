@@ -1,4 +1,4 @@
-<div class="app-ui flex min-w-0 flex-col gap-6">
+<div class="flex min-w-0 flex-col gap-6">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <a routerLink="/planejamentos" [queryParams]="{ month: monthKey }" class="btn btn-ghost btn-sm gap-1 px-2">
       <app-icon name="back" [size]="18" /> Planejamento
@@ -16,7 +16,7 @@
   }
 
   @if (loading() && !items()) {
-    <div class="flex items-center justify-center gap-3 py-16 text-base-content/70">
+    <div class="flex items-center justify-center gap-3 py-16 text-base-content/80">
       <span class="loading loading-spinner loading-md"></span> Carregando itens...
     </div>
   }

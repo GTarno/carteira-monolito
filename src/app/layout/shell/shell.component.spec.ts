@@ -9,17 +9,13 @@ import { provideAppLocale } from '../../core/i18n/locale';
 @Component({ template: '<p class="page">nova</p>' })
 class NewPage {}
 
-@Component({ template: '<p class="page">antiga</p>' })
-class LegacyPage {}
-
 describe('ShellComponent', () => {
   async function setup() {
     TestBed.configureTestingModule({
       providers: [
         provideAppLocale(),
         provideRouter([
-          { path: 'nova', component: NewPage, title: 'Nova' },
-          { path: 'antiga', component: LegacyPage, title: 'Antiga', data: { legacyUi: true } }
+          { path: 'nova', component: NewPage, title: 'Nova' }
         ]),
         { provide: TitleStrategy, useClass: PageTitleStrategy }
       ]
@@ -35,6 +31,12 @@ describe('ShellComponent', () => {
     return { fixture, go, el: fixture.nativeElement as HTMLElement };
   }
 
+  it('renders the routed page inside the main area', async () => {
+    const { el, go } = await setup();
+    await go('/nova');
+    expect(el.querySelector('main .page')?.textContent).toBe('nova');
+  });
+
   it('renders every menu item as a link', async () => {
     const { el, go } = await setup();
     await go('/nova');
@@ -49,18 +51,6 @@ describe('ShellComponent', () => {
     expect(TestBed.inject(Title).getTitle()).toBe('Nova · Minhas Finanças');
   });
 
-  it('wraps legacy pages in a light panel and new pages without it', async () => {
-    const { el, go } = await setup();
-
-    await go('/antiga');
-    const panel = el.querySelector('.legacy-surface');
-    expect(panel?.getAttribute('data-theme')).toBe('emerald');
-    expect(panel?.querySelector('.page')?.textContent).toBe('antiga');
-
-    await go('/nova');
-    expect(el.querySelector('.legacy-surface')).toBeNull();
-    expect(el.querySelector('main .page')?.textContent).toBe('nova');
-  });
 
   it('closes the mobile drawer after navigating', async () => {
     const { el, go, fixture } = await setup();

@@ -8,10 +8,6 @@ import { InventoryPage } from './pages/inventory/inventory.page';
 import { InventoryCategoryItemsPage } from './pages/inventory/pages/category-items/inventory-category-items.page';
 import { About } from './pages/about/about';
 
-/**
- * `data.legacyUi`: página ainda em Angular Material. O layout a exibe num painel claro
- * até ela ser migrada para Tailwind/DaisyUI (épico #27); ao migrar, remova a flag.
- */
 export const routes: Routes = [
   { path: 'home', component: HomeComponent, title: 'Início' },
   { path: 'planejamentos', component: PlanningPage, title: 'Planejamentos' },

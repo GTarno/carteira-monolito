@@ -1,4 +1,4 @@
-<section class="app-ui card bg-base-100 shadow-sm" aria-labelledby="quick-access-title">
+<section class="card bg-base-100 shadow-sm" aria-labelledby="quick-access-title">
   <div class="card-body gap-4 md:flex-row md:items-center">
     <div class="flex-1">
       <h2 id="quick-access-title" class="card-title mb-4">Acessos rápidos</h2>
@@ -6,8 +6,8 @@
         @for (item of visibleItems(); track item.id) {
           <a
             [routerLink]="item.route"
-            class="btn btn-soft btn-primary h-auto justify-start gap-3 py-4 text-base">
-            <app-icon [name]="item.icon" [size]="22" />
+            class="btn h-auto justify-start gap-3 border-base-300 bg-base-200 py-4 text-base hover:bg-base-300">
+            <app-icon [name]="item.icon" [size]="22" class="text-primary" />
             {{ item.label }}
           </a>
         }

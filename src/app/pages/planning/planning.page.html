@@ -1,8 +1,8 @@
-<div class="app-ui flex min-w-0 flex-col gap-6">
+<div class="flex min-w-0 flex-col gap-6">
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <h2 class="text-2xl font-bold">Planejamento do mês</h2>
-      <p class="text-sm text-base-content/70">Acompanhe quanto já gastou de cada categoria.</p>
+      <p class="text-sm text-base-content/80">Acompanhe quanto já gastou de cada categoria.</p>
     </div>
     <label class="select w-full sm:w-64">
       <span class="label"><app-icon name="calendar" [size]="18" /></span>
@@ -25,7 +25,7 @@
   }
 
   @if (loading() && !plan()) {
-    <div class="flex items-center justify-center gap-3 py-16 text-base-content/70">
+    <div class="flex items-center justify-center gap-3 py-16 text-base-content/80">
       <span class="loading loading-spinner loading-md"></span> Carregando planejamento...
     </div>
   }
@@ -53,7 +53,7 @@
               <ul class="flex flex-col gap-1 border-t border-base-200 pt-3 text-sm">
                 @for (item of card.items; track item.name) {
                   <li class="flex justify-between gap-2">
-                    <span class="truncate text-base-content/70">{{ item.name }}</span>
+                    <span class="truncate text-base-content/80">{{ item.name }}</span>
                     <span class="tabular-nums">{{ item.value | currency }}</span>
                   </li>
                 }

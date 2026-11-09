@@ -9,7 +9,7 @@
 
   <!-- Conteúdo -->
   <div class="drawer-content flex min-w-0 flex-col">
-    <header class="app-ui navbar sticky top-0 z-30 gap-2 border-b border-base-300 bg-base-100/90 px-3 backdrop-blur lg:px-6">
+    <header class="navbar sticky top-0 z-30 gap-2 border-b border-base-300 bg-base-100/90 px-3 backdrop-blur lg:px-6">
       <label for="app-drawer" class="btn btn-ghost btn-square lg:hidden" aria-label="Abrir menu">
         <app-icon name="menu" />
       </label>
@@ -18,14 +18,7 @@
     </header>
 
     <main class="flex-1 p-3 md:p-6">
-      @if (legacyUi()) {
-        <!-- Telas ainda em Angular Material: painel claro até serem migradas (épico #27) -->
-        <div data-theme="emerald" class="legacy-surface rounded-box bg-[#fafafa] p-4 text-[#212121] shadow-sm md:p-6">
-          <router-outlet />
-        </div>
-      } @else {
-        <router-outlet />
-      }
+      <router-outlet />
     </main>
 
     <app-footer />
@@ -34,7 +27,7 @@
   <!-- Menu lateral -->
   <div class="drawer-side z-40">
     <label for="app-drawer" class="drawer-overlay" aria-label="Fechar menu"></label>
-    <aside class="app-ui flex min-h-full w-72 flex-col border-r border-base-300 bg-base-100">
+    <aside class="flex min-h-full w-72 flex-col border-r border-base-300 bg-base-100">
       <a routerLink="/home" class="flex items-center gap-3 px-6 py-5 text-xl font-bold">
         <span class="rounded-box bg-primary p-2 text-primary-content">
           <app-icon name="wallet" [size]="22" />
@@ -56,7 +49,7 @@
                 <span class="flex flex-col">
                   <span>{{ item.label }}</span>
                   @if (item.description) {
-                    <span class="text-xs opacity-60">{{ item.description }}</span>
+                    <span class="text-xs opacity-80">{{ item.description }}</span>
                   }
                 </span>
               </a>

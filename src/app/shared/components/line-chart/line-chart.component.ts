@@ -20,7 +20,7 @@ interface SeriesMetric {
   selector: 'app-line-chart',
   imports: [BaseChartDirective, CurrencyPipe],
   template: `
-    <div class="app-ui flex h-full flex-col gap-4">
+    <div class="flex h-full flex-col gap-4">
       @if (title()) {
         <h3 class="font-semibold">{{ title() }}</h3>
       }
@@ -30,7 +30,7 @@ interface SeriesMetric {
           @for (metric of metrics(); track metric.label) {
             <div class="flex items-center gap-2">
               <span class="size-2.5 rounded-full" [style.background-color]="metric.color" aria-hidden="true"></span>
-              <span class="text-base-content/70">{{ metric.label }} (média):</span>
+              <span class="text-base-content/80">{{ metric.label }} (média):</span>
               <span class="font-semibold tabular-nums">{{ metric.average | currency }}</span>
             </div>
           }

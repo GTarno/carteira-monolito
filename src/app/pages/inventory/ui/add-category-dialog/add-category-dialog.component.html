@@ -1,4 +1,4 @@
-<form class="app-ui flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
   <div class="flex items-center gap-3">
     <span class="rounded-box bg-primary/15 p-2 text-primary"><app-icon name="inventory" /></span>
     <h2 class="text-lg font-semibold">Adicionar categoria</h2>
@@ -19,7 +19,7 @@
       formControlName="description" placeholder="Breve descrição da categoria..." rows="3" maxlength="120"></textarea>
     <div class="flex justify-between gap-2 text-sm">
       <span class="text-error">{{ showError('description') ? errorMessage('description') : '' }}</span>
-      <span class="tabular-nums text-base-content/60">{{ form.controls.description.value.length }}/120</span>
+      <span class="tabular-nums text-base-content/80">{{ form.controls.description.value.length }}/120</span>
     </div>
   </div>
 
@@ -32,7 +32,7 @@
       @if (previewUrl(); as preview) {
         <img [src]="preview" alt="Prévia da imagem da categoria" class="h-full w-full object-cover" />
       } @else {
-        <span class="flex flex-col items-center gap-2 text-sm text-base-content/70">
+        <span class="flex flex-col items-center gap-2 text-sm text-base-content/80">
           <app-icon name="image" [size]="32" />
           Clique para escolher uma imagem (até 2 MB)
         </span>

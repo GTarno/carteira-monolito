@@ -1,0 +1,45 @@
+/*
+ * Estilos globais: Tailwind CSS v4 + DaisyUI v5.
+ * O visual dos componentes fica nas classes dos próprios templates; aqui só entram
+ * o tema, o que é global (fonte, overlays do CDK) e o painel dos diálogos.
+ * Guia de UI: docs/UI.md
+ */
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  /* forest (escuro) é o padrão; emerald (claro) pelo botão de tema. Ver ThemeService. */
+  themes: forest --default, emerald;
+}
+
+/*
+ * Ajustes de acessibilidade no emerald (claro): success e error originais ficam abaixo
+ * de 4,5:1 como texto sobre o branco/cinza do tema. Tons mais escuros, com texto branco.
+ */
+@plugin "daisyui/theme" {
+  name: "emerald";
+  --color-success: oklch(50% 0.12 160);
+  --color-success-content: oklch(100% 0 0);
+  --color-error: oklch(52% 0.2 25);
+  --color-error-content: oklch(100% 0 0);
+}
+
+@theme {
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Overlays do Angular CDK (diálogos) */
+@import "@angular/cdk/overlay-prebuilt.css";
+
+html,
+body {
+  min-height: 100%;
+}
+
+/* Diálogos abertos pelo AppDialog (Dialog do CDK) com o visual do tema */
+.app-dialog-panel {
+  @apply bg-base-100 text-base-content rounded-box shadow-2xl p-6 w-[min(32rem,92vw)] max-h-[90vh] overflow-y-auto;
+}
+
+.app-dialog-backdrop {
+  background-color: oklch(0% 0 0 / 0.45);
+}

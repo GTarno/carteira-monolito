@@ -1,4 +1,4 @@
-<div class="app-ui flex min-w-0 flex-col gap-8">
+<div class="flex min-w-0 flex-col gap-8">
   <section class="card bg-primary text-primary-content shadow-sm">
     <div class="card-body items-center gap-3 py-12 text-center">
       <span class="rounded-box bg-primary-content/15 p-3"><app-icon name="wallet" [size]="36" /></span>
@@ -16,7 +16,7 @@
           <div class="card-body gap-3">
             <span class="w-fit rounded-box bg-primary/15 p-2.5 text-primary"><app-icon [name]="feature.icon" [size]="22" /></span>
             <h3 class="font-semibold">{{ feature.title }}</h3>
-            <p class="text-sm text-base-content/70">{{ feature.description }}</p>
+            <p class="text-sm text-base-content/80">{{ feature.description }}</p>
           </div>
         </div>
       }
@@ -28,10 +28,10 @@
     <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       @for (tech of techStack; track tech.name) {
         <div class="flex items-center gap-3 rounded-box bg-base-100 px-4 py-3 shadow-sm">
-          <app-icon name="code" class="text-base-content/60" />
+          <app-icon name="code" class="text-base-content/80" />
           <div class="flex-1">
             <div class="font-medium">{{ tech.name }}</div>
-            <div class="text-sm text-base-content/70">{{ tech.description }}</div>
+            <div class="text-sm text-base-content/80">{{ tech.description }}</div>
           </div>
           @if (tech.version) {
             <span class="badge badge-ghost badge-sm">v{{ tech.version }}</span>
@@ -46,7 +46,7 @@
       <span class="w-fit rounded-box bg-primary/15 p-3 text-primary"><app-icon name="education" [size]="28" /></span>
       <div class="flex-1">
         <h2 id="project-title" class="card-title">Sobre o projeto</h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-base-content/80">
           Trabalho de Conclusão de Curso desenvolvido por <strong class="text-base-content">{{ project.author }}</strong>
           na <strong class="text-base-content">{{ project.institution }}</strong> · {{ project.period }}.
         </p>

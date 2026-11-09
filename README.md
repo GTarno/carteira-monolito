@@ -4,6 +4,14 @@ Angular 20 SPA — personal wallet tracker. Deployed to GitHub Pages via a GitHu
 
 ---
 
+## Documentation
+
+- [docs/UI.md](docs/UI.md) — UI guide (Tailwind + DaisyUI, themes, icons, dialogs, charts)
+- [docs/PLANO_DE_ACAO.md](docs/PLANO_DE_ACAO.md) — action plan
+- [docs/BACKEND_SPRING_BOOT.md](docs/BACKEND_SPRING_BOOT.md) — backend plan
+
+---
+
 ## Local development
 
 ```bash

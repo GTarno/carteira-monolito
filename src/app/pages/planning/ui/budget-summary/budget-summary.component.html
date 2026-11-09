@@ -1,4 +1,4 @@
-<section class="app-ui card bg-base-100 shadow-sm">
+<section class="card bg-base-100 shadow-sm">
   <div class="card-body gap-5">
     <div class="flex items-start gap-3">
       <span class="rounded-box p-2.5" [class]="status().tint">
@@ -7,7 +7,7 @@
       <div class="min-w-0 flex-1">
         <h2 class="card-title truncate">{{ title() }}</h2>
         @if (subtitle()) {
-          <p class="text-sm text-base-content/70">{{ subtitle() }}</p>
+          <p class="text-sm text-base-content/80">{{ subtitle() }}</p>
         }
       </div>
       <span class="badge gap-1" [class]="status().badge">
@@ -23,19 +23,19 @@
 
     <div class="grid gap-3 sm:grid-cols-3">
       <div class="rounded-box bg-base-200 px-4 py-3">
-        <div class="text-sm text-base-content/70">Planejado</div>
+        <div class="text-sm text-base-content/80">Planejado</div>
         <div class="text-xl font-semibold tabular-nums">{{ planned() | currency }}</div>
       </div>
       <div class="rounded-box bg-base-200 px-4 py-3">
-        <div class="text-sm text-base-content/70">Gasto</div>
+        <div class="text-sm text-base-content/80">Gasto</div>
         <div class="text-xl font-semibold tabular-nums">{{ spent() | currency }}</div>
       </div>
       <div class="rounded-box bg-base-200 px-4 py-3">
         @if (excess() > 0) {
-          <div class="text-sm text-base-content/70">Excedente</div>
+          <div class="text-sm text-base-content/80">Excedente</div>
           <div class="text-xl font-semibold tabular-nums text-error">{{ excess() | currency }}</div>
         } @else {
-          <div class="text-sm text-base-content/70">Restante</div>
+          <div class="text-sm text-base-content/80">Restante</div>
           <div class="text-xl font-semibold tabular-nums text-success">{{ remaining() | currency }}</div>
         }
       </div>
@@ -48,7 +48,7 @@
         [value]="usage() * 100 > 100 ? 100 : usage() * 100"
         max="100"
         [attr.aria-label]="'Uso do orçamento: ' + (usage() | percent: '1.0-0')"></progress>
-      <span class="w-28 text-right text-sm tabular-nums text-base-content/70">{{ usage() | percent: '1.0-0' }} utilizado</span>
+      <span class="w-28 text-right text-sm tabular-nums text-base-content/80">{{ usage() | percent: '1.0-0' }} utilizado</span>
     </div>
   </div>
 </section>

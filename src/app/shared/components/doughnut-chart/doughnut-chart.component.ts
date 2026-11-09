@@ -22,12 +22,12 @@ interface LegendRow {
   selector: 'app-doughnut-chart',
   imports: [BaseChartDirective, CurrencyPipe, PercentPipe],
   template: `
-    <div class="app-ui flex h-full flex-col gap-4">
+    <div class="flex h-full flex-col gap-4">
       @if (title()) {
         <div>
           <h3 class="font-semibold">{{ title() }}</h3>
           @if (showTotal()) {
-            <p class="text-sm text-base-content/70">
+            <p class="text-sm text-base-content/80">
               Total: <span class="font-semibold text-base-content">{{ total() | currency }}</span>
             </p>
           }
@@ -43,7 +43,7 @@ interface LegendRow {
           <li class="flex items-center gap-2">
             <span class="size-2.5 shrink-0 rounded-full" [style.background-color]="row.color" aria-hidden="true"></span>
             <span class="flex-1 truncate">{{ row.label }}</span>
-            <span class="tabular-nums text-base-content/70">{{ row.share | percent: '1.0-0' }}</span>
+            <span class="tabular-nums text-base-content/80">{{ row.share | percent: '1.0-0' }}</span>
             <span class="w-24 text-right font-medium tabular-nums">{{ row.amount | currency }}</span>
           </li>
         }

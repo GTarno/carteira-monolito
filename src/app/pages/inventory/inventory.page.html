@@ -1,8 +1,8 @@
-<div class="app-ui flex min-w-0 flex-col gap-6">
+<div class="flex min-w-0 flex-col gap-6">
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
       <h2 class="text-2xl font-bold">Categorias</h2>
-      <p class="text-sm text-base-content/70">Organize suas coleções e bens pessoais.</p>
+      <p class="text-sm text-base-content/80">Organize suas coleções e bens pessoais.</p>
     </div>
     <button type="button" class="btn btn-primary" (click)="openAddDialog()">
       <app-icon name="add" [size]="18" /> Adicionar categoria
@@ -29,7 +29,7 @@
                 {{ itemCount().get(category.id) ?? 0 }} {{ (itemCount().get(category.id) ?? 0) === 1 ? 'item' : 'itens' }}
               </span>
             </div>
-            <p class="text-sm text-base-content/70">{{ category.description }}</p>
+            <p class="text-sm text-base-content/80">{{ category.description }}</p>
           </div>
         </a>
       }

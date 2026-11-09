@@ -1,4 +1,4 @@
-<div class="app-ui flex min-w-0 flex-col gap-6">
+<div class="flex min-w-0 flex-col gap-6">
   <div>
     <a [routerLink]="['/planejamentos', categoryId]" [queryParams]="{ month: monthKey }" class="btn btn-ghost btn-sm gap-1 px-2">
       <app-icon name="back" [size]="18" /> {{ category()?.title ?? 'Categoria' }}
@@ -6,7 +6,7 @@
   </div>
 
   @if (loading() && !item()) {
-    <div class="flex items-center justify-center gap-3 py-16 text-base-content/70">
+    <div class="flex items-center justify-center gap-3 py-16 text-base-content/80">
       <span class="loading loading-spinner loading-md"></span> Carregando item...
     </div>
   } @else if (item(); as current) {
@@ -25,14 +25,14 @@
           <app-icon name="trend" class="text-primary" />
           <div>
             <h2 id="trend-title" class="card-title">Tendência de gastos</h2>
-            <p class="text-sm text-base-content/70">Últimos 12 meses até {{ monthLabel }}</p>
+            <p class="text-sm text-base-content/80">Últimos 12 meses até {{ monthLabel }}</p>
           </div>
         </div>
 
         @if (chartData().labels.length) {
           <app-line-chart [trendData]="chartData()" height="300px" [showMetrics]="false" />
         } @else {
-          <div class="flex items-center gap-2 py-8 text-base-content/70">
+          <div class="flex items-center gap-2 py-8 text-base-content/80">
             <app-icon name="info" /> Nenhum dado histórico disponível.
           </div>
         }

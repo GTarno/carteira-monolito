@@ -1,9 +1,9 @@
-<section class="app-ui card h-full bg-base-100 shadow-sm" aria-labelledby="installments-title">
+<section class="card h-full bg-base-100 shadow-sm" aria-labelledby="installments-title">
   <div class="card-body min-w-0 gap-5">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h2 id="installments-title" class="card-title">Meus parcelamentos</h2>
-        <p class="text-sm text-base-content/70">
+        <p class="text-sm text-base-content/80">
           Falta pagar <span class="font-semibold text-base-content tabular-nums">{{ totalRemaining() | currency }}</span>
         </p>
       </div>
@@ -27,7 +27,7 @@
             </figure>
             <div class="flex flex-col gap-2 p-4">
               <h3 class="truncate font-semibold">{{ plan.title }}</h3>
-              <p class="text-sm text-base-content/70">
+              <p class="text-sm text-base-content/80">
                 <span class="font-semibold text-base-content tabular-nums">{{ plan.amount | currency }}</span> por mês
               </p>
               <progress
@@ -35,7 +35,7 @@
                 [value]="plan.progress * 100"
                 max="100"
                 [attr.aria-label]="plan.title + ': ' + plan.paid + ' de ' + plan.total + ' parcelas pagas'"></progress>
-              <p class="text-xs text-base-content/70">{{ plan.paid }} de {{ plan.total }} parcelas pagas</p>
+              <p class="text-xs text-base-content/80">{{ plan.paid }} de {{ plan.total }} parcelas pagas</p>
             </div>
           </article>
         </li>

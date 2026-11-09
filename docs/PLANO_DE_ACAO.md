@@ -2,7 +2,7 @@
 
 ## Propósito do projeto
 
-App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, com deploy no GitHub Pages via GitHub Actions. Módulos atuais:
+App de **gestão financeira pessoal** (TCC) em Angular 20 + Tailwind CSS/DaisyUI (temas forest e emerald), com deploy no GitHub Pages via GitHub Actions. Módulos atuais:
 
 | Módulo | O que faz | Fonte de dados hoje |
 |---|---|---|
@@ -24,7 +24,7 @@ App de **gestão financeira pessoal** (TCC) em Angular 20 + Angular Material, co
 - Lógica duplicada: status do orçamento (3x), resize dos gráficos (3x), formatação de moeda (4 formas), nomes de meses.
 - CSS com cores fixas repetidas (`#1976d2` 35x), mais de 50 media queries sem padrão e `about.css` morto.
 - Três sistemas de ícones (FA Free via CDN, regras de FA Pro, `mat-icon`).
-- PrimeNG inteiro configurado para um único carrossel; nenhuma rota com lazy loading.
+- PrimeNG inteiro configurado para um único carrossel; nenhuma rota com lazy loading. *(PrimeNG removido na migração de UI.)*
 
 ## Backend
 
@@ -43,14 +43,17 @@ Neste repositório fica apenas a integração do front com a API ([#13](https://
 ### Fases 1 a 3 — Backend (repositório `carteira-api`)
 Seguir o roteiro da seção 11 de [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md). As issues [#8](https://github.com/GTarno/carteira-monolito/issues/8) a [#12](https://github.com/GTarno/carteira-monolito/issues/12) descrevem os mesmos módulos e podem ser recriadas no novo repositório. No front, a integração é a [#13](https://github.com/GTarno/carteira-monolito/issues/13), e a [#19](https://github.com/GTarno/carteira-monolito/issues/19) (regras de domínio centralizadas) facilita essa troca.
 
+### Migração de UI para Tailwind + DaisyUI ✅
+Épico [#27](https://github.com/GTarno/carteira-monolito/issues/27), etapas #28 a #33: Angular Material, PrimeNG e Font Awesome substituídos por Tailwind + DaisyUI (temas forest/emerald com alternância) e ícones Lucide. Contraste validado (axe, zero violações nos dois temas). Bundle inicial de 1,57 MB para ~840 KB. Guia: [`UI.md`](./UI.md).
+
 ### Fase 4 — Qualidade contínua do frontend (em paralelo, quando houver folga)
-- [#20](https://github.com/GTarno/carteira-monolito/issues/20) Componentes de gráfico e `ChartService`
-- [#21](https://github.com/GTarno/carteira-monolito/issues/21) Control flow, `inject()`, signals, `OnPush`
-- [#22](https://github.com/GTarno/carteira-monolito/issues/22) Design tokens, breakpoints e SCSS
-- [#23](https://github.com/GTarno/carteira-monolito/issues/23) Ícones
-- [#24](https://github.com/GTarno/carteira-monolito/issues/24) Lazy loading, rota 404, bundle
-- [#25](https://github.com/GTarno/carteira-monolito/issues/25) UX e acessibilidade
+- [x] [#20](https://github.com/GTarno/carteira-monolito/issues/20) Componentes de gráfico e `ChartService`
+- [x] [#21](https://github.com/GTarno/carteira-monolito/issues/21) Control flow, `inject()`, signals, `OnPush`
+- [x] [#22](https://github.com/GTarno/carteira-monolito/issues/22) Design tokens, breakpoints e SCSS
+- [x] [#23](https://github.com/GTarno/carteira-monolito/issues/23) Ícones
+- [ ] [#24](https://github.com/GTarno/carteira-monolito/issues/24) Lazy loading e rota 404 (bundle e títulos já resolvidos)
+- [ ] [#25](https://github.com/GTarno/carteira-monolito/issues/25) UX e acessibilidade (navegação, idioma, Sobre e contraste já resolvidos)
 
 ## Decisões em aberto
 
-Ver a seção 12 de [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md). No front: remover ou não o PrimeNG (recomendado remover, já que só o carrossel usa).
+Ver a seção 12 de [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BOOT.md).

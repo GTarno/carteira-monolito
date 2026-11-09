@@ -1,9 +1,9 @@
-<form class="app-ui flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+<form class="flex flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
   <div class="flex items-center gap-3">
     <span class="rounded-box bg-primary/15 p-2 text-primary"><app-icon name="edit" /></span>
     <div>
       <h2 class="text-lg font-semibold">Editar valores</h2>
-      <p class="text-sm text-base-content/70">{{ data.itemName }}</p>
+      <p class="text-sm text-base-content/80">{{ data.itemName }}</p>
     </div>
   </div>
 
@@ -11,7 +11,7 @@
     <div class="flex flex-col gap-1">
       <label [for]="'edit-' + field.key" class="text-sm font-medium">{{ field.label }}</label>
       <label class="input w-full" [class.input-error]="showError($any(field.key))">
-        <span class="text-base-content/60">R$</span>
+        <span class="text-base-content/80">R$</span>
         <input [id]="'edit-' + field.key" [formControlName]="field.key" inputmode="decimal" placeholder="0,00" autocomplete="off" />
       </label>
       @if (showError($any(field.key))) {

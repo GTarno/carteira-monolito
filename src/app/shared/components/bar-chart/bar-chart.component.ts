@@ -11,7 +11,7 @@ import { MonthlyBudget } from '../../types/chart.types';
   selector: 'app-bar-chart',
   imports: [BaseChartDirective, CurrencyPipe],
   template: `
-    <div class="app-ui flex h-full flex-col gap-4">
+    <div class="flex h-full flex-col gap-4">
       @if (title()) {
         <h3 class="font-semibold">{{ title() }}</h3>
       }
@@ -19,11 +19,11 @@ import { MonthlyBudget } from '../../types/chart.types';
       @if (showSummary()) {
         <div class="grid grid-cols-2 gap-3 text-sm">
           <div class="rounded-box bg-base-200 px-4 py-3">
-            <div class="text-base-content/70">Média de gastos</div>
+            <div class="text-base-content/80">Média de gastos</div>
             <div class="text-lg font-semibold tabular-nums">{{ averageActual() | currency }}</div>
           </div>
           <div class="rounded-box bg-base-200 px-4 py-3">
-            <div class="text-base-content/70">Orçamento médio</div>
+            <div class="text-base-content/80">Orçamento médio</div>
             <div class="text-lg font-semibold tabular-nums">{{ averageBudget() | currency }}</div>
           </div>
         </div>

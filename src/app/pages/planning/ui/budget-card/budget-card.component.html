@@ -1,0 +1,34 @@
+<a
+  [routerLink]="link()"
+  [queryParams]="queryParams()"
+  class="app-ui card h-full bg-base-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+  [attr.aria-label]="title() + ': ' + (usage() | percent: '1.0-0') + ' utilizado, ' + status().description">
+  <div class="card-body gap-4">
+    <div class="flex items-start gap-3">
+      <span class="rounded-box p-2.5" [class]="status().tint">
+        <app-icon [name]="icon()" [size]="22" />
+      </span>
+      <div class="min-w-0 flex-1">
+        <h3 class="truncate text-base font-semibold">{{ title() }}</h3>
+        <p class="text-sm text-base-content/70">Planejado <span class="tabular-nums">{{ planned() | currency }}</span></p>
+      </div>
+      <span class="badge badge-sm gap-1 whitespace-nowrap" [class]="status().badge">
+        <app-icon [name]="status().icon" [size]="12" />
+        {{ status().label }}
+      </span>
+    </div>
+
+    <div>
+      <progress class="progress w-full" [class]="status().progress" [value]="progress() * 100" max="100" aria-hidden="true"></progress>
+      <div class="mt-1 flex justify-between text-sm">
+        <span class="text-base-content/70">{{ usage() | percent: '1.0-0' }} utilizado</span>
+        <span class="font-semibold tabular-nums">{{ spent() | currency }}</span>
+      </div>
+      @if (excess() > 0) {
+        <p class="mt-1 text-sm font-medium text-error">Excedeu {{ excess() | currency }}</p>
+      }
+    </div>
+
+    <ng-content />
+  </div>
+</a>

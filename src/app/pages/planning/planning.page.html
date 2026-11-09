@@ -1,157 +1,67 @@
-<div class="planning-page">
-  <div class="planning-header">
-    <h1>Planejamentos</h1>
-    
-    <!-- Filtro de Mês -->
-    <div class="month-filter">
-      <mat-form-field appearance="outline">
-        <mat-label>Selecionar Mês</mat-label>
-        <mat-select 
-          [value]="selectedMonth$ | async" 
-          (selectionChange)="onMonthSelected($event.value)"
-          [compareWith]="compareYearMonths"
-        >
-          <mat-option 
-            *ngFor="let month of months$ | async" 
-            [value]="month"
-          >
-            {{ getMonthLabel(month) }}
-          </mat-option>
-        </mat-select>
-        <i class="far fa-calendar" matSuffix></i>
-      </mat-form-field>
+<div class="app-ui flex min-w-0 flex-col gap-6">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold">Planejamento do mês</h2>
+      <p class="text-sm text-base-content/70">Acompanhe quanto já gastou de cada categoria.</p>
     </div>
+    <label class="select w-full sm:w-64">
+      <span class="label"><app-icon name="calendar" [size]="18" /></span>
+      <select aria-label="Mês do planejamento" [value]="selectedKey()" (change)="onMonthChange($any($event.target).value)">
+        @for (option of monthOptions(); track option.key) {
+          <option [value]="option.key" [selected]="option.key === selectedKey()">{{ option.label }}</option>
+        }
+      </select>
+    </label>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="isLoading$ | async" class="loading-container">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Carregando dados...</p>
-  </div>
+  @if (error(); as message) {
+    <div role="alert" class="alert alert-error alert-soft">
+      <app-icon name="error" />
+      <span>{{ message }}</span>
+      <button type="button" class="btn btn-sm" (click)="retry()">
+        <app-icon name="refresh" [size]="16" /> Tentar novamente
+      </button>
+    </div>
+  }
 
-  <!-- Error State -->
-  <div *ngIf="error$ | async as error" class="error-container">
-    <i class="fas fa-exclamation-circle" color="warn"></i>
-    <h3>Erro ao carregar dados</h3>
-    <p>{{ error }}</p>
-    <button mat-stroked-button color="primary" (click)="retryLoad()">
-      <i class="fas fa-sync-alt"></i>
-      Tentar novamente
-    </button>
-  </div>
+  @if (loading() && !plan()) {
+    <div class="flex items-center justify-center gap-3 py-16 text-base-content/70">
+      <span class="loading loading-spinner loading-md"></span> Carregando planejamento...
+    </div>
+  }
 
-  <!-- Main Content -->
-  <div class="planning-content">
-    <!-- Medidor Planejado vs Gasto -->
-    <app-planned-vs-spent-meter
-      [plannedTotal]="(plannedTotal$ | async) || 0"
-      [spentTotal]="(spentTotal$ | async) || 0"
-    ></app-planned-vs-spent-meter>
+  @if (plan()) {
+    <app-budget-summary
+      title="Resumo do mês"
+      [subtitle]="selectedLabel()"
+      icon="wallet"
+      [planned]="plannedTotal()"
+      [spent]="spentTotal()" />
 
-    <!-- Cards de Planejamento -->
-    <div class="planning-cards">
-      <h2>Categorias de Gastos</h2>
-      
-      <div class="cards-grid">
-        <mat-card 
-          *ngFor="let card of cards$ | async; trackBy: trackByCardId"
-          class="plan-card"
-          [class]="getCardStatusClass(card)"
-          (click)="onCardClick(card)"
-          [attr.role]="'button'"
-          [attr.tabindex]="0"
-          (keydown.enter)="onCardClick(card)"
-          (keydown.space)="onCardClick(card)"
-        >
-          <mat-card-header>
-            <mat-icon 
-              mat-card-avatar 
-              [class]="'card-icon ' + getCardStatusClass(card)"
-            >
-              {{ card.icon }}
-            </mat-icon>
-            
-            <mat-card-title>{{ card.title }}</mat-card-title>
-            
-            <mat-card-subtitle>
-              Planejado: {{ card.plannedValue | currency }}
-            </mat-card-subtitle>
-
-            <div class="card-actions">
-              <mat-chip 
-                *ngIf="getCardStatus(card) === 'over'" 
-                class="excess-chip"
-              >
-                Excedeu
-              </mat-chip>
-              
-              <mat-chip 
-                *ngIf="getCardStatus(card) === 'limit'" 
-                class="limit-chip"
-              >
-                No limite
-              </mat-chip>
-            </div>
-          </mat-card-header>
-
-          <mat-card-content>
-            <div class="card-progress">
-              <div class="progress-bar">
-                <div 
-                  class="progress-fill"
-                  [style.width.%]="getCardProgress(card) * 100"
-                  [class]="getCardStatusClass(card)"
-                ></div>
-              </div>
-              
-              <div class="progress-text">
-                {{ (getCardProgress(card) * 100) | number:'1.0-0' }}% utilizado
-              </div>
-            </div>
-
-            <!-- Lista de itens -->
-            <div *ngIf="card.items && card.items.length > 0" class="card-items">
-              <h4>Itens:</h4>
-              <div class="item-list">
-                <div 
-                  *ngFor="let item of card.items" 
-                  class="plan-item"
-                >
-                  <span class="item-name">{{ item.name }}</span>
-                  <span class="item-value">
-                    {{ item.value | currency }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Valor real -->
-            <div class="real-value">
-              <strong>
-                Valor real: {{ getRealValue(card) | currency }}
-              </strong>
-              
-              <span 
-                *ngIf="getCardExcess(card) > 0" 
-                class="excess-amount"
-              >
-                (Excesso: {{ getCardExcess(card) | currency }})
-              </span>
-            </div>
-          </mat-card-content>
-        </mat-card>
+    <section class="flex flex-col gap-4" aria-labelledby="categories-title">
+      <h2 id="categories-title" class="text-lg font-semibold">Categorias de gastos</h2>
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" [class.opacity-60]="loading()">
+        @for (card of cards(); track card.id) {
+          <app-budget-card
+            [title]="card.title"
+            [icon]="card.icon"
+            [planned]="card.plannedValue"
+            [spent]="realValue(card)"
+            [link]="['/planejamentos', card.id]"
+            [queryParams]="{ month: selectedKey() }">
+            @if (card.items?.length) {
+              <ul class="flex flex-col gap-1 border-t border-base-200 pt-3 text-sm">
+                @for (item of card.items; track item.name) {
+                  <li class="flex justify-between gap-2">
+                    <span class="truncate text-base-content/70">{{ item.name }}</span>
+                    <span class="tabular-nums">{{ item.value | currency }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          </app-budget-card>
+        }
       </div>
-    </div>
-
-    <!-- Resumo Final usando componente reutilizável -->
-    <app-summary-header-card 
-      *ngIf="plan$ | async as plan"
-      title="Resumo do Mês"
-      [subtitle]="getSelectedMonthLabel()"
-      icon="assessment"
-      [totalPlanned$]="plannedTotal$"
-      [totalSpent$]="spentTotal$"
-      [remaining$]="remaining$"
-    ></app-summary-header-card>
-  </div>
+    </section>
+  }
 </div>

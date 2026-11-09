@@ -1,16 +1,18 @@
 import { PlanItemDetail } from '../models/planning.models';
 import { YearMonth, YearMonthUtils } from '../models/year-month.models';
+import { AppIconName } from '../../../shared/ui/icon/app-icons';
 
 export interface PlanningCategory {
   id: string;
   title: string;
-  icon: string;
+  /** Nome do ícone em APP_ICONS */
+  icon: AppIconName;
 }
 
 interface ItemSeed {
   id: string;
   name: string;
-  icon: string;
+  icon: AppIconName;
   plannedValue: number;
   /** Gasto típico do item no mês. */
   baseValue: number;
@@ -31,10 +33,10 @@ const CATEGORY_SEEDS: CategorySeed[] = [
   {
     id: 'contas',
     title: 'Contas',
-    icon: 'receipt_long',
+    icon: 'receipt',
     items: [
       { id: 'luz', name: 'Luz', icon: 'lightbulb', plannedValue: 200, baseValue: 185, variation: 0.15 },
-      { id: 'condominio', name: 'Condomínio', icon: 'apartment', plannedValue: 450, baseValue: 450, variation: 0 },
+      { id: 'condominio', name: 'Condomínio', icon: 'building', plannedValue: 450, baseValue: 450, variation: 0 },
       { id: 'internet', name: 'Internet', icon: 'wifi', plannedValue: 100, baseValue: 89.9, variation: 0 },
       { id: 'financiamento', name: 'Financiamento', icon: 'home', plannedValue: 1850, baseValue: 1850, variation: 0 }
     ]
@@ -42,19 +44,19 @@ const CATEGORY_SEEDS: CategorySeed[] = [
   {
     id: 'cartao-credito',
     title: 'Cartão de crédito',
-    icon: 'credit_card',
+    icon: 'credit-card',
     items: [
-      { id: 'fatura', name: 'Fatura', icon: 'credit_card', plannedValue: 800, baseValue: 760, variation: 0.25 }
+      { id: 'fatura', name: 'Fatura', icon: 'credit-card', plannedValue: 800, baseValue: 760, variation: 0.25 }
     ]
   },
   {
     id: 'alimentacao',
     title: 'Alimentação',
-    icon: 'restaurant',
+    icon: 'food',
     items: [
-      { id: 'mercado', name: 'Mercado', icon: 'shopping_cart', plannedValue: 700, baseValue: 660, variation: 0.2 },
-      { id: 'acougue', name: 'Açougue', icon: 'restaurant', plannedValue: 200, baseValue: 185, variation: 0.18 },
-      { id: 'restaurantes', name: 'Restaurantes', icon: 'dinner_dining', plannedValue: 300, baseValue: 340, variation: 0.3 }
+      { id: 'mercado', name: 'Mercado', icon: 'shopping-cart', plannedValue: 700, baseValue: 660, variation: 0.2 },
+      { id: 'acougue', name: 'Açougue', icon: 'food', plannedValue: 200, baseValue: 185, variation: 0.18 },
+      { id: 'restaurantes', name: 'Restaurantes', icon: 'restaurant', plannedValue: 300, baseValue: 340, variation: 0.3 }
     ]
   }
 ];

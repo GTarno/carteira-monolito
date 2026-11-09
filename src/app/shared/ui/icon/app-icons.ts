@@ -2,11 +2,14 @@ import { LucideIconData } from '@lucide/angular';
 import {
   Building,
   Calendar,
+  CalendarClock,
   ChevronLeft,
+  ChevronRight,
   CircleCheck,
   CircleExclamationPoint,
   CircleQuestionMark,
   CircleUserRound,
+  Clock,
   CreditCard,
   FolderOpen,
   House,
@@ -19,6 +22,7 @@ import {
   Pencil,
   Plus,
   Receipt,
+  RefreshCw,
   Settings,
   ShoppingCart,
   SquarePlus,
@@ -59,6 +63,7 @@ export const APP_ICONS = {
   about: icon('circle-question-mark', CircleQuestionMark),
   menu: icon('menu', Menu),
   back: icon('chevron-left', ChevronLeft),
+  forward: icon('chevron-right', ChevronRight),
   user: icon('circle-user-round', CircleUserRound),
   settings: icon('settings', Settings),
   logout: icon('log-out', LogOut),
@@ -69,6 +74,7 @@ export const APP_ICONS = {
   delete: icon('trash', Trash),
   close: icon('x', X),
   calendar: icon('calendar', Calendar),
+  refresh: icon('refresh-cw', RefreshCw),
 
   // Tema
   sun: icon('sun', Sun),
@@ -79,6 +85,8 @@ export const APP_ICONS = {
   error: icon('circle-exclamation-point', CircleExclamationPoint),
   warning: icon('triangle-exclamation-point', TriangleExclamationPoint),
   info: icon('info', Info),
+  pending: icon('clock', Clock),
+  'due-today': icon('calendar-clock', CalendarClock),
 
   // Categorias e itens de gasto
   receipt: icon('receipt', Receipt),

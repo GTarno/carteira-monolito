@@ -1,147 +1,112 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input } from '@angular/core';
+import { CurrencyPipe, PercentPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { ChartService } from '../../../core/services/chart.service';
-import { BaseChartConfig, ChartInteractionEvent, ExpenseCategory } from '../../types/chart.types';
+import { ThemeService } from '../../../core/theme/theme.service';
+import { formatBRL } from '../../../core/i18n/locale';
+import { CHART_CHROME, chartModeAt, seriesColor } from '../../charts/chart-palette';
+import { ExpenseCategory } from '../../types/chart.types';
 
+interface LegendRow {
+  label: string;
+  amount: number;
+  share: number;
+  color: string;
+}
+
+/**
+ * Gráfico de rosca com legenda em lista (cor, nome, valor e %), que também serve
+ * de "tabela" acessível — a identidade nunca depende só da cor.
+ */
 @Component({
   selector: 'app-doughnut-chart',
-  standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [BaseChartDirective, CurrencyPipe, PercentPipe],
   template: `
-    <div class="doughnut-chart-container">
-      <h3 *ngIf="title">{{ title }}</h3>
-      
-      <div *ngIf="showTotal" class="total-display">
-        Total: R$ {{ getTotal().toLocaleString('pt-BR') }}
+    <div class="app-ui flex h-full flex-col gap-4">
+      @if (title()) {
+        <div>
+          <h3 class="font-semibold">{{ title() }}</h3>
+          @if (showTotal()) {
+            <p class="text-sm text-base-content/70">
+              Total: <span class="font-semibold text-base-content">{{ total() | currency }}</span>
+            </p>
+          }
+        </div>
+      }
+
+      <div class="relative" [style.height]="height()">
+        <canvas baseChart type="doughnut" [data]="chartData()" [options]="chartOptions()" [attr.aria-label]="ariaLabel()" role="img"></canvas>
       </div>
-      
-      <div class="chart-wrapper" [style.height]="height" #chartContainer>
-        <canvas 
-          baseChart 
-          [data]="chartData" 
-          [type]="chartType"
-          [options]="chartOptions"
-          (chartClick)="onChartClick($event)"
-          (chartHover)="onChartHover($event)">
-        </canvas>
-      </div>
-      
-      <div *ngIf="showActions" class="chart-actions">
-        <button 
-          (click)="onActionClick()" 
-          class="action-btn"
-          [disabled]="!data || data.length === 0">
-          {{ actionLabel }}
-        </button>
-      </div>
+
+      <ul class="flex flex-col gap-1.5 text-sm">
+        @for (row of legend(); track row.label) {
+          <li class="flex items-center gap-2">
+            <span class="size-2.5 shrink-0 rounded-full" [style.background-color]="row.color" aria-hidden="true"></span>
+            <span class="flex-1 truncate">{{ row.label }}</span>
+            <span class="tabular-nums text-base-content/70">{{ row.share | percent: '1.0-0' }}</span>
+            <span class="w-24 text-right font-medium tabular-nums">{{ row.amount | currency }}</span>
+          </li>
+        }
+      </ul>
     </div>
   `,
-  styleUrls: ['./doughnut-chart.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DoughnutChartComponent implements BaseChartConfig, OnInit, OnChanges, AfterViewInit, OnDestroy {
-  @Input() data: ExpenseCategory[] = [];
-  @Input() title?: string;
-  @Input() height: string = '400px';
-  @Input() showLegend: boolean = true;
-  @Input() showTotal: boolean = true;
-  @Input() showActions: boolean = false;
-  @Input() actionLabel: string = 'Adicionar Item';
+export class DoughnutChartComponent {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly themeService = inject(ThemeService);
 
-  @Output() chartClick = new EventEmitter<ChartInteractionEvent>();
-  @Output() chartHover = new EventEmitter<ChartInteractionEvent>();
-  @Output() actionClick = new EventEmitter<void>();
+  readonly data = input<ExpenseCategory[]>([]);
+  readonly title = input<string>();
+  readonly height = input('240px');
+  readonly showTotal = input(true);
 
-  @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
-  @ViewChild('chartContainer') chartContainer: ElementRef | undefined;
+  private readonly mode = computed(() => {
+    this.themeService.theme();
+    return chartModeAt(this.host.nativeElement);
+  });
 
-  public chartData: ChartData<'doughnut'> = { labels: [], datasets: [] };
-  public chartOptions: ChartOptions<'doughnut'> = {};
-  public chartType = 'doughnut' as const;
-  private resizeObserver?: ResizeObserver;
-  private resizeTimeout?: any;
+  protected readonly total = computed(() => this.data().reduce((sum, item) => sum + item.amount, 0));
 
-  constructor(private chartService: ChartService) {}
+  protected readonly legend = computed<LegendRow[]>(() => {
+    const total = this.total() || 1;
+    return this.data().map((item, index) => ({
+      label: item.category,
+      amount: item.amount,
+      share: item.amount / total,
+      color: item.color ?? seriesColor(this.mode(), index)
+    }));
+  });
 
-  ngOnInit(): void {
-    this.updateChart();
-  }
+  protected readonly chartData = computed<ChartData<'doughnut'>>(() => ({
+    labels: this.legend().map(row => row.label),
+    datasets: [{
+      data: this.legend().map(row => row.amount),
+      backgroundColor: this.legend().map(row => row.color),
+      borderColor: CHART_CHROME[this.mode()].surface,
+      borderWidth: 2,
+      hoverOffset: 6
+    }]
+  }));
 
-  ngOnChanges(): void {
-    this.updateChart();
-  }
-
-  ngAfterViewInit(): void {
-    this.setupResizeObserver();
-    // Força redimensionamento inicial após um pequeno delay
-    setTimeout(() => this.resizeChart(), 100);
-  }
-
-  ngOnDestroy(): void {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    if (this.resizeTimeout) {
-      clearTimeout(this.resizeTimeout);
-    }
-  }
-
-  private setupResizeObserver(): void {
-    if (this.chartContainer && 'ResizeObserver' in window) {
-      this.resizeObserver = new ResizeObserver((entries) => {
-        if (this.resizeTimeout) {
-          clearTimeout(this.resizeTimeout);
-        }
-        this.resizeTimeout = setTimeout(() => {
-          this.resizeChart();
-        }, 150);
-      });
-      this.resizeObserver.observe(this.chartContainer.nativeElement);
-    }
-  }
-
-  private resizeChart(): void {
-    if (this.chart && this.chart.chart) {
-      this.chart.chart.resize();
-    }
-  }
-
-  private updateChart(): void {
-    if (this.data && this.data.length > 0) {
-      const config = this.chartService.generateExpenseDoughnutChart(this.data);
-      this.chartData = config.data;
-      this.chartOptions = {
-        ...config.options,
-        responsive: true,
-        maintainAspectRatio: false,
-        aspectRatio: 0, // Remove qualquer ratio fixo
-        plugins: {
-          ...config.options.plugins,
-          legend: {
-            ...config.options.plugins?.legend,
-            display: this.showLegend
+  protected readonly chartOptions = computed<ChartOptions<'doughnut'>>(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '64%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: context => {
+            const share = (Number(context.parsed) / (this.total() || 1)) * 100;
+            return `${context.label}: ${formatBRL(Number(context.parsed))} (${share.toFixed(0)}%)`;
           }
         }
-      };
-      // Força redimensionamento após atualizar opções
-      setTimeout(() => this.resizeChart(), 50);
+      }
     }
-  }
+  }));
 
-  public getTotal(): number {
-    return this.chartService.calculateTotal(this.data);
-  }
-
-  public onChartClick(event: ChartInteractionEvent): void {
-    this.chartClick.emit(event);
-  }
-
-  public onChartHover(event: ChartInteractionEvent): void {
-    this.chartHover.emit(event);
-  }
-
-  public onActionClick(): void {
-    this.actionClick.emit();
-  }
+  protected readonly ariaLabel = computed(() =>
+    `${this.title() ?? 'Gráfico de rosca'}: ` + this.legend().map(row => `${row.label} ${formatBRL(row.amount)}`).join(', ')
+  );
 }

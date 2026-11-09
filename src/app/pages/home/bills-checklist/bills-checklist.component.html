@@ -1,102 +1,67 @@
-<div class="bills-checklist-container" *ngIf="billsSummary$ | async as summary">
-  <div class="bills-layout">
-    <!-- Summary Section (Left Column) -->
-    <div class="bills-summary">
-      <div class="title-group">
-        <h2 class="title">Checklist de Contas</h2>
-        <p class="subtitle">Mês atual</p>
+<section class="app-ui card h-full bg-base-100 shadow-sm" aria-labelledby="bills-title">
+  <div class="card-body gap-5">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 id="bills-title" class="card-title">Contas do mês</h2>
+        <p class="text-sm text-base-content/70">{{ monthLabel }}</p>
       </div>
-      
-      <!-- Summary Stats -->
-      <div class="summary-stats">
-        <div class="stats-item">
-          <span class="stats-label">Pagas</span>
-          <span class="stats-value">{{ summary.paidCount }}/{{ summary.totalCount }}</span>
-        </div>
-        <div class="stats-item">
-          <span class="stats-label">Pendente</span>
-          <span class="stats-value">{{ summary.pendingTotalAmount | currency }}</span>
-        </div>
-      </div>
-
-      <!-- Progress Bar -->
-      <div class="progress-section">
-        <mat-progress-bar 
-          mode="determinate" 
-          [value]="summary.progressPercent"
-          color="primary">
-        </mat-progress-bar>
-        <span class="progress-text">{{ summary.progressPercent | number:'1.0-0' }}% concluído</span>
-      </div>
-
-      <!-- Reset Button -->
-      <button 
-        mat-stroked-button 
-        color="primary" 
-        class="reset-button"
-        (click)="onResetMonth()">
-        <i class="fas fa-sync-alt"></i>
-        Resetar Mês
+      <button type="button" class="btn btn-ghost btn-sm gap-2" (click)="onResetMonth()">
+        <app-icon name="refresh" [size]="16" />
+        Reiniciar mês
       </button>
     </div>
 
-    <!-- Bills List (Right Column) -->
-    <div class="bills-list-wrapper">
-      <div class="bills-list-scroll">
-        <mat-card 
-          *ngFor="let bill of summary.bills; trackBy: trackByBillId" 
-          class="bill-card"
-          [class.paid]="bill.isPaid">
-          
-          <div class="bill-content">
-            <!-- Checkbox -->
-            <mat-checkbox
-              [checked]="bill.isPaid"
-              (change)="onTogglePaid(bill.id)"
-              color="primary"
-              class="bill-checkbox">
-            </mat-checkbox>
-
-            <!-- Bill Info -->
-            <div class="bill-info">
-              <div class="bill-name" [class.strike-through]="bill.isPaid">
-                {{ bill.name }}
-              </div>
-              
-              <div class="bill-details">
-                <span class="bill-amount">
-                  {{ bill.amount | currency }}
-                </span>
-                <span class="bill-due-date">
-                  {{ getDueDateLabel(bill.dueDate) }}
-                </span>
-              </div>
-            </div>
-
-            <!-- Status Chip -->
-            <mat-chip 
-              [color]="bill.status.color"
-              class="status-chip">
-              {{ bill.status.label }}
-            </mat-chip>
-
-            <!-- Calendar Icon with Date -->
-            <div class="date-badge">
-              <i class="far fa-calendar-alt date-icon"></i>
-              <span class="date-text">{{ formatDueDate(bill.dueDate) }}</span>
-            </div>
-          </div>
-
-        </mat-card>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="rounded-box bg-base-200 px-4 py-3">
+        <div class="text-sm text-base-content/70">Pagas</div>
+        <div class="text-xl font-semibold tabular-nums">{{ paidCount() }}/{{ totalCount() }}</div>
+      </div>
+      <div class="rounded-box bg-base-200 px-4 py-3">
+        <div class="text-sm text-base-content/70">Pendente</div>
+        <div class="text-xl font-semibold tabular-nums">{{ pendingAmount() | currency }}</div>
       </div>
     </div>
 
-  </div>
+    <div class="flex items-center gap-3">
+      <progress class="progress progress-primary flex-1" [value]="progress() * 100" max="100" aria-label="Contas pagas"></progress>
+      <span class="w-24 text-right text-sm tabular-nums text-base-content/70">{{ progress() | percent: '1.0-0' }} concluído</span>
+    </div>
 
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="summary.totalCount === 0">
-    <i class="fas fa-receipt empty-icon"></i>
-    <h3>Nenhuma conta encontrada</h3>
-    <p>Clique em "Resetar Mês" para carregar as contas padrão</p>
+    @if (bills().length) {
+      <ul class="flex flex-col divide-y divide-base-200">
+        @for (bill of bills(); track bill.id) {
+          <li>
+            <label class="flex cursor-pointer items-center gap-3 py-3">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-primary"
+                [checked]="bill.isPaid"
+                (change)="onTogglePaid(bill.id)"
+                [attr.aria-label]="'Marcar ' + bill.name + ' como paga'" />
+
+              <span class="flex min-w-0 flex-1 flex-col">
+                <span class="truncate font-medium" [class.line-through]="bill.isPaid" [class.opacity-60]="bill.isPaid">
+                  {{ bill.name }}
+                </span>
+                <span class="text-sm text-base-content/70">
+                  <span class="tabular-nums">{{ bill.amount | currency }}</span> · vence {{ formatDueDate(bill.dueDate) }}
+                </span>
+              </span>
+
+              <span class="badge badge-sm gap-1 whitespace-nowrap" [class]="statusStyle[bill.status.type].badge">
+                <app-icon [name]="statusStyle[bill.status.type].icon" [size]="12" />
+                {{ bill.status.label }}
+              </span>
+            </label>
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="flex flex-col items-center gap-2 py-8 text-center text-base-content/70">
+        <app-icon name="receipt" [size]="40" />
+        <p class="font-medium text-base-content">Nenhuma conta neste mês</p>
+        <p class="text-sm">Use "Reiniciar mês" para carregar as contas padrão.</p>
+      </div>
+    }
   </div>
-</div>
+</section>

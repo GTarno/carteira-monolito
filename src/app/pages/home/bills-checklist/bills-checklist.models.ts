@@ -6,8 +6,9 @@ export interface Bill {
   isPaid: boolean;
 }
 
+export type BillStatusType = 'paid' | 'pending' | 'dueToday' | 'overdue';
+
 export interface BillStatus {
-  type: 'paid' | 'pending' | 'dueToday' | 'overdue';
+  type: BillStatusType;
   label: string;
-  color: string;
 }

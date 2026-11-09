@@ -1,23 +1,19 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { IconComponent } from '../../../shared/ui/icon/icon.component';
 
+/** Saudação e saldo do usuário (dados de exemplo até existir login/API). */
 @Component({
   selector: 'app-persona',
-  imports: [CommonModule],
+  imports: [CurrencyPipe, IconComponent],
   templateUrl: './persona.component.html',
-  styleUrl: './persona.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PersonaComponent {
   // Dados mockados da persona
-  persona = {
+  readonly persona = {
     nome: 'João Silva',
+    cargo: 'Analista de Sistemas',
     valorEmCaixa: 2500.75
   };
-
-  formatCurrency(value: number): string {
-    return value.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    });
-  }
 }

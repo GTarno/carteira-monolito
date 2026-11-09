@@ -1,171 +1,104 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { ChartService } from '../../../core/services/chart.service';
-import { BaseChartConfig, ChartInteractionEvent, TrendData } from '../../types/chart.types';
+import { ThemeService } from '../../../core/theme/theme.service';
+import { CHART_CHROME, cartesianOptions, chartModeAt, seriesColor, withAlpha } from '../../charts/chart-palette';
+import { TrendData } from '../../types/chart.types';
 
+interface SeriesMetric {
+  label: string;
+  color: string;
+  average: number;
+}
+
+/**
+ * Linhas de tendência. Com uma série, preenche a área abaixo da linha; com várias,
+ * só linhas (áreas sobrepostas escondem dados).
+ */
 @Component({
   selector: 'app-line-chart',
-  standalone: true,
-  imports: [CommonModule, BaseChartDirective],
+  imports: [BaseChartDirective, CurrencyPipe],
   template: `
-    <div class="line-chart-container">
-      <h3 *ngIf="title">{{ title }}</h3>
-      
-      <div *ngIf="showMetrics && trendData" class="metrics-display">
-        <div class="metric-item" *ngFor="let dataset of trendData.datasets">
-          <span class="metric-color" [style.background-color]="dataset.color"></span>
-          <span class="metric-label">{{ dataset.label }}:</span>
-          <span class="metric-value">
-            R$ {{ getDatasetAverage(dataset.data).toLocaleString('pt-BR') }}
-            <small>(média)</small>
-          </span>
+    <div class="app-ui flex h-full flex-col gap-4">
+      @if (title()) {
+        <h3 class="font-semibold">{{ title() }}</h3>
+      }
+
+      @if (showMetrics() && metrics().length) {
+        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+          @for (metric of metrics(); track metric.label) {
+            <div class="flex items-center gap-2">
+              <span class="size-2.5 rounded-full" [style.background-color]="metric.color" aria-hidden="true"></span>
+              <span class="text-base-content/70">{{ metric.label }} (média):</span>
+              <span class="font-semibold tabular-nums">{{ metric.average | currency }}</span>
+            </div>
+          }
         </div>
-      </div>
-      
-      <div class="chart-wrapper" [style.height]="height" #chartContainer>
-        <canvas 
-          baseChart 
-          [data]="chartData" 
-          [type]="chartType"
-          [options]="chartOptions"
-          (chartClick)="onChartClick($event)"
-          (chartHover)="onChartHover($event)">
-        </canvas>
-      </div>
-      
-      <div *ngIf="showActions" class="chart-actions">
-        <button 
-          (click)="onActionClick()" 
-          class="action-btn"
-          [disabled]="!trendData || !trendData.datasets || trendData.datasets.length === 0">
-          {{ actionLabel }}
-        </button>
+      }
+
+      <div class="relative" [style.height]="height()">
+        <canvas baseChart type="line" [data]="chartData()" [options]="chartOptions()" role="img" [attr.aria-label]="title() ?? 'Gráfico de linhas'"></canvas>
       </div>
     </div>
   `,
-  styleUrls: ['./line-chart.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LineChartComponent implements BaseChartConfig, OnInit, OnChanges, AfterViewInit, OnDestroy {
-  @Input() trendData: TrendData | null = null;
-  @Input() title?: string;
-  @Input() height: string = '400px';
-  @Input() showLegend: boolean = true;
-  @Input() showMetrics: boolean = true;
-  @Input() showActions: boolean = false;
-  @Input() actionLabel: string = 'Adicionar Série';
+export class LineChartComponent {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly themeService = inject(ThemeService);
 
-  @Output() chartClick = new EventEmitter<ChartInteractionEvent>();
-  @Output() chartHover = new EventEmitter<ChartInteractionEvent>();
-  @Output() actionClick = new EventEmitter<void>();
+  readonly trendData = input<TrendData | null>(null);
+  readonly title = input<string>();
+  readonly height = input('300px');
+  readonly showLegend = input(true);
+  readonly showMetrics = input(true);
 
-  @ViewChild(BaseChartDirective) chart: BaseChartDirective | undefined;
-  @ViewChild('chartContainer') chartContainer: ElementRef | undefined;
+  private readonly mode = computed(() => {
+    this.themeService.theme();
+    return chartModeAt(this.host.nativeElement);
+  });
 
-  public chartData: ChartData<'line'> = { labels: [], datasets: [] };
-  public chartOptions: ChartOptions<'line'> = {};
-  public chartType = 'line' as const;
-  private resizeObserver?: ResizeObserver;
-  private resizeTimeout?: any;
+  private readonly series = computed(() =>
+    (this.trendData()?.datasets ?? []).map((dataset, index) => ({
+      ...dataset,
+      color: dataset.color ?? seriesColor(this.mode(), index)
+    }))
+  );
 
-  constructor(private chartService: ChartService) {}
+  protected readonly metrics = computed<SeriesMetric[]>(() =>
+    this.series().map(series => ({
+      label: series.label,
+      color: series.color,
+      average: series.data.length ? series.data.reduce((sum, value) => sum + value, 0) / series.data.length : 0
+    }))
+  );
 
-  ngOnInit(): void {
-    this.updateChart();
-  }
+  protected readonly chartData = computed<ChartData<'line'>>(() => {
+    const single = this.series().length === 1;
+    const surface = CHART_CHROME[this.mode()].surface;
+    return {
+      labels: this.trendData()?.labels ?? [],
+      datasets: this.series().map(series => ({
+        label: series.label,
+        data: series.data,
+        borderColor: series.color,
+        backgroundColor: single ? withAlpha(series.color, 0.12) : series.color,
+        fill: single,
+        tension: 0.35,
+        borderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: series.color,
+        pointBorderColor: surface,
+        pointBorderWidth: 2
+      }))
+    };
+  });
 
-  ngOnChanges(): void {
-    this.updateChart();
-  }
-
-  ngAfterViewInit(): void {
-    this.setupResizeObserver();
-    // Força redimensionamento inicial após um pequeno delay
-    setTimeout(() => this.resizeChart(), 100);
-  }
-
-  ngOnDestroy(): void {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    if (this.resizeTimeout) {
-      clearTimeout(this.resizeTimeout);
-    }
-  }
-
-  private setupResizeObserver(): void {
-    if (this.chartContainer && 'ResizeObserver' in window) {
-      this.resizeObserver = new ResizeObserver((entries) => {
-        if (this.resizeTimeout) {
-          clearTimeout(this.resizeTimeout);
-        }
-        this.resizeTimeout = setTimeout(() => {
-          this.resizeChart();
-        }, 150);
-      });
-      this.resizeObserver.observe(this.chartContainer.nativeElement);
-    }
-  }
-
-  private resizeChart(): void {
-    if (this.chart && this.chart.chart) {
-      this.chart.chart.resize();
-    }
-  }
-
-  private updateChart(): void {
-    if (this.trendData && this.trendData.labels && this.trendData.datasets) {
-      const config = this.chartService.generateTrendLineChart(
-        this.trendData.labels,
-        this.trendData.datasets
-      );
-      this.chartData = config.data;
-      this.chartOptions = {
-        ...config.options,
-        responsive: true,
-        maintainAspectRatio: false,
-        aspectRatio: 0, // Remove qualquer ratio fixo
-        plugins: {
-          ...config.options.plugins,
-          legend: {
-            ...config.options.plugins?.legend,
-            display: this.showLegend
-          }
-        }
-      };
-      // Força redimensionamento após atualizar opções
-      setTimeout(() => this.resizeChart(), 50);
-    }
-  }
-
-  public getDatasetAverage(data: number[]): number {
-    if (!data || data.length === 0) return 0;
-    const sum = data.reduce((acc, val) => acc + val, 0);
-    return sum / data.length;
-  }
-
-  public getTrendDirection(data: number[]): 'up' | 'down' | 'stable' {
-    if (!data || data.length < 2) return 'stable';
-    const first = data[0];
-    const last = data[data.length - 1];
-    const threshold = 0.05; // 5% change threshold
-    
-    const change = (last - first) / first;
-    if (change > threshold) return 'up';
-    if (change < -threshold) return 'down';
-    return 'stable';
-  }
-
-  public onChartClick(event: ChartInteractionEvent): void {
-    this.chartClick.emit(event);
-  }
-
-  public onChartHover(event: ChartInteractionEvent): void {
-    this.chartHover.emit(event);
-  }
-
-  public onActionClick(): void {
-    this.actionClick.emit();
-  }
+  protected readonly chartOptions = computed(() => {
+    // Com as médias visíveis, elas já servem de legenda (cor + nome); evita legenda duplicada
+    const showLegend = this.showLegend() && this.series().length > 1 && !this.showMetrics();
+    return cartesianOptions(this.mode(), showLegend) as ChartOptions<'line'>;
+  });
 }

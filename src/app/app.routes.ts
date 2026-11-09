@@ -13,7 +13,7 @@ import { About } from './pages/about/about';
  * até ela ser migrada para Tailwind/DaisyUI (épico #27); ao migrar, remova a flag.
  */
 export const routes: Routes = [
-  { path: 'home', component: HomeComponent, title: 'Início', data: { legacyUi: true } },
+  { path: 'home', component: HomeComponent, title: 'Início' },
   { path: 'planejamentos', component: PlanningPage, title: 'Planejamentos', data: { legacyUi: true } },
   { path: 'planejamentos/:categoryId/:itemId', component: PlanningItemDetailPage, title: 'Detalhe do item', data: { legacyUi: true } },
   { path: 'planejamentos/:categoryId', component: PlanningCategoryItemsPage, title: 'Itens da categoria', data: { legacyUi: true } },

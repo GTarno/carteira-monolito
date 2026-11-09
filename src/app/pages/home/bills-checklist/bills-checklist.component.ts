@@ -1,76 +1,57 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule, AsyncPipe, NgFor, NgIf, CurrencyPipe } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatButtonModule } from '@angular/material/button';
-import { Observable, map } from 'rxjs';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { CurrencyPipe, PercentPipe } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 
-import { Bill, BillStatus } from './bills-checklist.models';
+import { Bill, BillStatus, BillStatusType } from './bills-checklist.models';
 import { compareBills, getBillStatus } from './bills-checklist.utils';
-import { parseIsoDate } from '../../../shared/utils/date.utils';
 import { BillsChecklistService } from './bills-checklist.service';
+import { parseIsoDate } from '../../../shared/utils/date.utils';
+import { IconComponent } from '../../../shared/ui/icon/icon.component';
+import { AppIconName } from '../../../shared/ui/icon/app-icons';
 
 interface BillWithStatus extends Bill {
   status: BillStatus;
 }
 
-interface BillsSummary {
-  bills: BillWithStatus[];
-  paidCount: number;
-  totalCount: number;
-  pendingTotalAmount: number;
-  progressPercent: number;
-}
+/** Como cada status aparece: cor do badge + ícone (o status nunca depende só da cor). */
+const STATUS_STYLE: Record<BillStatusType, { badge: string; icon: AppIconName }> = {
+  paid: { badge: 'badge-success', icon: 'success' },
+  pending: { badge: 'badge-ghost', icon: 'pending' },
+  dueToday: { badge: 'badge-warning', icon: 'due-today' },
+  overdue: { badge: 'badge-error', icon: 'error' }
+};
 
+/** Contas do mês: marcar como paga, progresso e total pendente. */
 @Component({
   selector: 'app-bills-checklist',
-  standalone: true,
-  imports: [
-    CommonModule,
-    AsyncPipe,
-    NgFor,
-    NgIf,
-    CurrencyPipe,
-    MatCardModule,
-    MatCheckboxModule,
-    MatChipsModule,
-    MatProgressBarModule,
-    MatButtonModule
-  ],
+  imports: [CurrencyPipe, PercentPipe, IconComponent],
   templateUrl: './bills-checklist.component.html',
-  styleUrl: './bills-checklist.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BillsChecklistComponent {
-  private billsService = inject(BillsChecklistService);
-  
-  billsSummary$: Observable<BillsSummary> = this.billsService.bills$.pipe(
-    map(bills => this.processBillsData(bills))
-  );
+  private readonly billsService = inject(BillsChecklistService);
 
-  private processBillsData(bills: Bill[]): BillsSummary {
+  protected readonly statusStyle = STATUS_STYLE;
+
+  private readonly rawBills = toSignal(this.billsService.bills$, { initialValue: [] as Bill[] });
+
+  protected readonly bills = computed<BillWithStatus[]>(() => {
     const today = new Date();
-    const sortedBills: BillWithStatus[] = bills
+    return this.rawBills()
       .map(bill => ({ ...bill, status: getBillStatus(bill, today) }))
       .sort(compareBills);
+  });
 
-    const paidCount = bills.filter(bill => bill.isPaid).length;
-    const totalCount = bills.length;
-    const pendingTotalAmount = bills
-      .filter(bill => !bill.isPaid)
-      .reduce((sum, bill) => sum + bill.amount, 0);
-    const progressPercent = totalCount > 0 ? (paidCount / totalCount) * 100 : 0;
+  protected readonly paidCount = computed(() => this.rawBills().filter(bill => bill.isPaid).length);
+  protected readonly totalCount = computed(() => this.rawBills().length);
+  protected readonly pendingAmount = computed(() =>
+    this.rawBills().filter(bill => !bill.isPaid).reduce((sum, bill) => sum + bill.amount, 0)
+  );
+  protected readonly progress = computed(() => (this.totalCount() ? this.paidCount() / this.totalCount() : 0));
 
-    return {
-      bills: sortedBills,
-      paidCount,
-      totalCount,
-      pendingTotalAmount,
-      progressPercent
-    };
-  }
+  protected readonly monthLabel = capitalize(
+    new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date())
+  );
 
   onTogglePaid(billId: string): void {
     this.billsService.togglePaid(billId);
@@ -82,16 +63,11 @@ export class BillsChecklistComponent {
 
   formatDueDate(dueDate: string): string {
     const date = parseIsoDate(dueDate);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    return `${day.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}`;
+    return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
+}
 
-  getDueDateLabel(dueDate: string): string {
-    return `Vence dia ${parseIsoDate(dueDate).getDate()}`;
-  }
-
-  trackByBillId(index: number, bill: BillWithStatus): string {
-    return bill.id;
-  }
+/** "novembro de 2026" → "Novembro de 2026" (só a primeira letra). */
+function capitalize(text: string): string {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }

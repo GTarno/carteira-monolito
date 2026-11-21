@@ -14,6 +14,12 @@ O app usa **Tailwind CSS v4 + DaisyUI v5**, com ícones **Lucide** e comportamen
 - `forest` (escuro, padrão) e `emerald` (claro), alternados pelo botão da barra superior.
 - `ThemeService` (`src/app/core/theme/theme.service.ts`) guarda a escolha no `localStorage` e aplica `data-theme` no `<html>`. Um script no `index.html` aplica o tema salvo antes do Angular iniciar, para não piscar.
 
+## Rotas
+
+- Todas as páginas são carregadas sob demanda (`loadComponent`/`loadChildren` em `app.routes.ts`). Áreas com várias páginas têm um arquivo de rotas próprio (`pages/*/*.routes.ts`).
+- O Chart.js é registrado (`provideCharts`) só nas rotas com gráficos (Início e Planejamento), para não entrar no pacote inicial.
+- Endereços desconhecidos caem na página 404 (`pages/not-found`).
+
 ## Ícones
 
 ```html
@@ -40,6 +46,13 @@ Os toasts aparecem pelo `<app-toast-outlet>` no `AppComponent`.
 ```ts
 this.dialog.open<MeuDialogo, Dados, Resultado>(MeuDialogo, { data, ariaLabel: 'Editar item' })
   .closed.subscribe(resultado => { ... });
+```
+
+Para pedir confirmação (ex.: antes de excluir), use `confirm()`: emite `true` só se o usuário confirmar.
+
+```ts
+this.dialog.confirm({ title: 'Excluir item?', message: '...', confirmLabel: 'Excluir', danger: true })
+  .pipe(filter(Boolean)).subscribe(() => excluir());
 ```
 
 No componente do diálogo: `inject(DIALOG_DATA)` e `inject(DialogRef)` de `@angular/cdk/dialog`; feche com `ref.close(resultado)`. O `AppDialog` (`src/app/shared/ui/dialog`) aplica o painel e o fundo do tema. Exemplos: `src/app/pages/planning/ui/*-dialog`.

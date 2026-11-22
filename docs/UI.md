@@ -73,6 +73,11 @@ No componente do diálogo: `inject(DIALOG_DATA)` e `inject(DialogRef)` de `@angu
 - Aparência de cada status (rótulo, ícone, cores): `src/app/pages/planning/ui/budget-status.ts`. Status sempre com **rótulo e ícone**, nunca só cor.
 - `app-budget-summary` (resumo com planejado, gasto e restante) e `app-budget-card` (card clicável de categoria/item).
 
+## Meses
+
+- `YearMonth` e suas funções ficam em `src/app/shared/utils/year-month.ts`: `formatYearMonthShort` ("Nov/2026"), `formatYearMonthLong` ("Novembro de 2026"), `addMonths`, `yearMonthKey`/`parseYearMonthKey` ("2026-11", usado em URLs e na API).
+- Os nomes dos meses vêm do `Intl` (pt-BR), não de listas escritas à mão.
+
 ## Valores em reais
 
 - Exibição: pipe `currency` (o app já está em pt-BR/BRL) ou `formatBRL()` fora de templates.

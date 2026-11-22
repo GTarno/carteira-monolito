@@ -5,7 +5,7 @@ import { catchError, filter, finalize, map, of, startWith, switchMap } from 'rxj
 
 import { PlanningService } from '../../data-access/planning.service';
 import { PlanItemDetail, PlanningItemCreate } from '../../models/planning.models';
-import { YearMonth, YearMonthUtils } from '../../models/year-month.models';
+import { YearMonth, formatYearMonthLong, isSameYearMonth, parseYearMonthKey, yearMonthKey } from '../../../../shared/utils/year-month';
 import { AddPlanningItemDialogComponent } from '../../ui/add-planning-item-dialog/add-planning-item-dialog.component';
 import { BudgetSummaryComponent } from '../../ui/budget-summary/budget-summary.component';
 import { BudgetCardComponent } from '../../ui/budget-card/budget-card.component';
@@ -28,18 +28,18 @@ export class PlanningCategoryItemsPage {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
-  readonly month: YearMonth = YearMonthUtils.parseKey(this.route.snapshot.queryParamMap.get('month'))
+  readonly month: YearMonth = parseYearMonthKey(this.route.snapshot.queryParamMap.get('month'))
     ?? this.planningService.getCurrentMonth();
 
-  protected readonly monthKey = YearMonthUtils.toKey(this.month);
-  protected readonly monthLabel = YearMonthUtils.toLongLabel(this.month);
+  protected readonly monthKey = yearMonthKey(this.month);
+  protected readonly monthLabel = formatYearMonthLong(this.month);
 
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
   /** Recarrega quando itens desta categoria/mês mudam (ex.: item adicionado). */
   private readonly refresh$ = this.planningService.itemsChanged$.pipe(
-    filter(change => change.categoryId === this.categoryId && YearMonthUtils.equals(change.month, this.month)),
+    filter(change => change.categoryId === this.categoryId && isSameYearMonth(change.month, this.month)),
     startWith(null)
   );
 

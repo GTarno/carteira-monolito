@@ -1,4 +1,4 @@
-import { YearMonth } from './year-month.models';
+import { YearMonth } from '../../../shared/utils/year-month';
 
 export interface PlanItem {
   name: string;
@@ -60,55 +60,20 @@ export function getBudgetExcess(plannedValue: number, realValue: number): number
   return Math.max(realValue - plannedValue, 0);
 }
 
-export class PlanningUtils {
-  static getRealValue(card: PlanCard): number {
-    if (card.items && card.items.length > 0) {
-      return card.items.reduce((sum, item) => sum + item.value, 0);
-    }
-    return card.currentValue ?? 0;
+/** Valor gasto de um card: soma dos itens, ou `currentValue` quando não há itens. */
+export function getCardSpent(card: PlanCard): number {
+  if (card.items?.length) {
+    return card.items.reduce((sum, item) => sum + item.value, 0);
   }
+  return card.currentValue ?? 0;
+}
 
-  static getCardStatus(card: PlanCard): PlanCardStatus {
-    return getBudgetStatus(card.plannedValue, PlanningUtils.getRealValue(card));
-  }
+/** Total planejado do mês (soma dos cards). */
+export function getPlanPlanned(plan: MonthlyPlan): number {
+  return plan.cards.reduce((sum, card) => sum + card.plannedValue, 0);
+}
 
-  static getCardProgress(card: PlanCard): number {
-    return getBudgetProgress(card.plannedValue, PlanningUtils.getRealValue(card));
-  }
-
-  static getCardExcess(card: PlanCard): number {
-    return getBudgetExcess(card.plannedValue, PlanningUtils.getRealValue(card));
-  }
-
-  static getTotalPlanned(plan: MonthlyPlan): number {
-    return plan.cards.reduce((sum, card) => sum + card.plannedValue, 0);
-  }
-
-  static getTotalSpent(plan: MonthlyPlan): number {
-    return plan.cards.reduce((sum, card) => sum + PlanningUtils.getRealValue(card), 0);
-  }
-
-  static getOverallStatus(plan: MonthlyPlan): PlanCardStatus {
-    return getBudgetStatus(PlanningUtils.getTotalPlanned(plan), PlanningUtils.getTotalSpent(plan));
-  }
-
-  static getOverallProgress(plan: MonthlyPlan): number {
-    return getBudgetProgress(PlanningUtils.getTotalPlanned(plan), PlanningUtils.getTotalSpent(plan));
-  }
-
-  static getOverallExcess(plan: MonthlyPlan): number {
-    return getBudgetExcess(PlanningUtils.getTotalPlanned(plan), PlanningUtils.getTotalSpent(plan));
-  }
-
-  static getItemStatus(plannedValue: number, realValue: number): PlanCardStatus {
-    return getBudgetStatus(plannedValue, realValue);
-  }
-
-  static getItemProgress(plannedValue: number, realValue: number): number {
-    return getBudgetProgress(plannedValue, realValue);
-  }
-
-  static getItemExcess(plannedValue: number, realValue: number): number {
-    return getBudgetExcess(plannedValue, realValue);
-  }
+/** Total gasto do mês (soma dos cards). */
+export function getPlanSpent(plan: MonthlyPlan): number {
+  return plan.cards.reduce((sum, card) => sum + getCardSpent(card), 0);
 }

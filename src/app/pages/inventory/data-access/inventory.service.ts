@@ -1,3 +1,4 @@
+import { createId } from '../../../shared/utils/id.utils';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map } from 'rxjs';
 import { InventoryCategory, InventoryCategoryCreate } from '../models/inventory-category.model';
@@ -34,7 +35,7 @@ export class InventoryService {
   addCategory(create: InventoryCategoryCreate): void {
     const newCategory: InventoryCategory = {
       ...create,
-      id: this.generateId()
+      id: createId()
     };
     
     const currentCategories = this.categoriesSubject.value;
@@ -44,7 +45,7 @@ export class InventoryService {
   addItem(create: InventoryItemCreate): void {
     const newItem: InventoryItem = {
       ...create,
-      id: this.generateId(),
+      id: createId(),
       createdAt: new Date().toISOString()
     };
     
@@ -58,11 +59,4 @@ export class InventoryService {
     this.itemsSubject.next(filteredItems);
   }
 
-  private generateId(): string {
-    // Fallback se crypto.randomUUID não estiver disponível
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-  }
 }

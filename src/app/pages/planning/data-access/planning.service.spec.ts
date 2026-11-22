@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { PlanningService } from './planning.service';
-import { YearMonthUtils } from '../models/year-month.models';
+import { addMonths, currentYearMonth, yearMonthKey } from '../../../shared/utils/year-month';
 import { PLANNING_FUTURE_MONTHS, PLANNING_HISTORY_MONTHS } from './planning.mock';
 
 describe('PlanningService (in-memory)', () => {
   let service: PlanningService;
-  const current = YearMonthUtils.getCurrentYearMonth();
+  const current = currentYearMonth();
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
@@ -16,7 +16,7 @@ describe('PlanningService (in-memory)', () => {
   it('offers months around the current month, newest first', async () => {
     const months = await firstValueFrom(service.getAvailableMonths());
     expect(months.length).toBe(PLANNING_HISTORY_MONTHS + PLANNING_FUTURE_MONTHS + 1);
-    expect(months[0]).toEqual(YearMonthUtils.addMonths(current, PLANNING_FUTURE_MONTHS));
+    expect(months[0]).toEqual(addMonths(current, PLANNING_FUTURE_MONTHS));
     expect(months).toContain(jasmine.objectContaining(current));
   });
 
@@ -54,6 +54,6 @@ describe('PlanningService (in-memory)', () => {
   it('builds a 12-month trend ending at the requested month', async () => {
     const trend = await firstValueFrom(service.getItemTrend('contas', 'condominio', current));
     expect(trend.length).toBe(12);
-    expect(trend[trend.length - 1].month).toBe(YearMonthUtils.toKey(current));
+    expect(trend[trend.length - 1].month).toBe(yearMonthKey(current));
   });
 });

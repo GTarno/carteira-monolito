@@ -40,6 +40,23 @@ body {
   @apply bg-base-100 text-base-content rounded-box shadow-2xl p-6 w-[min(32rem,92vw)] max-h-[90vh] overflow-y-auto;
 }
 
+.app-drawer-panel {
+  @apply bg-base-100 text-base-content shadow-2xl h-full overflow-y-auto p-6;
+  animation: app-drawer-in 0.2s ease-out;
+}
+
+@keyframes app-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-drawer-panel {
+    animation: none;
+  }
+}
+
 .app-dialog-backdrop {
   background-color: oklch(0% 0 0 / 0.45);
 }

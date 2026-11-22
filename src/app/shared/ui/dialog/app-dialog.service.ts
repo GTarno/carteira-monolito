@@ -1,4 +1,5 @@
 import { Dialog, DialogConfig, DialogRef } from '@angular/cdk/dialog';
+import { Overlay } from '@angular/cdk/overlay';
 import { ComponentType } from '@angular/cdk/portal';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
@@ -11,6 +12,8 @@ export interface AppDialogOptions<D> {
   /** Fecha ao clicar fora e com Esc. Padrão: true. */
   dismissible?: boolean;
   ariaLabel?: string;
+  /** `drawer`: painel lateral à direita, com a altura da tela (bom para formulários longos). */
+  variant?: 'modal' | 'drawer';
 }
 
 /**
@@ -32,13 +35,20 @@ export interface AppDialogOptions<D> {
 @Injectable({ providedIn: 'root' })
 export class AppDialog {
   private readonly dialog = inject(Dialog);
+  private readonly overlay = inject(Overlay);
 
   open<C, D = unknown, R = unknown>(component: ComponentType<C>, options: AppDialogOptions<D> = {}): DialogRef<R, C> {
+    const drawer = options.variant === 'drawer';
     const config: DialogConfig<D, DialogRef<R, C>> = {
       data: options.data,
-      panelClass: 'app-dialog-panel',
+      panelClass: drawer ? 'app-drawer-panel' : 'app-dialog-panel',
       backdropClass: 'app-dialog-backdrop',
-      maxWidth: options.maxWidth ?? 'min(32rem, 92vw)',
+      maxWidth: drawer ? '100vw' : (options.maxWidth ?? 'min(32rem, 92vw)'),
+      ...(drawer && {
+        width: options.maxWidth ?? 'min(30rem, 100vw)',
+        height: '100%',
+        positionStrategy: this.overlay.position().global().right('0').top('0')
+      }),
       disableClose: options.dismissible === false,
       ariaLabel: options.ariaLabel,
       autoFocus: 'first-tabbable',

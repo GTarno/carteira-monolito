@@ -1,0 +1,77 @@
+<form class="flex min-h-full flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <header class="flex items-start gap-3">
+    <span class="rounded-box bg-primary/15 p-2 text-primary"><app-icon name="receipt" /></span>
+    <div class="flex-1">
+      <h2 class="text-lg font-semibold">Novo gasto mensal</h2>
+      <p class="text-sm text-base-content/80">Uma conta que se repete todo mês.</p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm btn-square" aria-label="Fechar" (click)="cancel()">
+      <app-icon name="close" [size]="18" />
+    </button>
+  </header>
+
+  <div class="flex flex-col gap-1">
+    <label for="expense-name" class="text-sm font-medium">Nome</label>
+    <input id="expense-name" class="input w-full" [class.input-error]="showError('name')" formControlName="name"
+      placeholder="Ex.: Conta de luz, Academia, Streaming..." maxlength="60" autocomplete="off" />
+    @if (showError('name')) {
+      <p class="text-sm text-error">{{ errorMessage('name') }}</p>
+    }
+  </div>
+
+  <fieldset class="flex flex-col gap-2">
+    <legend class="mb-2 text-sm font-medium">Tipo de conta</legend>
+    <p class="-mt-1 text-sm text-base-content/80">Em qual categoria do planejamento esse gasto se encaixa?</p>
+    <div class="grid gap-2 sm:grid-cols-2">
+      @for (category of data.categories; track category.id) {
+        <label
+          class="flex cursor-pointer items-center gap-3 rounded-box border px-3 py-3 transition hover:bg-base-200"
+          [class]="form.controls.categoryId.value === category.id ? 'border-primary bg-primary/10' : 'border-base-300'">
+          <input type="radio" class="radio radio-primary radio-sm" formControlName="categoryId" [value]="category.id" />
+          <app-icon [name]="category.icon" [size]="20" />
+          <span class="font-medium">{{ category.title }}</span>
+        </label>
+      }
+    </div>
+    @if (showError('categoryId')) {
+      <p class="text-sm text-error">{{ errorMessage('categoryId') }}</p>
+    }
+  </fieldset>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="flex flex-col gap-1">
+      <label for="expense-value" class="text-sm font-medium">Valor planejado</label>
+      <label class="input w-full" [class.input-error]="showError('plannedValue')">
+        <span class="text-base-content/80">R$</span>
+        <input id="expense-value" formControlName="plannedValue" inputmode="decimal" placeholder="0,00" autocomplete="off" />
+      </label>
+      @if (showError('plannedValue')) {
+        <p class="text-sm text-error">{{ errorMessage('plannedValue') }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="expense-due" class="text-sm font-medium">Dia do vencimento</label>
+      <input id="expense-due" class="input w-full" [class.input-error]="showError('dueDay')" formControlName="dueDay"
+        inputmode="numeric" maxlength="2" autocomplete="off" />
+      @if (showError('dueDay')) {
+        <p class="text-sm text-error">{{ errorMessage('dueDay') }}</p>
+      }
+    </div>
+  </div>
+
+  @if (summary(); as s) {
+    <div role="status" class="alert alert-soft alert-info text-sm">
+      <app-icon name="info" [size]="18" />
+      <span>
+        <strong>{{ s.amount | currency }}</strong> por mês, vencendo todo dia {{ s.dueDay }}.
+        Vai aparecer em <strong>Contas do mês</strong> (Início) e no <strong>Planejamento › {{ s.category }}</strong>.
+      </span>
+    </div>
+  }
+
+  <div class="mt-auto flex justify-end gap-2 pt-2">
+    <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary"><app-icon name="check" [size]="18" /> Adicionar gasto</button>
+  </div>
+</form>

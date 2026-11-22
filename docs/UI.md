@@ -48,6 +48,8 @@ this.dialog.open<MeuDialogo, Dados, Resultado>(MeuDialogo, { data, ariaLabel: 'E
   .closed.subscribe(resultado => { ... });
 ```
 
+Para formulários mais longos, abra como **drawer** (painel lateral à direita, tela cheia no celular): `this.dialog.open(Form, { variant: 'drawer' })`. Exemplos: `src/app/pages/adicionar-gastos/ui/*-form`.
+
 Para pedir confirmação (ex.: antes de excluir), use `confirm()`: emite `true` só se o usuário confirmar.
 
 ```ts
@@ -77,6 +79,19 @@ No componente do diálogo: `inject(DIALOG_DATA)` e `inject(DialogRef)` de `@angu
 
 - `YearMonth` e suas funções ficam em `src/app/shared/utils/year-month.ts`: `formatYearMonthShort` ("Nov/2026"), `formatYearMonthLong` ("Novembro de 2026"), `addMonths`, `yearMonthKey`/`parseYearMonthKey` ("2026-11", usado em URLs e na API).
 - Os nomes dos meses vêm do `Intl` (pt-BR), não de listas escritas à mão.
+
+## Dados salvos no navegador
+
+Enquanto não há API, o que o usuário cadastra fica no `localStorage` (helpers em `src/app/shared/utils/storage.utils.ts`, que nunca lançam erro):
+
+| Chave | Conteúdo |
+|---|---|
+| `carteira.monthly-expenses` | Gastos mensais (`MonthlyExpensesStore`): alimentam as Contas do mês e o Planejamento |
+| `carteira.installments` | Grandes compras cadastradas (carrossel de parcelamentos) |
+| `bills-checklist` | Contas do mês atual e quais estão pagas |
+| `carteira-theme` | Tema escolhido |
+
+Imagens enviadas pelo usuário são reduzidas antes de salvar (`readImageAsDataUrl`, até 800 px em JPEG), porque o `localStorage` tem só ~5 MB.
 
 ## Valores em reais
 

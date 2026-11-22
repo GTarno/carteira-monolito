@@ -1,11 +1,13 @@
 import { createId } from '../../../shared/utils/id.utils';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, Subject, of, delay, throwError } from 'rxjs';
 import { MonthlyPlan, PlanCard, PlanItemDetail, PlanningItemCreate } from '../models/planning.models';
 import { PlanningItemUpdate } from '../models/planning-item-update.model';
 import { YearMonth, addMonths, compareYearMonths, currentYearMonth, formatYearMonthShort, parseYearMonthKey, yearMonthKey } from '../../../shared/utils/year-month';
 import { ItemMonthlyTrend } from '../models/item-monthly-trend.model';
 import { PLANNING_CATEGORIES, PlanningCategory, createPlanningSeed } from './planning.mock';
+import { MonthlyExpensesStore } from '../../../core/expenses/monthly-expenses.store';
+import { MonthlyExpense } from '../../../core/expenses/monthly-expense.model';
 
 export interface PlanningItemsChange {
   month: YearMonth;
@@ -33,6 +35,28 @@ export class PlanningService {
 
   /** Emite sempre que itens de uma categoria/mês são criados ou alterados. */
   readonly itemsChanged$: Observable<PlanningItemsChange> = this.itemsChangedSubject.asObservable();
+
+  constructor() {
+    // Gastos mensais cadastrados em "Adicionar gastos" (salvos no navegador)
+    for (const expense of inject(MonthlyExpensesStore).expenses()) {
+      this.applyMonthlyExpense(expense);
+    }
+  }
+
+  /** Categorias do planejamento (ex.: para escolher onde um gasto se encaixa). */
+  getCategories(): PlanningCategory[] {
+    return this.categories;
+  }
+
+  /**
+   * Inclui um gasto mensal como item da categoria escolhida, do mês de início em diante
+   * (o planejado é o valor informado; o gasto começa em zero).
+   */
+  addMonthlyExpense(expense: MonthlyExpense): void {
+    for (const month of this.applyMonthlyExpense(expense)) {
+      this.itemsChangedSubject.next({ month, categoryId: expense.categoryId });
+    }
+  }
 
   /** Meses com dados, do mais recente para o mais antigo. */
   getAvailableMonths(): Observable<YearMonth[]> {
@@ -122,6 +146,27 @@ export class PlanningService {
     this.itemsByMonth.set(key, items.map(item => item === target ? updatedItem : item));
     this.itemsChangedSubject.next({ month, categoryId });
     return this.respond(updatedItem);
+  }
+
+  /** Aplica o gasto aos meses a partir de `startMonth`; retorna os meses alterados. */
+  private applyMonthlyExpense(expense: MonthlyExpense): YearMonth[] {
+    const category = this.findCategory(expense.categoryId);
+    if (!category) return [];
+
+    const changed: YearMonth[] = [];
+    for (const [key, items] of this.itemsByMonth) {
+      if (key < expense.startMonth || items.some(item => item.id === expense.id)) continue;
+      this.itemsByMonth.set(key, [...items, {
+        id: expense.id,
+        categoryId: category.id,
+        name: expense.name,
+        icon: category.icon,
+        plannedValue: expense.plannedValue,
+        realValue: 0
+      }]);
+      changed.push(parseYearMonthKey(key)!);
+    }
+    return changed;
   }
 
   private buildCard(category: PlanningCategory, monthItems: PlanItemDetail[]): PlanCard {

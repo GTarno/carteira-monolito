@@ -1,0 +1,94 @@
+<form class="flex min-h-full flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <header class="flex items-start gap-3">
+    <span class="rounded-box bg-primary/15 p-2 text-primary"><app-icon name="credit-card" /></span>
+    <div class="flex-1">
+      <h2 class="text-lg font-semibold">Nova grande compra</h2>
+      <p class="text-sm text-base-content/80">Uma compra parcelada para acompanhar as parcelas.</p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm btn-square" aria-label="Fechar" (click)="cancel()">
+      <app-icon name="close" [size]="18" />
+    </button>
+  </header>
+
+  <div class="flex flex-col gap-1">
+    <label for="purchase-title" class="text-sm font-medium">O que você comprou?</label>
+    <input id="purchase-title" class="input w-full" [class.input-error]="showError('title')" formControlName="title"
+      placeholder="Ex.: Notebook, Geladeira, Viagem..." maxlength="60" autocomplete="off" />
+    @if (showError('title')) {
+      <p class="text-sm text-error">{{ errorMessage('title') }}</p>
+    }
+  </div>
+
+  <div class="flex flex-col gap-1">
+    <label for="purchase-total" class="text-sm font-medium">Valor total</label>
+    <label class="input w-full" [class.input-error]="showError('totalAmount')">
+      <span class="text-base-content/80">R$</span>
+      <input id="purchase-total" formControlName="totalAmount" inputmode="decimal" placeholder="0,00" autocomplete="off" />
+    </label>
+    @if (showError('totalAmount')) {
+      <p class="text-sm text-error">{{ errorMessage('totalAmount') }}</p>
+    }
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="flex flex-col gap-1">
+      <label for="purchase-installments" class="text-sm font-medium">Quantidade de parcelas</label>
+      <input id="purchase-installments" class="input w-full" [class.input-error]="showError('installments')"
+        formControlName="installments" inputmode="numeric" maxlength="3" autocomplete="off" />
+      @if (showError('installments')) {
+        <p class="text-sm text-error">{{ errorMessage('installments') }}</p>
+      }
+    </div>
+    <div class="flex flex-col gap-1">
+      <label for="purchase-paid" class="text-sm font-medium">Parcelas já pagas</label>
+      <input id="purchase-paid" class="input w-full" [class.input-error]="showError('paidInstallments')"
+        formControlName="paidInstallments" inputmode="numeric" maxlength="3" autocomplete="off" />
+      @if (showError('paidInstallments')) {
+        <p class="text-sm text-error">{{ errorMessage('paidInstallments') }}</p>
+      }
+    </div>
+  </div>
+
+  @if (preview(); as p) {
+    <div role="status" class="alert alert-soft alert-info text-sm">
+      <app-icon name="info" [size]="18" />
+      <span>
+        <strong>{{ p.count }}x de {{ p.amount | currency }}</strong>@if (p.remaining < p.count) {<span> · faltam {{ p.remaining }} parcelas</span>}.
+        Vai aparecer em <strong>Meus parcelamentos</strong> (Início).
+      </span>
+    </div>
+  }
+
+  <div class="flex flex-col gap-2">
+    <span class="text-sm font-medium" id="purchase-image-label">Imagem ilustrativa <span class="font-normal text-base-content/80">(opcional)</span></span>
+    <label
+      for="purchase-image"
+      class="relative flex h-40 cursor-pointer items-center justify-center overflow-hidden rounded-box border-2 border-dashed bg-base-200 transition hover:border-primary"
+      [class]="imageError() ? 'border-error' : 'border-base-300'">
+      @if (imageLoading()) {
+        <span class="loading loading-spinner loading-md"></span>
+      } @else if (imageUrl(); as url) {
+        <img [src]="url" alt="Prévia da imagem da compra" class="h-full w-full object-cover" />
+      } @else {
+        <span class="flex flex-col items-center gap-2 text-sm text-base-content/80">
+          <app-icon name="image" [size]="32" />
+          Clique para escolher uma imagem
+        </span>
+      }
+    </label>
+    <input id="purchase-image" type="file" accept="image/*" class="sr-only" aria-labelledby="purchase-image-label" (change)="onImageSelected($event)" />
+    @if (imageUrl()) {
+      <button type="button" class="btn btn-ghost btn-sm w-fit gap-1" (click)="removeImage()">
+        <app-icon name="delete" [size]="16" /> Remover imagem
+      </button>
+    }
+    @if (imageError(); as message) {
+      <p class="text-sm text-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="mt-auto flex justify-end gap-2 pt-2">
+    <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary" [disabled]="imageLoading()"><app-icon name="check" [size]="18" /> Adicionar compra</button>
+  </div>
+</form>

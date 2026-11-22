@@ -1,0 +1,81 @@
+<form class="flex min-h-full flex-col gap-5" [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <header class="flex items-start gap-3">
+    <span class="rounded-box bg-primary/15 p-2 text-primary"><app-icon name="receipt" /></span>
+    <div class="flex-1">
+      <h2 class="text-lg font-semibold">Novo gasto mensal</h2>
+      <p class="text-sm text-base-content/80">Uma conta que se repete todo mês.</p>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm btn-square" aria-label="Fechar" (click)="cancel()">
+      <app-icon name="close" [size]="18" />
+    </button>
+  </header>
+
+  <div class="flex flex-col gap-1">
+    <label for="expense-name" class="text-sm font-medium">Nome</label>
+    <input id="expense-name" class="input w-full" [class.input-error]="showError('name')" formControlName="name"
+      placeholder="Ex.: Conta de luz, Academia, Streaming..." maxlength="60" autocomplete="off" />
+    @if (showError('name')) {
+      <p class="text-sm text-error">{{ errorMessage('name') }}</p>
+    }
+  </div>
+
+  <fieldset class="flex flex-col gap-2">
+    <legend class="mb-2 text-sm font-medium">Tipo de conta</legend>
+    <p class="-mt-1 text-sm text-base-content/80">Em qual categoria do planejamento esse gasto se encaixa?</p>
+    <app-category-picker formControlName="categoryId" [categories]="data.categories" />
+    @if (showError('categoryId')) {
+      <p class="text-sm text-error">{{ errorMessage('categoryId') }}</p>
+    }
+  </fieldset>
+
+  <div class="grid gap-4 sm:grid-cols-2">
+    <div class="flex flex-col gap-1">
+      <label for="expense-value" class="text-sm font-medium">Valor planejado</label>
+      <label class="input w-full" [class.input-error]="showError('plannedValue')">
+        <span class="text-base-content/80">R$</span>
+        <input id="expense-value" formControlName="plannedValue" inputmode="decimal" placeholder="0,00" autocomplete="off" />
+      </label>
+      @if (showError('plannedValue')) {
+        <p class="text-sm text-error">{{ errorMessage('plannedValue') }}</p>
+      }
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="expense-due" class="text-sm font-medium">Dia do vencimento</label>
+      <input id="expense-due" class="input w-full" [class.input-error]="showError('dueDay')" formControlName="dueDay"
+        inputmode="numeric" maxlength="2" autocomplete="off" />
+      @if (showError('dueDay')) {
+        <p class="text-sm text-error">{{ errorMessage('dueDay') }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="flex flex-col gap-1 rounded-box border border-base-300 px-4 py-3">
+    <label class="flex cursor-pointer items-center justify-between gap-3">
+      <span class="font-medium">Já paguei este mês</span>
+      <input type="checkbox" class="toggle toggle-primary" formControlName="paidThisMonth" />
+    </label>
+    <p class="text-sm text-base-content/80">
+      @switch (dueThisMonth()) {
+        @case ('passed') { O vencimento deste mês (dia {{ form.controls.dueDay.value }}) já passou. Se você já pagou, marque para a conta não aparecer como atrasada. }
+        @case ('today') { A conta deste mês vence hoje. }
+        @default { Marque se a conta deste mês já foi paga. }
+      }
+    </p>
+  </div>
+
+  @if (summary(); as s) {
+    <div role="status" class="alert alert-soft alert-info text-sm">
+      <app-icon name="info" [size]="18" />
+      <span>
+        <strong>{{ s.amount | currency }}</strong> por mês, vencendo todo dia {{ s.dueDay }}.
+        Vai aparecer em <strong>Contas do mês</strong> (Início){{ s.paid ? ', já marcada como paga,' : '' }} e no <strong>Planejamento › {{ s.category }}</strong>.
+      </span>
+    </div>
+  }
+
+  <div class="mt-auto flex justify-end gap-2 pt-2">
+    <button type="button" class="btn btn-ghost" (click)="cancel()">Cancelar</button>
+    <button type="submit" class="btn btn-primary"><app-icon name="check" [size]="18" /> Adicionar gasto</button>
+  </div>
+</form>

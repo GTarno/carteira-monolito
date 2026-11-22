@@ -4,6 +4,7 @@ import {
   formatYearMonthLong,
   formatYearMonthShort,
   isSameYearMonth,
+  monthsBetween,
   parseYearMonthKey,
   yearMonthFromDate,
   yearMonthKey
@@ -21,6 +22,12 @@ describe('year-month', () => {
     expect(addMonths({ year: 2026, month: 11 }, 3)).toEqual({ year: 2027, month: 2 });
     expect(addMonths({ year: 2026, month: 1 }, -1)).toEqual({ year: 2025, month: 12 });
     expect(addMonths({ year: 2026, month: 5 }, -12)).toEqual({ year: 2025, month: 5 });
+  });
+
+  it('counts months between two months', () => {
+    expect(monthsBetween({ year: 2026, month: 1 }, { year: 2026, month: 11 })).toBe(10);
+    expect(monthsBetween({ year: 2025, month: 12 }, { year: 2026, month: 2 })).toBe(2);
+    expect(monthsBetween({ year: 2026, month: 5 }, { year: 2026, month: 3 })).toBe(-2);
   });
 
   it('compares and checks equality', () => {

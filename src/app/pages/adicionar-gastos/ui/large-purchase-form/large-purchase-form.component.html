@@ -49,12 +49,21 @@
     </div>
   </div>
 
+  <fieldset class="flex flex-col gap-2">
+    <legend class="mb-2 text-sm font-medium">Categoria no planejamento</legend>
+    <p class="-mt-1 text-sm text-base-content/80">Cada parcela entra no mês dela, nesta categoria.</p>
+    <app-category-picker formControlName="categoryId" [categories]="data.categories" />
+    @if (showError('categoryId')) {
+      <p class="text-sm text-error">{{ errorMessage('categoryId') }}</p>
+    }
+  </fieldset>
+
   @if (preview(); as p) {
     <div role="status" class="alert alert-soft alert-info text-sm">
       <app-icon name="info" [size]="18" />
       <span>
         <strong>{{ p.count }}x de {{ p.amount | currency }}</strong>@if (p.remaining < p.count) {<span> · faltam {{ p.remaining }} parcelas</span>}.
-        Vai aparecer em <strong>Meus parcelamentos</strong> (Início).
+        Vai aparecer em <strong>Meus parcelamentos</strong> (Início)@if (p.category) {<span> e no <strong>Planejamento › {{ p.category }}</strong></span>}.
       </span>
     </div>
   }

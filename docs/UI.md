@@ -87,7 +87,7 @@ Enquanto não há API, o que o usuário cadastra fica no `localStorage` (helpers
 | Chave | Conteúdo |
 |---|---|
 | `carteira.monthly-expenses` | Gastos mensais (`MonthlyExpensesStore`): alimentam as Contas do mês e o Planejamento |
-| `carteira.installments` | Grandes compras cadastradas (carrossel de parcelamentos) |
+| `carteira.large-purchases` | Grandes compras (`LargePurchasesStore`): alimentam o carrossel de parcelamentos e as parcelas no Planejamento. O formato antigo (`carteira.installments`) é convertido automaticamente |
 | `bills-checklist` | Contas do mês atual e quais estão pagas |
 | `carteira-theme` | Tema escolhido |
 

@@ -43,6 +43,11 @@ export function addMonths(yearMonth: YearMonth, months: number): YearMonth {
   return yearMonthFromDate(date);
 }
 
+/** Quantos meses de `from` até `to` (negativo se `to` vem antes). */
+export function monthsBetween(from: YearMonth, to: YearMonth): number {
+  return (to.year - from.year) * 12 + (to.month - from.month);
+}
+
 /** Para ordenar: negativo se `a` vem antes de `b`. */
 export function compareYearMonths(a: YearMonth, b: YearMonth): number {
   return a.year !== b.year ? a.year - b.year : a.month - b.month;

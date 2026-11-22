@@ -22,17 +22,7 @@
   <fieldset class="flex flex-col gap-2">
     <legend class="mb-2 text-sm font-medium">Tipo de conta</legend>
     <p class="-mt-1 text-sm text-base-content/80">Em qual categoria do planejamento esse gasto se encaixa?</p>
-    <div class="grid gap-2 sm:grid-cols-2">
-      @for (category of data.categories; track category.id) {
-        <label
-          class="flex cursor-pointer items-center gap-3 rounded-box border px-3 py-3 transition hover:bg-base-200"
-          [class]="form.controls.categoryId.value === category.id ? 'border-primary bg-primary/10' : 'border-base-300'">
-          <input type="radio" class="radio radio-primary radio-sm" formControlName="categoryId" [value]="category.id" />
-          <app-icon [name]="category.icon" [size]="20" />
-          <span class="font-medium">{{ category.title }}</span>
-        </label>
-      }
-    </div>
+    <app-category-picker formControlName="categoryId" [categories]="data.categories" />
     @if (showError('categoryId')) {
       <p class="text-sm text-error">{{ errorMessage('categoryId') }}</p>
     }

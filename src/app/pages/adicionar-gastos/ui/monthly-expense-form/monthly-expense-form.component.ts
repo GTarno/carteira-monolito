@@ -6,6 +6,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NewMonthlyExpense } from '../../../../core/expenses/monthly-expense.model';
 import { PlanningCategory } from '../../../planning/data-access/planning.mock';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
+import { CategoryPickerComponent } from '../category-picker/category-picker.component';
 import { moneyValidator, parseMoney } from '../../../../shared/utils/money.utils';
 
 export interface MonthlyExpenseFormData {
@@ -17,7 +18,7 @@ type Field = 'name' | 'categoryId' | 'plannedValue' | 'dueDay';
 /** Formulário (no drawer) de um gasto mensal recorrente. Fecha com `NewMonthlyExpense`. */
 @Component({
   selector: 'app-monthly-expense-form',
-  imports: [ReactiveFormsModule, IconComponent, CurrencyPipe],
+  imports: [ReactiveFormsModule, IconComponent, CurrencyPipe, CategoryPickerComponent],
   templateUrl: './monthly-expense-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

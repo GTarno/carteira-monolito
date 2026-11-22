@@ -1,14 +1,23 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { DialogRef } from '@angular/cdk/dialog';
+import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { CurrencyPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
-import { LargePurchaseInput, installmentAmount } from '../../../home/installments-carousel/models/installments.models';
+import { LargePurchaseInput, installmentAmount } from '../../../../core/expenses/large-purchase.model';
+import { PlanningCategory } from '../../../planning/data-access/planning.mock';
+import { CategoryPickerComponent } from '../category-picker/category-picker.component';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { moneyValidator, parseMoney } from '../../../../shared/utils/money.utils';
 import { imageErrorMessage, readImageAsDataUrl } from '../../../../shared/utils/image.utils';
 
-type Field = 'title' | 'totalAmount' | 'installments' | 'paidInstallments';
+type Field = 'title' | 'totalAmount' | 'installments' | 'paidInstallments' | 'categoryId';
+
+export interface LargePurchaseFormData {
+  categories: PlanningCategory[];
+}
+
+/** Categoria sugerida para compras parceladas. */
+const DEFAULT_CATEGORY = 'cartao-credito';
 
 const MAX_INSTALLMENTS = 120;
 
@@ -22,11 +31,12 @@ function paidBelowTotal(group: AbstractControl): ValidationErrors | null {
 /** Formulário (no drawer) de uma grande compra parcelada. Fecha com `LargePurchaseInput`. */
 @Component({
   selector: 'app-large-purchase-form',
-  imports: [ReactiveFormsModule, IconComponent, CurrencyPipe],
+  imports: [ReactiveFormsModule, IconComponent, CurrencyPipe, CategoryPickerComponent],
   templateUrl: './large-purchase-form.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LargePurchaseFormComponent {
+  protected readonly data = inject<LargePurchaseFormData>(DIALOG_DATA);
   private readonly dialogRef = inject<DialogRef<LargePurchaseInput>>(DialogRef);
 
   protected readonly submitted = signal(false);
@@ -39,7 +49,8 @@ export class LargePurchaseFormComponent {
     title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
     totalAmount: ['', [Validators.required, moneyValidator(0.01)]],
     installments: ['12', [Validators.required, Validators.pattern(/^\d+$/), Validators.min(1), Validators.max(MAX_INSTALLMENTS)]],
-    paidInstallments: ['0', [Validators.required, Validators.pattern(/^\d+$/), Validators.min(0)]]
+    paidInstallments: ['0', [Validators.required, Validators.pattern(/^\d+$/), Validators.min(0)]],
+    categoryId: [this.defaultCategory(), Validators.required]
   }, { validators: paidBelowTotal });
 
   private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
@@ -52,7 +63,8 @@ export class LargePurchaseFormComponent {
     const paid = Number(value.paidInstallments) || 0;
     if (!total || total <= 0 || !Number.isInteger(count) || count < 1 || count > MAX_INSTALLMENTS) return null;
     const amount = installmentAmount(total, count);
-    return { count, amount, remaining: Math.max(count - paid, 0) };
+    const category = this.data.categories.find(c => c.id === value.categoryId)?.title;
+    return { count, amount, remaining: Math.max(count - paid, 0), category };
   });
 
   showError(field: Field): boolean {
@@ -63,6 +75,7 @@ export class LargePurchaseFormComponent {
 
   errorMessage(field: Field): string {
     const errors = this.form.controls[field].errors;
+    if (field === 'categoryId' && errors?.['required']) return 'Escolha a categoria do planejamento.';
     if (errors?.['required']) return 'Campo obrigatório.';
     if (errors?.['minlength']) return `Use pelo menos ${errors['minlength'].requiredLength} caracteres.`;
     if (errors?.['maxlength']) return `Use no máximo ${errors['maxlength'].requiredLength} caracteres.`;
@@ -74,6 +87,10 @@ export class LargePurchaseFormComponent {
     }
     if (errors?.['min']) return 'O valor deve ser maior que zero.';
     return '';
+  }
+
+  private defaultCategory(): string {
+    return this.data.categories.some(c => c.id === DEFAULT_CATEGORY) ? DEFAULT_CATEGORY : (this.data.categories[0]?.id ?? '');
   }
 
   async onImageSelected(event: Event): Promise<void> {
@@ -114,6 +131,7 @@ export class LargePurchaseFormComponent {
       totalAmount: parseMoney(value.totalAmount) ?? 0,
       installments: Number(value.installments),
       paidInstallments: Number(value.paidInstallments),
+      categoryId: value.categoryId,
       imageUrl: this.imageUrl() ?? undefined
     });
   }

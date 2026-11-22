@@ -2,12 +2,12 @@ import { Injectable, inject } from '@angular/core';
 import { MonthlyExpensesStore } from '../../../core/expenses/monthly-expenses.store';
 import { MonthlyExpense, NewMonthlyExpense } from '../../../core/expenses/monthly-expense.model';
 import { BillsChecklistService } from '../../home/bills-checklist/bills-checklist.service';
-import { InstallmentsService } from '../../home/installments-carousel/data-access/installments.service';
-import { InstallmentPlan, LargePurchaseInput } from '../../home/installments-carousel/models/installments.models';
+import { LargePurchasesStore } from '../../../core/expenses/large-purchases.store';
+import { LargePurchase, LargePurchaseInput } from '../../../core/expenses/large-purchase.model';
 import { PlanningService } from '../../planning/data-access/planning.service';
 import { PlanningCategory } from '../../planning/data-access/planning.mock';
 import { createId } from '../../../shared/utils/id.utils';
-import { currentYearMonth, yearMonthKey } from '../../../shared/utils/year-month';
+import { addMonths, currentYearMonth, yearMonthKey } from '../../../shared/utils/year-month';
 
 export interface SaveResult<T> {
   value: T;
@@ -18,14 +18,14 @@ export interface SaveResult<T> {
 /**
  * Cadastro de gastos da tela "Adicionar gastos":
  * - gasto mensal → Contas do mês (Início) + item na categoria do Planejamento;
- * - grande compra → carrossel de parcelamentos (Início).
+ * - grande compra → carrossel de parcelamentos (Início) + parcelas no Planejamento.
  */
 @Injectable({ providedIn: 'root' })
 export class AddExpensesFacade {
   private readonly expensesStore = inject(MonthlyExpensesStore);
   private readonly bills = inject(BillsChecklistService);
   private readonly planning = inject(PlanningService);
-  private readonly installments = inject(InstallmentsService);
+  private readonly purchasesStore = inject(LargePurchasesStore);
 
   planningCategories(): PlanningCategory[] {
     return this.planning.getCategories();
@@ -39,8 +39,15 @@ export class AddExpensesFacade {
     return { value: expense, saved };
   }
 
-  addLargePurchase(input: LargePurchaseInput): SaveResult<InstallmentPlan> {
-    const { plan, saved } = this.installments.addPurchase(input);
-    return { value: plan, saved };
+  addLargePurchase({ paidInstallments, ...input }: LargePurchaseInput): SaveResult<LargePurchase> {
+    const purchase: LargePurchase = {
+      ...input,
+      id: createId(),
+      // As parcelas já pagas ficaram nos meses anteriores: a do mês atual é a seguinte
+      firstMonth: yearMonthKey(addMonths(currentYearMonth(), -paidInstallments))
+    };
+    const saved = this.purchasesStore.add(purchase);
+    this.planning.addLargePurchase(purchase);
+    return { value: purchase, saved };
   }
 }

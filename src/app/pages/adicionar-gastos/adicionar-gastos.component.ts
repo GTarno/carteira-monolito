@@ -5,10 +5,10 @@ import { AppDialog } from '../../shared/ui/dialog/app-dialog.service';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { AppIconName } from '../../shared/ui/icon/app-icons';
 import { NewMonthlyExpense } from '../../core/expenses/monthly-expense.model';
-import { LargePurchaseInput } from '../home/installments-carousel/models/installments.models';
+import { LargePurchaseInput } from '../../core/expenses/large-purchase.model';
 import { AddExpensesFacade } from './data-access/add-expenses.facade';
 import { MonthlyExpenseFormComponent, MonthlyExpenseFormData } from './ui/monthly-expense-form/monthly-expense-form.component';
-import { LargePurchaseFormComponent } from './ui/large-purchase-form/large-purchase-form.component';
+import { LargePurchaseFormComponent, LargePurchaseFormData } from './ui/large-purchase-form/large-purchase-form.component';
 
 type ExpenseType = 'gastos-mensais' | 'grandes-compras';
 
@@ -45,7 +45,7 @@ export class AdicionarGastosComponent {
     {
       type: 'grandes-compras',
       title: 'Grandes compras',
-      description: 'Uma compra parcelada, para acompanhar as parcelas em Meus parcelamentos.',
+      description: 'Uma compra parcelada. Entra em Meus parcelamentos e as parcelas no Planejamento.',
       image: 'assets/images/parcelamentos.png',
       icon: 'credit-card'
     }
@@ -74,12 +74,14 @@ export class AdicionarGastosComponent {
   }
 
   private openLargePurchase(): void {
-    this.dialog.open<LargePurchaseFormComponent, void, LargePurchaseInput>(LargePurchaseFormComponent, {
+    this.dialog.open<LargePurchaseFormComponent, LargePurchaseFormData, LargePurchaseInput>(LargePurchaseFormComponent, {
       variant: 'drawer',
+      data: { categories: this.facade.planningCategories() },
       ariaLabel: 'Nova grande compra'
     }).closed.pipe(filter((input): input is LargePurchaseInput => !!input)).subscribe(input => {
       const { value, saved } = this.facade.addLargePurchase(input);
-      this.toast.success(`"${value.title}" adicionado a Meus parcelamentos.`, { duration: 5000 });
+      const category = this.facade.planningCategories().find(c => c.id === value.categoryId)?.title ?? 'Planejamento';
+      this.toast.success(`"${value.title}" adicionado a Meus parcelamentos e ao Planejamento › ${category}.`, { duration: 5000 });
       if (!saved) this.toast.warning(NOT_SAVED_WARNING);
     });
   }

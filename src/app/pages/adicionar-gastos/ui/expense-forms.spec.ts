@@ -90,7 +90,7 @@ describe('MonthlyExpenseFormComponent', () => {
 
 describe('LargePurchaseFormComponent', () => {
   it('previews the installment value and closes without image when none is chosen', () => {
-    const { close, type, submit, text } = setup(LargePurchaseFormComponent);
+    const { close, type, submit, text } = setup(LargePurchaseFormComponent, { categories: PLANNING_CATEGORIES });
     type('#purchase-title', 'Geladeira');
     type('#purchase-total', '3.000,00');
     type('#purchase-installments', '10');
@@ -98,13 +98,29 @@ describe('LargePurchaseFormComponent', () => {
 
     expect(text()).toContain('10x de R$ 300,00');
     expect(text()).toContain('faltam 8 parcelas');
+    expect(text()).toContain('Planejamento › Cartão de crédito');
 
     submit();
-    expect(close).toHaveBeenCalledWith({ title: 'Geladeira', totalAmount: 3000, installments: 10, paidInstallments: 2, imageUrl: undefined });
+    expect(close).toHaveBeenCalledWith({
+      title: 'Geladeira', totalAmount: 3000, installments: 10, paidInstallments: 2, categoryId: 'cartao-credito', imageUrl: undefined
+    });
+  });
+
+  it('suggests the credit card category and lets the user change it', () => {
+    const { el, close, type, submit, fixture } = setup(LargePurchaseFormComponent, { categories: PLANNING_CATEGORIES });
+    const radios = el.querySelectorAll<HTMLInputElement>('input[type=radio]');
+    expect(Array.from(radios).find(r => r.checked)?.value).toBe('cartao-credito');
+
+    radios[0].click(); // Contas
+    fixture.detectChanges();
+    type('#purchase-title', 'Sofá');
+    type('#purchase-total', '1200');
+    submit();
+    expect(close).toHaveBeenCalledWith(jasmine.objectContaining({ categoryId: 'contas' }));
   });
 
   it('does not accept more paid installments than the total', () => {
-    const { close, type, submit, text } = setup(LargePurchaseFormComponent);
+    const { close, type, submit, text } = setup(LargePurchaseFormComponent, { categories: PLANNING_CATEGORIES });
     type('#purchase-title', 'Geladeira');
     type('#purchase-total', '3000');
     type('#purchase-installments', '3');

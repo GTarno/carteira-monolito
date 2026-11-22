@@ -51,8 +51,8 @@ Seguir o roteiro da seção 11 de [`BACKEND_SPRING_BOOT.md`](./BACKEND_SPRING_BO
 - [x] [#21](https://github.com/GTarno/carteira-monolito/issues/21) Control flow, `inject()`, signals, `OnPush`
 - [x] [#22](https://github.com/GTarno/carteira-monolito/issues/22) Design tokens, breakpoints e SCSS
 - [x] [#23](https://github.com/GTarno/carteira-monolito/issues/23) Ícones
-- [ ] [#24](https://github.com/GTarno/carteira-monolito/issues/24) Lazy loading e rota 404 (bundle e títulos já resolvidos)
-- [ ] [#25](https://github.com/GTarno/carteira-monolito/issues/25) UX e acessibilidade (navegação, idioma, Sobre e contraste já resolvidos)
+- [x] [#24](https://github.com/GTarno/carteira-monolito/issues/24) Lazy loading, rota 404 e bundle (inicial ~456 KB)
+- [ ] [#25](https://github.com/GTarno/carteira-monolito/issues/25) UX e acessibilidade (navegação, idioma, Sobre, contraste e confirmação de exclusão resolvidos; faltam testes com leitor de tela e teclado)
 
 ## Decisões em aberto
 

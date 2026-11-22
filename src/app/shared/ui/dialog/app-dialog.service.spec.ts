@@ -38,3 +38,31 @@ describe('AppDialog', () => {
     expect(document.querySelector('.app-dialog-panel')).toBeNull();
   }));
 });
+
+describe('AppDialog.confirm', () => {
+  afterEach(() => TestBed.inject(AppDialog).closeAll());
+
+  function run(buttonText: string): boolean | undefined {
+    let result: boolean | undefined;
+    TestBed.inject(AppDialog)
+      .confirm({ title: 'Excluir item?', message: 'Não pode ser desfeito.', confirmLabel: 'Excluir', danger: true })
+      .subscribe(value => (result = value));
+    flush();
+
+    const panel = document.querySelector('.app-dialog-panel') as HTMLElement;
+    expect(panel.querySelector('[role=alertdialog]')).toBeTruthy();
+    expect(panel.textContent).toContain('Excluir item?');
+    const button = Array.from(panel.querySelectorAll('button')).find(b => b.textContent!.trim() === buttonText)!;
+    button.click();
+    flush();
+    return result;
+  }
+
+  it('emits true when confirmed and uses a danger button', fakeAsync(() => {
+    expect(run('Excluir')).toBeTrue();
+  }));
+
+  it('emits false when cancelled', fakeAsync(() => {
+    expect(run('Cancelar')).toBeFalse();
+  }));
+});

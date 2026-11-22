@@ -1,6 +1,8 @@
 import { Dialog, DialogConfig, DialogRef } from '@angular/cdk/dialog';
 import { ComponentType } from '@angular/cdk/portal';
 import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
+import { ConfirmDialogComponent, ConfirmDialogOptions } from './confirm-dialog.component';
 
 export interface AppDialogOptions<D> {
   data?: D;
@@ -43,6 +45,23 @@ export class AppDialog {
       restoreFocus: true
     };
     return this.dialog.open<R, D, C>(component, config);
+  }
+
+  /**
+   * Pede confirmação ao usuário. Emite `true` só se ele confirmar
+   * (cancelar, Esc ou clicar fora emitem `false`).
+   *
+   * ```ts
+   * this.dialog.confirm({ title: 'Excluir item?', message: '...', confirmLabel: 'Excluir', danger: true })
+   *   .pipe(filter(Boolean)).subscribe(() => ...);
+   * ```
+   */
+  confirm(options: ConfirmDialogOptions): Observable<boolean> {
+    return this.open<ConfirmDialogComponent, ConfirmDialogOptions, boolean>(ConfirmDialogComponent, {
+      data: options,
+      maxWidth: 'min(28rem, 92vw)',
+      ariaLabel: options.title
+    }).closed.pipe(map(result => result === true));
   }
 
   closeAll(): void {

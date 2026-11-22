@@ -43,7 +43,14 @@ export class InventoryCategoryItemsPage {
   }
 
   onDeleteItem(item: InventoryItem): void {
-    this.inventoryService.deleteItem(item.id);
-    this.toast.info(`"${item.title}" removido.`);
+    this.dialog.confirm({
+      title: 'Excluir item?',
+      message: `"${item.title}" será removido de ${this.category()?.name ?? 'esta categoria'}. Essa ação não pode ser desfeita.`,
+      confirmLabel: 'Excluir',
+      danger: true
+    }).pipe(filter(Boolean)).subscribe(() => {
+      this.inventoryService.deleteItem(item.id);
+      this.toast.info(`"${item.title}" removido.`);
+    });
   }
 }

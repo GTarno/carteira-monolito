@@ -6,7 +6,7 @@ import { catchError, filter, finalize, map, of, startWith, switchMap, take } fro
 import { PlanningService } from '../../data-access/planning.service';
 import { PlanItemDetail } from '../../models/planning.models';
 import { EditPlanningItemDialogData, PlanningItemUpdate } from '../../models/planning-item-update.model';
-import { YearMonth, YearMonthUtils } from '../../models/year-month.models';
+import { YearMonth, formatYearMonthLong, formatYearMonthShort, isSameYearMonth, parseYearMonthKey, yearMonthKey } from '../../../../shared/utils/year-month';
 import { ItemMonthlyTrend } from '../../models/item-monthly-trend.model';
 import { BudgetSummaryComponent } from '../../ui/budget-summary/budget-summary.component';
 import { EditPlanningItemDialogComponent } from '../../ui/edit-planning-item-dialog/edit-planning-item-dialog.component';
@@ -32,17 +32,17 @@ export class PlanningItemDetailPage {
 
   readonly categoryId = this.route.snapshot.paramMap.get('categoryId') ?? '';
   readonly itemId = this.route.snapshot.paramMap.get('itemId') ?? '';
-  readonly month: YearMonth = YearMonthUtils.parseKey(this.route.snapshot.queryParamMap.get('month'))
+  readonly month: YearMonth = parseYearMonthKey(this.route.snapshot.queryParamMap.get('month'))
     ?? this.planningService.getCurrentMonth();
 
-  protected readonly monthKey = YearMonthUtils.toKey(this.month);
-  protected readonly monthLabel = YearMonthUtils.toLongLabel(this.month);
+  protected readonly monthKey = yearMonthKey(this.month);
+  protected readonly monthLabel = formatYearMonthLong(this.month);
 
   protected readonly loading = signal(true);
 
   /** Recarrega quando itens desta categoria/mês mudam (ex.: após editar). */
   private readonly refresh$ = this.planningService.itemsChanged$.pipe(
-    filter(change => change.categoryId === this.categoryId && YearMonthUtils.equals(change.month, this.month)),
+    filter(change => change.categoryId === this.categoryId && isSameYearMonth(change.month, this.month)),
     startWith(null)
   );
 
@@ -75,7 +75,7 @@ export class PlanningItemDetailPage {
   protected readonly chartData = computed<TrendData>(() => {
     const trend = this.trend();
     return {
-      labels: trend.map(point => YearMonthUtils.toShortLabel(YearMonthUtils.fromKey(point.month))),
+      labels: trend.map(point => formatYearMonthShort(parseYearMonthKey(point.month)!)),
       datasets: trend.length ? [{ label: 'Valor gasto', data: trend.map(point => point.value) }] : []
     };
   });

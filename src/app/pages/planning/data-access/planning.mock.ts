@@ -1,5 +1,5 @@
 import { PlanItemDetail } from '../models/planning.models';
-import { YearMonth, YearMonthUtils } from '../models/year-month.models';
+import { YearMonth, addMonths, yearMonthKey } from '../../../shared/utils/year-month';
 import { AppIconName } from '../../../shared/ui/icon/app-icons';
 
 export interface PlanningCategory {
@@ -76,13 +76,13 @@ function roundCents(value: number): number {
 /**
  * Gera os itens de planejamento (todas as categorias) por mês, de
  * `PLANNING_HISTORY_MONTHS` meses atrás até `PLANNING_FUTURE_MONTHS` à frente de `current`.
- * Chave do mapa: `YearMonthUtils.toKey(month)`.
+ * Chave do mapa: `yearMonthKey(month)`.
  */
 export function createPlanningSeed(current: YearMonth): Map<string, PlanItemDetail[]> {
   const itemsByMonth = new Map<string, PlanItemDetail[]>();
 
   for (let offset = -PLANNING_HISTORY_MONTHS; offset <= PLANNING_FUTURE_MONTHS; offset++) {
-    const month = YearMonthUtils.addMonths(current, offset);
+    const month = addMonths(current, offset);
     const isFuture = offset > 0;
 
     const items = CATEGORY_SEEDS.flatMap((category, categoryIndex) =>
@@ -99,7 +99,7 @@ export function createPlanningSeed(current: YearMonth): Map<string, PlanItemDeta
       })
     );
 
-    itemsByMonth.set(YearMonthUtils.toKey(month), items);
+    itemsByMonth.set(yearMonthKey(month), items);
   }
 
   return itemsByMonth;

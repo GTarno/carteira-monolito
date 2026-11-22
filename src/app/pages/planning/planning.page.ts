@@ -4,8 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 
 import { PlanningService } from './data-access/planning.service';
-import { MonthlyPlan, PlanningUtils } from './models/planning.models';
-import { YearMonth, YearMonthUtils } from './models/year-month.models';
+import { MonthlyPlan, getCardSpent, getPlanPlanned, getPlanSpent } from './models/planning.models';
+import { YearMonth, formatYearMonthLong, parseYearMonthKey, yearMonthKey } from '../../shared/utils/year-month';
 import { BudgetSummaryComponent } from './ui/budget-summary/budget-summary.component';
 import { BudgetCardComponent } from './ui/budget-card/budget-card.component';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
@@ -25,7 +25,7 @@ export class PlanningPage {
 
   /** Mês selecionado: `?month=yyyy-mm` da URL ou o mês atual. */
   protected readonly selectedMonth = signal<YearMonth>(
-    YearMonthUtils.parseKey(this.route.snapshot.queryParamMap.get('month')) ?? this.planningService.getCurrentMonth()
+    parseYearMonthKey(this.route.snapshot.queryParamMap.get('month')) ?? this.planningService.getCurrentMonth()
   );
   private readonly reloadCount = signal(0);
 
@@ -51,7 +51,7 @@ export class PlanningPage {
       switchMap(({ month }) =>
         this.planningService.getMonthlyPlan(month).pipe(
           catchError(() => {
-            this.error.set(`Não há dados de planejamento para ${YearMonthUtils.toLongLabel(month)}.`);
+            this.error.set(`Não há dados de planejamento para ${formatYearMonthLong(month)}.`);
             return of(null);
           }),
           finalize(() => this.loading.set(false))
@@ -64,24 +64,24 @@ export class PlanningPage {
   protected readonly cards = computed(() => this.plan()?.cards ?? []);
   protected readonly plannedTotal = computed(() => {
     const plan = this.plan();
-    return plan ? PlanningUtils.getTotalPlanned(plan) : 0;
+    return plan ? getPlanPlanned(plan) : 0;
   });
   protected readonly spentTotal = computed(() => {
     const plan = this.plan();
-    return plan ? PlanningUtils.getTotalSpent(plan) : 0;
+    return plan ? getPlanSpent(plan) : 0;
   });
 
-  protected readonly selectedKey = computed(() => YearMonthUtils.toKey(this.selectedMonth()));
-  protected readonly selectedLabel = computed(() => YearMonthUtils.toLongLabel(this.selectedMonth()));
+  protected readonly selectedKey = computed(() => yearMonthKey(this.selectedMonth()));
+  protected readonly selectedLabel = computed(() => formatYearMonthLong(this.selectedMonth()));
 
   protected readonly monthOptions = computed(() =>
-    this.months().map(month => ({ key: YearMonthUtils.toKey(month), label: YearMonthUtils.toLongLabel(month) }))
+    this.months().map(month => ({ key: yearMonthKey(month), label: formatYearMonthLong(month) }))
   );
 
-  protected readonly realValue = PlanningUtils.getRealValue;
+  protected readonly cardSpent = getCardSpent;
 
   onMonthChange(key: string): void {
-    const month = YearMonthUtils.parseKey(key);
+    const month = parseYearMonthKey(key);
     if (!month) return;
     this.selectedMonth.set(month);
     this.router.navigate([], {

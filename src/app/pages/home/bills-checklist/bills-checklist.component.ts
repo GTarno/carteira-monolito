@@ -6,6 +6,7 @@ import { Bill, BillStatus, BillStatusType } from './bills-checklist.models';
 import { compareBills, getBillStatus } from './bills-checklist.utils';
 import { BillsChecklistService } from './bills-checklist.service';
 import { parseIsoDate } from '../../../shared/utils/date.utils';
+import { currentYearMonth, formatYearMonthLong } from '../../../shared/utils/year-month';
 import { IconComponent } from '../../../shared/ui/icon/icon.component';
 import { AppIconName } from '../../../shared/ui/icon/app-icons';
 
@@ -49,9 +50,7 @@ export class BillsChecklistComponent {
   );
   protected readonly progress = computed(() => (this.totalCount() ? this.paidCount() / this.totalCount() : 0));
 
-  protected readonly monthLabel = capitalize(
-    new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(new Date())
-  );
+  protected readonly monthLabel = formatYearMonthLong(currentYearMonth());
 
   onTogglePaid(billId: string): void {
     this.billsService.togglePaid(billId);
@@ -65,9 +64,4 @@ export class BillsChecklistComponent {
     const date = parseIsoDate(dueDate);
     return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
   }
-}
-
-/** "novembro de 2026" → "Novembro de 2026" (só a primeira letra). */
-function capitalize(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }

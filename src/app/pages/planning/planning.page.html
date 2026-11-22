@@ -46,7 +46,7 @@
             [title]="card.title"
             [icon]="card.icon"
             [planned]="card.plannedValue"
-            [spent]="realValue(card)"
+            [spent]="cardSpent(card)"
             [link]="['/planejamentos', card.id]"
             [queryParams]="{ month: selectedKey() }">
             @if (card.items?.length) {

@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { MonthlyExpensesStore } from '../../../core/expenses/monthly-expenses.store';
-import { MonthlyExpense, MonthlyExpenseInput } from '../../../core/expenses/monthly-expense.model';
+import { MonthlyExpense, NewMonthlyExpense } from '../../../core/expenses/monthly-expense.model';
 import { BillsChecklistService } from '../../home/bills-checklist/bills-checklist.service';
 import { InstallmentsService } from '../../home/installments-carousel/data-access/installments.service';
 import { InstallmentPlan, LargePurchaseInput } from '../../home/installments-carousel/models/installments.models';
@@ -31,10 +31,10 @@ export class AddExpensesFacade {
     return this.planning.getCategories();
   }
 
-  addMonthlyExpense(input: MonthlyExpenseInput): SaveResult<MonthlyExpense> {
+  addMonthlyExpense({ paidThisMonth, ...input }: NewMonthlyExpense): SaveResult<MonthlyExpense> {
     const expense: MonthlyExpense = { ...input, id: createId(), startMonth: yearMonthKey(currentYearMonth()) };
     const saved = this.expensesStore.add(expense);
-    this.bills.addMonthlyExpense(expense);
+    this.bills.addMonthlyExpense(expense, paidThisMonth);
     this.planning.addMonthlyExpense(expense);
     return { value: expense, saved };
   }

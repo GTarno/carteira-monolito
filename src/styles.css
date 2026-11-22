@@ -12,7 +12,7 @@
 }
 
 /*
- * Ajustes de acessibilidade no emerald (claro): success e error originais ficam abaixo
+ * Ajustes de acessibilidade no emerald (claro): success, error e info originais ficam abaixo
  * de 4,5:1 como texto sobre o branco/cinza do tema. Tons mais escuros, com texto branco.
  */
 @plugin "daisyui/theme" {
@@ -21,6 +21,8 @@
   --color-success-content: oklch(100% 0 0);
   --color-error: oklch(52% 0.2 25);
   --color-error-content: oklch(100% 0 0);
+  --color-info: oklch(50% 0.13 245);
+  --color-info-content: oklch(100% 0 0);
 }
 
 @theme {

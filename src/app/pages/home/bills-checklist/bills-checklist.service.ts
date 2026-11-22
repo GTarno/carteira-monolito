@@ -38,11 +38,14 @@ export class BillsChecklistService {
     this.update(this.buildMonth());
   }
 
-  /** Inclui no mês atual a conta de um gasto mensal recém-cadastrado. */
-  addMonthlyExpense(expense: MonthlyExpense): void {
+  /**
+   * Inclui no mês atual a conta de um gasto mensal recém-cadastrado.
+   * `paid`: o usuário informou que já pagou a conta deste mês.
+   */
+  addMonthlyExpense(expense: MonthlyExpense, paid = false): void {
     const bills = this.billsSubject.value;
     if (bills.some(bill => bill.id === EXPENSE_BILL_PREFIX + expense.id)) return;
-    this.update([...bills, this.toBill(expense, new Date())]);
+    this.update([...bills, { ...this.toBill(expense, new Date()), isPaid: paid }]);
   }
 
   getBills(): Bill[] {

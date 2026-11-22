@@ -14,6 +14,11 @@ export interface MonthlyExpense {
 
 export type MonthlyExpenseInput = Omit<MonthlyExpense, 'id' | 'startMonth'>;
 
+/** O que o formulário devolve: o gasto + se a conta deste mês já foi paga (não é salvo no gasto). */
+export interface NewMonthlyExpense extends MonthlyExpenseInput {
+  paidThisMonth: boolean;
+}
+
 export function isMonthlyExpense(value: unknown): value is MonthlyExpense {
   const v = value as MonthlyExpense;
   return !!v && typeof v.id === 'string' && typeof v.name === 'string' && typeof v.categoryId === 'string'

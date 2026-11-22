@@ -3,7 +3,7 @@ import { DIALOG_DATA, DialogRef } from '@angular/cdk/dialog';
 import { CurrencyPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MonthlyExpenseInput } from '../../../../core/expenses/monthly-expense.model';
+import { NewMonthlyExpense } from '../../../../core/expenses/monthly-expense.model';
 import { PlanningCategory } from '../../../planning/data-access/planning.mock';
 import { IconComponent } from '../../../../shared/ui/icon/icon.component';
 import { moneyValidator, parseMoney } from '../../../../shared/utils/money.utils';
@@ -14,7 +14,7 @@ export interface MonthlyExpenseFormData {
 
 type Field = 'name' | 'categoryId' | 'plannedValue' | 'dueDay';
 
-/** Formulário (no drawer) de um gasto mensal recorrente. Fecha com `MonthlyExpenseInput`. */
+/** Formulário (no drawer) de um gasto mensal recorrente. Fecha com `NewMonthlyExpense`. */
 @Component({
   selector: 'app-monthly-expense-form',
   imports: [ReactiveFormsModule, IconComponent, CurrencyPipe],
@@ -23,7 +23,7 @@ type Field = 'name' | 'categoryId' | 'plannedValue' | 'dueDay';
 })
 export class MonthlyExpenseFormComponent {
   protected readonly data = inject<MonthlyExpenseFormData>(DIALOG_DATA);
-  private readonly dialogRef = inject<DialogRef<MonthlyExpenseInput>>(DialogRef);
+  private readonly dialogRef = inject<DialogRef<NewMonthlyExpense>>(DialogRef);
 
   protected readonly submitted = signal(false);
 
@@ -31,17 +31,32 @@ export class MonthlyExpenseFormComponent {
     name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(60)]],
     categoryId: ['', Validators.required],
     plannedValue: ['', [Validators.required, moneyValidator(0.01)]],
-    dueDay: ['10', [Validators.required, Validators.pattern(/^\d{1,2}$/), Validators.min(1), Validators.max(31)]]
+    dueDay: ['10', [Validators.required, Validators.pattern(/^\d{1,2}$/), Validators.min(1), Validators.max(31)]],
+    paidThisMonth: [false]
   });
 
   private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+
+  /**
+   * Situação do vencimento deste mês em relação a hoje, para orientar a pergunta "já pagou?".
+   * Em meses curtos, o dia 31 vence no último dia do mês.
+   */
+  protected readonly dueThisMonth = computed<'passed' | 'today' | 'upcoming' | null>(() => {
+    const day = Number(this.values().dueDay);
+    if (!Number.isInteger(day) || day < 1 || day > 31) return null;
+    const today = new Date();
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const due = Math.min(day, lastDay);
+    if (due < today.getDate()) return 'passed';
+    return due === today.getDate() ? 'today' : 'upcoming';
+  });
 
   /** Resumo de onde o gasto vai aparecer, atualizado enquanto o usuário preenche. */
   protected readonly summary = computed(() => {
     const value = this.values();
     const category = this.data.categories.find(c => c.id === value.categoryId);
     const amount = parseMoney(value.plannedValue ?? '');
-    return category && amount ? { category: category.title, amount, dueDay: value.dueDay } : null;
+    return category && amount ? { category: category.title, amount, dueDay: value.dueDay, paid: !!value.paidThisMonth } : null;
   });
 
   showError(field: Field): boolean {
@@ -79,7 +94,8 @@ export class MonthlyExpenseFormComponent {
       name: value.name.trim(),
       categoryId: value.categoryId,
       plannedValue: parseMoney(value.plannedValue) ?? 0,
-      dueDay: Number(value.dueDay)
+      dueDay: Number(value.dueDay),
+      paidThisMonth: value.paidThisMonth
     });
   }
 }

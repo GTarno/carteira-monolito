@@ -60,12 +60,26 @@
     </div>
   </div>
 
+  <div class="flex flex-col gap-1 rounded-box border border-base-300 px-4 py-3">
+    <label class="flex cursor-pointer items-center justify-between gap-3">
+      <span class="font-medium">Já paguei este mês</span>
+      <input type="checkbox" class="toggle toggle-primary" formControlName="paidThisMonth" />
+    </label>
+    <p class="text-sm text-base-content/80">
+      @switch (dueThisMonth()) {
+        @case ('passed') { O vencimento deste mês (dia {{ form.controls.dueDay.value }}) já passou. Se você já pagou, marque para a conta não aparecer como atrasada. }
+        @case ('today') { A conta deste mês vence hoje. }
+        @default { Marque se a conta deste mês já foi paga. }
+      }
+    </p>
+  </div>
+
   @if (summary(); as s) {
     <div role="status" class="alert alert-soft alert-info text-sm">
       <app-icon name="info" [size]="18" />
       <span>
         <strong>{{ s.amount | currency }}</strong> por mês, vencendo todo dia {{ s.dueDay }}.
-        Vai aparecer em <strong>Contas do mês</strong> (Início) e no <strong>Planejamento › {{ s.category }}</strong>.
+        Vai aparecer em <strong>Contas do mês</strong> (Início){{ s.paid ? ', já marcada como paga,' : '' }} e no <strong>Planejamento › {{ s.category }}</strong>.
       </span>
     </div>
   }

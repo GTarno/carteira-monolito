@@ -15,7 +15,7 @@ describe('AddExpensesFacade', () => {
 
   it('adds a monthly expense to the bills checklist and to the planning category', async () => {
     const facade = TestBed.inject(AddExpensesFacade);
-    const { value, saved } = facade.addMonthlyExpense({ name: 'Academia', categoryId: 'contas', plannedValue: 99.9, dueDay: 31 });
+    const { value, saved } = facade.addMonthlyExpense({ name: 'Academia', categoryId: 'contas', plannedValue: 99.9, dueDay: 31, paidThisMonth: false });
 
     expect(saved).toBeTrue();
     const bill = TestBed.inject(BillsChecklistService).getBills().find(b => b.name === 'Academia')!;
@@ -33,8 +33,18 @@ describe('AddExpensesFacade', () => {
     expect(before.some(i => i.id === value.id)).toBeFalse();
   });
 
+  it('adds the bill as already paid when the user says so, without storing it in the expense', () => {
+    const { value } = TestBed.inject(AddExpensesFacade).addMonthlyExpense({
+      name: 'Internet fibra', categoryId: 'contas', plannedValue: 120, dueDay: 1, paidThisMonth: true
+    });
+    const bill = TestBed.inject(BillsChecklistService).getBills().find(b => b.name === 'Internet fibra')!;
+    expect(bill.isPaid).toBeTrue();
+    expect('paidThisMonth' in value).toBeFalse();
+    expect(localStorage.getItem(MONTHLY_EXPENSES_STORAGE_KEY)).not.toContain('paidThisMonth');
+  });
+
   it('restores saved monthly expenses after a reload', async () => {
-    TestBed.inject(AddExpensesFacade).addMonthlyExpense({ name: 'Streaming', categoryId: 'alimentacao', plannedValue: 40, dueDay: 5 });
+    TestBed.inject(AddExpensesFacade).addMonthlyExpense({ name: 'Streaming', categoryId: 'alimentacao', plannedValue: 40, dueDay: 5, paidThisMonth: false });
     localStorage.removeItem('bills-checklist'); // força o checklist a ser remontado
 
     TestBed.resetTestingModule();

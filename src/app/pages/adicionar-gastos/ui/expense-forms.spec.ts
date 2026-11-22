@@ -49,7 +49,34 @@ describe('MonthlyExpenseFormComponent', () => {
     expect(text()).toContain('Planejamento › Contas');
 
     submit();
-    expect(close).toHaveBeenCalledWith({ name: 'Academia', categoryId: 'contas', plannedValue: 1099.9, dueDay: 15 });
+    expect(close).toHaveBeenCalledWith({ name: 'Academia', categoryId: 'contas', plannedValue: 1099.9, dueDay: 15, paidThisMonth: false });
+  });
+
+  describe('paid this month', () => {
+    beforeEach(() => jasmine.clock().install());
+    afterEach(() => jasmine.clock().uninstall());
+
+    it('explains when this month\'s due date has passed and returns the answer', () => {
+      jasmine.clock().mockDate(new Date(2026, 10, 22, 10, 0)); // 22/11/2026
+      const { el, close, type, submit, text, fixture } = setup(MonthlyExpenseFormComponent, { categories: PLANNING_CATEGORIES });
+      type('#expense-name', 'Academia');
+      el.querySelectorAll<HTMLInputElement>('input[type=radio]')[0].click();
+      type('#expense-value', '120');
+
+      type('#expense-due', '12');
+      expect(text()).toContain('O vencimento deste mês (dia 12) já passou.');
+      type('#expense-due', '22');
+      expect(text()).toContain('A conta deste mês vence hoje.');
+      type('#expense-due', '30');
+      expect(text()).toContain('Marque se a conta deste mês já foi paga.');
+
+      el.querySelector<HTMLInputElement>('input.toggle')!.click();
+      fixture.detectChanges();
+      expect(text()).toContain('já marcada como paga');
+
+      submit();
+      expect(close).toHaveBeenCalledWith(jasmine.objectContaining({ dueDay: 30, paidThisMonth: true }));
+    });
   });
 
   it('rejects an invalid due day', () => {

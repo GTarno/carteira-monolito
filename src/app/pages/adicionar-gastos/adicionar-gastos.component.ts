@@ -4,7 +4,7 @@ import { ToastService } from '../../shared/ui/toast/toast.service';
 import { AppDialog } from '../../shared/ui/dialog/app-dialog.service';
 import { IconComponent } from '../../shared/ui/icon/icon.component';
 import { AppIconName } from '../../shared/ui/icon/app-icons';
-import { MonthlyExpenseInput } from '../../core/expenses/monthly-expense.model';
+import { NewMonthlyExpense } from '../../core/expenses/monthly-expense.model';
 import { LargePurchaseInput } from '../home/installments-carousel/models/installments.models';
 import { AddExpensesFacade } from './data-access/add-expenses.facade';
 import { MonthlyExpenseFormComponent, MonthlyExpenseFormData } from './ui/monthly-expense-form/monthly-expense-form.component';
@@ -60,14 +60,15 @@ export class AdicionarGastosComponent {
   }
 
   private openMonthlyExpense(): void {
-    this.dialog.open<MonthlyExpenseFormComponent, MonthlyExpenseFormData, MonthlyExpenseInput>(MonthlyExpenseFormComponent, {
+    this.dialog.open<MonthlyExpenseFormComponent, MonthlyExpenseFormData, NewMonthlyExpense>(MonthlyExpenseFormComponent, {
       variant: 'drawer',
       data: { categories: this.facade.planningCategories() },
       ariaLabel: 'Novo gasto mensal'
-    }).closed.pipe(filter((input): input is MonthlyExpenseInput => !!input)).subscribe(input => {
+    }).closed.pipe(filter((input): input is NewMonthlyExpense => !!input)).subscribe(input => {
       const { value, saved } = this.facade.addMonthlyExpense(input);
       const category = this.facade.planningCategories().find(c => c.id === value.categoryId)?.title ?? 'Planejamento';
-      this.toast.success(`"${value.name}" adicionado às Contas do mês e ao Planejamento › ${category}.`, { duration: 5000 });
+      const paidNote = input.paidThisMonth ? ' (paga este mês)' : '';
+      this.toast.success(`"${value.name}" adicionado às Contas do mês${paidNote} e ao Planejamento › ${category}.`, { duration: 5000 });
       if (!saved) this.toast.warning(NOT_SAVED_WARNING);
     });
   }
